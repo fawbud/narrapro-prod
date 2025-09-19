@@ -2,8 +2,25 @@ from django.db import models
 from django.core.validators import URLValidator
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+import uuid
+import os
 
 User = get_user_model()
+
+
+def event_cover_upload_path(instance, filename):
+    """
+    Generate a unique upload path for event cover images.
+    Format: event_covers/user_id/uuid_filename
+    """
+    # Get file extension
+    ext = filename.split('.')[-1].lower()
+    
+    # Generate unique filename
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    
+    # Create path with user ID for organization
+    return f"event_covers/{instance.user.id}/{unique_filename}"
 
 
 class EventProfile(models.Model):
@@ -95,7 +112,7 @@ class EventProfile(models.Model):
     
     # Cover image
     cover_image = models.ImageField(
-        upload_to='event_covers/',
+        upload_to=event_cover_upload_path,
         help_text="Cover image for the event or organization"
     )
     
