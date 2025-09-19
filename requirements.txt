@@ -1,0 +1,37 @@
+# Core Django
+django
+
+# Production server
+gunicorn
+
+# Static files serving
+whitenoise
+
+# Database
+psycopg2-binary
+dj-database-url
+
+# HTTP requests
+requests
+urllib3
+
+# Environment management
+python-dotenv
+
+# Image handling
+Pillow
+
+# File storage (for Supabase storage)
+django-storages
+boto3
+
+# Email backend
+django-anymail
+
+# Form handling and validation (optional)
+django-widget-tweaks
+
+# Tailwind
+django-tailwind
+cookiecutter
+django-browser-reload
