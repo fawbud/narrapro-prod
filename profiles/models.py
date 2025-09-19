@@ -12,6 +12,7 @@ class User(AbstractUser):
     """
     
     USER_TYPE_CHOICES = [
+        ('', 'Pilih Role'),
         ('narasumber', 'Narasumber'),
         ('event', 'Event'),
     ]
@@ -19,6 +20,7 @@ class User(AbstractUser):
     user_type = models.CharField(
         max_length=20,
         choices=USER_TYPE_CHOICES,
+        blank=True,  # Allow blank for the default choice
         help_text="Type of user account"
     )
     
