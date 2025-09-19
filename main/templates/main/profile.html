@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - NarraPro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Profile Header -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">My Profile</h1>
+            <div class="flex items-center space-x-3">
+                <span class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
+                    {{ user_role }}
+                </span>
+                {% if is_approved %}
+                    <span class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">
+                        Approved
+                    </span>
+                {% else %}
+                    <span class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded-full">
+                        Pending Approval
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Basic User Info -->
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Information</h3>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                        <dd class="text-sm text-gray-900">{{ user.first_name }} {{ user.last_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Username</dt>
+                        <dd class="text-sm text-gray-900">{{ user.username }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Email</dt>
+                        <dd class="text-sm text-gray-900">{{ user.email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Member Since</dt>
+                        <dd class="text-sm text-gray-900">{{ user.created_at|date:"F d, Y" }}</dd>
+                    </div>
+                    {% if user.approval_date %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Approved On</dt>
+                            <dd class="text-sm text-gray-900">{{ user.approval_date|date:"F d, Y" }}</dd>
+                        </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Stats</h3>
+                <div class="space-y-3">
+                    {% if user.user_type == 'narasumber' %}
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="text-sm font-medium text-blue-700">Profile Views</span>
+                            <span class="text-lg font-bold text-blue-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm font-medium text-green-700">Event Invitations</span>
+                            <span class="text-lg font-bold text-green-600">0</span>
+                        </div>
+                    {% elif user.user_type == 'event' %}
+                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span class="text-sm font-medium text-purple-700">Active Events</span>
+                            <span class="text-lg font-bold text-purple-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                            <span class="text-sm font-medium text-orange-700">Speaker Connections</span>
+                            <span class="text-lg font-bold text-orange-600">0</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role-specific Profile Information -->
+    {% if user.user_type == 'narasumber' and narasumber_profile %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Narasumber Profile</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Full Name</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.full_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Location</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.location_display }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Email</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.email }}</dd>
+                        </div>
+                        {% if narasumber_profile.get_public_phone %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                                <dd class="text-sm text-gray-900">{{ narasumber_profile.get_public_phone }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if narasumber_profile.portfolio_link %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Portfolio</dt>
+                                <dd class="text-sm">
+                                    <a href="{{ narasumber_profile.portfolio_link }}" target="_blank" 
+                                       class="text-blue-600 hover:text-blue-800">
+                                        View Portfolio
+                                    </a>
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Expertise</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Area of Expertise</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.expertise_area.name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Experience Level</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.get_experience_level_display }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Years of Experience</dt>
+                            <dd class="text-sm text-gray-900">{{ narasumber_profile.years_of_experience }} years</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Biography</h3>
+                <p class="text-gray-700 leading-relaxed">{{ narasumber_profile.bio }}</p>
+            </div>
+        </div>
+        
+    {% elif user.user_type == 'event' and event_profile %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Event Organizer Profile</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Event Information</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Event/Organization Name</dt>
+                            <dd class="text-sm text-gray-900">{{ event_profile.name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Location</dt>
+                            <dd class="text-sm text-gray-900">{{ event_profile.location_display }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Contact</dt>
+                            <dd class="text-sm text-gray-900">{{ event_profile.contact }}</dd>
+                        </div>
+                        {% if event_profile.website %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Website</dt>
+                                <dd class="text-sm">
+                                    <a href="{{ event_profile.website }}" target="_blank" 
+                                       class="text-blue-600 hover:text-blue-800">
+                                        View Website
+                                    </a>
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Event Details</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Event Status</dt>
+                            <dd class="text-sm">
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    {% if event_profile.event_status == 'Active' %}bg-green-100 text-green-800
+                                    {% elif event_profile.event_status == 'Upcoming' %}bg-blue-100 text-blue-800
+                                    {% elif event_profile.event_status == 'Ongoing' %}bg-purple-100 text-purple-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ event_profile.event_status }}
+                                </span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Event Duration</dt>
+                            <dd class="text-sm text-gray-900">{{ event_profile.event_duration_display }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Profile Created</dt>
+                            <dd class="text-sm text-gray-900">{{ event_profile.created_at|date:"F d, Y" }}</dd>
+                        </div>
+                    </dl>
+                    
+                    {% if event_profile.cover_image %}
+                        <div class="mt-4">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Cover Image</dt>
+                            <img src="{{ event_profile.cover_image.url }}" 
+                                 alt="Event Cover" 
+                                 class="w-full h-32 object-cover rounded-lg border">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Description</h3>
+                <p class="text-gray-700 leading-relaxed">{{ event_profile.description }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Actions</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+            <a href="{% url 'main:home' %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white text-center py-3 px-4 rounded-lg transition duration-300">
+                Back to Dashboard
+            </a>
+            <button class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition duration-300">
+                Edit Profile
+            </button>
+            <a href="{% url 'main:logout' %}" 
+               class="bg-red-600 hover:bg-red-700 text-white text-center py-3 px-4 rounded-lg transition duration-300">
+                Logout
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

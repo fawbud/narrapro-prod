@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+	<div class="col-lg-8">
+		<div class="card">
+			<div class="card-header bg-primary text-white">
+				<h4 class="mb-0">
+					<i class="fas fa-tachometer-alt me-2"></i>
+					Welcome to Your Dashboard
+				</h4>
+			</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-4 text-center">
+						<div class="mb-3">
+							{% if user.user_type == 'narasumber' %}
+							<i class="fas fa-user-graduate text-primary fa-4x"></i>
+							{% elif user.user_type == 'event' %}
+							<i class="fas fa-calendar-alt text-success fa-4x"></i>
+							{% endif %}
+						</div>
+					</div>
+					<div class="col-md-8">
+						<h5>Hello, {{ user.first_name }} {{ user.last_name }}!</h5>
+						<p class="text-muted mb-3">{{ user.email }}</p>
+
+						<div class="mb-3">
+							<span class="badge bg-primary fs-6">
+								{{ user.get_user_type_display }}
+							</span>
+							{% if user.is_approved %}
+							<span class="badge bg-success fs-6 ms-2">
+								<i class="fas fa-check-circle me-1"></i>Approved
+							</span>
+							{% else %}
+							<span class="badge bg-warning fs-6 ms-2">
+								<i class="fas fa-clock me-1"></i>Pending Approval
+							</span>
+							{% endif %}
+						</div>
+
+						<div class="row g-2 mb-3">
+							<div class="col-sm-6">
+								<small class="text-muted">Member since:</small><br />
+								<strong>{{ user.created_at|date:"F d, Y" }}</strong>
+							</div>
+							{% if user.approval_date %}
+							<div class="col-sm-6">
+								<small class="text-muted">Approved on:</small><br />
+								<strong>{{ user.approval_date|date:"F d, Y" }}</strong>
+							</div>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+
+				{% if not user.is_approved %}
+				<div class="alert alert-warning">
+					<i class="fas fa-info-circle me-2"></i>
+					<strong>Account Pending Approval</strong><br />
+					Your account is currently under review by our admin team. You will
+					receive an email notification once your account is approved.
+				</div>
+				{% endif %}
+
+				<!-- Profile Status -->
+				<div class="mt-4">
+					<h6 class="border-bottom pb-2">Profile Status</h6>
+					<div class="row">
+						<div class="col-md-6">
+							{% if user.user_type == 'narasumber' %}
+								{% if user.narasumber_profile %}
+							<div class="d-flex align-items-center text-success">
+								<i class="fas fa-check-circle me-2"></i>
+								<span>Narasumber profile completed</span>
+							</div>
+							<small class="text-muted">
+								Expertise: {{ user.narasumber_profile.expertise_area.name }}
+							</small>
+							{% else %}
+							<div class="d-flex align-items-center text-warning">
+								<i class="fas fa-exclamation-triangle me-2"></i>
+								<span>Profile incomplete</span>
+							</div>
+							<small class="text-muted">
+								Complete your narasumber profile to get started
+							</small>
+							{% endif %}
+							{% elif user.user_type == 'event' %}
+								{% if user.event_profile %}
+							<div class="d-flex align-items-center text-success">
+								<i class="fas fa-check-circle me-2"></i>
+								<span>Event profile completed</span>
+							</div>
+							<small class="text-muted">
+								Organization: {{ user.event_profile.name }}
+							</small>
+							{% else %}
+							<div class="d-flex align-items-center text-warning">
+								<i class="fas fa-exclamation-triangle me-2"></i>
+								<span>Profile incomplete</span>
+							</div>
+							<small class="text-muted">
+								Complete your event organizer profile to get started
+							</small>
+							{% endif %}
+						{% endif %}
+						</div>
+					</div>
+				</div>
+
+				<!-- Quick Actions -->
+				<div class="mt-4">
+					<h6 class="border-bottom pb-2">Quick Actions</h6>
+					<div class="d-grid gap-2 d-md-block">
+						{% if user.user_type == 'narasumber' %}
+						<button class="btn btn-outline-primary" disabled>
+							<i class="fas fa-edit me-2"></i>Edit Narasumber Profile
+						</button>
+						<button class="btn btn-outline-info" disabled>
+							<i class="fas fa-eye me-2"></i>View Public Profile
+						</button>
+						{% elif user.user_type == 'event' %}
+						<button class="btn btn-outline-primary" disabled>
+							<i class="fas fa-edit me-2"></i>Edit Event Profile
+						</button>
+						<button class="btn btn-outline-success" disabled>
+							<i class="fas fa-plus me-2"></i>Create New Event
+						</button>
+						{% endif %}
+						<a href="{% url 'main:logout' %}" class="btn btn-outline-danger">
+							<i class="fas fa-sign-out-alt me-2"></i>Logout
+						</a>
+					</div>
+					<p class="text-muted mt-2">
+						<small><em>Profile management features coming soon!</em></small>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+/>
+{% endblock %}

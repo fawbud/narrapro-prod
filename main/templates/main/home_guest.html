@@ -1,0 +1,75 @@
+{% extends 'base.html' %}{% block title %}Welcome - NarraPro{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+	<div class="col-lg-8">
+		<div class="text-center mb-5">
+			<h1 class="display-4 fw-bold text-primary">Welcome to NarraPro</h1>
+			<p class="lead text-muted">
+				Connect with expert narasumber and discover amazing events across
+				Indonesia
+			</p>
+		</div>
+
+		<!-- Features Section -->
+		<div class="row g-4 mb-5">
+			<div class="col-md-6">
+				<div class="card h-100 border-primary">
+					<div class="card-body text-center">
+						<div class="text-primary mb-3">
+							<i class="fas fa-user-graduate fa-3x"></i>
+						</div>
+						<h5 class="card-title">For Narasumber</h5>
+						<p class="card-text">
+							Share your expertise and connect with people who need your
+							knowledge. Build your professional profile and expand your
+							network.
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card h-100 border-success">
+					<div class="card-body text-center">
+						<div class="text-success mb-3">
+							<i class="fas fa-calendar-alt fa-3x"></i>
+						</div>
+						<h5 class="card-title">For Event Organizers</h5>
+						<p class="card-text">
+							Promote your events and reach the right audience. Organize
+							impactful events and build lasting connections.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Call to Action -->
+		<div class="text-center">
+			<h3 class="mb-4">Ready to Get Started?</h3>
+			<div class="d-grid gap-2 d-md-block">
+				<a
+					href="{% url 'main:register' %}"
+					class="btn btn-primary btn-lg me-md-3"
+				>
+					<i class="fas fa-user-plus me-2"></i>Register Now
+				</a>
+				<a href="{% url 'main:login' %}" class="btn btn-outline-primary btn-lg">
+					<i class="fas fa-sign-in-alt me-2"></i>Login
+				</a>
+			</div>
+			<p class="text-muted mt-3">
+				<small
+					>Already have an account?
+					<a href="{% url 'main:login' %}">Sign in here</a></small
+				>
+			</p>
+		</div>
+	</div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+/>
+{% endblock %}

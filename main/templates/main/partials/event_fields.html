@@ -1,0 +1,78 @@
+<div class="border rounded p-3 bg-light">
+	<h5 class="text-success mb-3">
+		<i class="fas fa-calendar-alt me-2"></i>
+		Event Organizer Profile Information
+	</h5>
+
+	<div class="row g-3">
+		<div class="col-12">
+			<label for="{{ form.name.id_for_label }}" class="form-label"
+				>Event/Organization Name *</label
+			>
+			{{ form.name }}
+		</div>
+
+		<div class="col-12">
+			<label for="{{ form.description.id_for_label }}" class="form-label"
+				>Description *</label
+			>
+			{{ form.description }}
+		</div>
+
+		<div class="col-md-6">
+			<label for="{{ form.location.id_for_label }}" class="form-label"
+				>Location (Province) *</label
+			>
+			{{ form.location }}
+		</div>
+
+		<div class="col-md-6">
+			<label for="{{ form.contact.id_for_label }}" class="form-label"
+				>Contact Information *</label
+			>
+			{{ form.contact }}
+		</div>
+
+		<div class="col-12">
+			<label for="{{ form.website.id_for_label }}" class="form-label"
+				>Website URL</label
+			>
+			{{ form.website }}
+		</div>
+
+		<div class="col-12">
+			<label for="{{ form.cover_image.id_for_label }}" class="form-label"
+				>Cover Image *</label
+			>
+			{{ form.cover_image }}
+			<div class="form-text">
+				Upload a cover image for your event or organization (JPG, PNG, etc.)
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<label for="{{ form.start_date.id_for_label }}" class="form-label"
+				>Event Start Date</label
+			>
+			{{ form.start_date }}
+			<div class="form-text">Optional: For one-time events only</div>
+		</div>
+
+		<div class="col-md-6">
+			<label for="{{ form.end_date.id_for_label }}" class="form-label"
+				>Event End Date</label
+			>
+			{{ form.end_date }}
+			<div class="form-text">Optional: For one-time events only</div>
+		</div>
+	</div>
+
+	<div class="mt-3">
+		<small class="text-muted">
+			<i class="fas fa-info-circle me-1"></i>
+			Fields marked with * are required. Leave event dates empty for
+			ongoing/regular events. Your profile will be reviewed by admin before
+			approval.
+		</small>
+	</div>
+</div>
