@@ -5,11 +5,10 @@ env\Scripts\activate # or source env/bin/activate on mac
 pip install -r requirements.txt
 python manange.py tailwind install
 python manage.py migrate
-python manage.py tailwind dev # run dev server with tailwind
+python manage.py tailwind start # run tailwind
 ```
 
-Do note that we use
+Do note that `python manage.py tailwind start` will "hog" your terminal. To run the development server, open a new terminal and run
 ```
-python manage.py tailwind dev
+python manage.py runserver
 ```
-to run development server instead of the conventional `python manage.py runserver` due to the usage of `django-tailwind` package.
