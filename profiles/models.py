@@ -3,13 +3,22 @@ from django.db import models
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+import uuid
 
 
 class User(AbstractUser):
     """
     Custom User model extending AbstractUser with additional fields for user type,
-    approval status, and timestamps.
+    approval status, timestamps, and UUID primary key.
     """
+    
+    # Override the default id field with UUID
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        help_text="Unique identifier for the user"
+    )
     
     USER_TYPE_CHOICES = [
         ('', 'Pilih Role'),
