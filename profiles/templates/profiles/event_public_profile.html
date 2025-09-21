@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ event_profile.name }} - NarraPro
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Card 1: Cover Image and Main Info -->
+    <div class="card mb-4">
+        <!-- Cover Image (4:1 ratio) -->
+        {% if event_profile.cover_image %}
+        <div class="position-relative" style="padding-bottom: 25%; overflow: hidden;">
+            <img src="{{ event_profile.cover_image.url }}" 
+                 alt="Event Cover" 
+                 class="position-absolute w-100 h-100"
+                 style="object-fit: cover; top: 0; left: 0;">
+        </div>
+        {% else %}
+        <div class="bg-light position-relative d-flex align-items-center justify-content-center" 
+             style="height: 200px;">
+            <i class="fas fa-image fa-3x text-muted"></i>
+        </div>
+        {% endif %}
+        
+        <!-- Event Info Below Cover -->
+        <div class="card-body">
+            <div class="row">
+                <!-- Event Name and Username -->
+                <div class="col-12 mb-2">
+                    <h3 class="mb-1">{{ event_profile.name }}</h3>
+                    <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+                </div>
+                
+                <!-- Tags/Labels -->
+                <div class="col-12 mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.location_display }}</span>
+                        {% if profile_user.is_approved %}
+                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">
+                                <i class="fas fa-check-circle me-1"></i>Verified
+                            </span>
+                        {% endif %}
+                        {% if event_profile.is_one_time_event %}
+                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.event_status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">Ongoing Events</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Contact Details -->
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span>{{ event_profile.email }}</span>
+                    </div>
+                </div>
+                
+                {% if event_profile.get_public_phone %}
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-phone me-2"></i>
+                        <span>{{ event_profile.get_public_phone }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Join Date -->
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-calendar me-2"></i>
+                        <span>Bergabung {{ profile_user.date_joined|date:"F Y" }}</span>
+                    </div>
+                </div>
+                
+                {% if event_profile.is_one_time_event and event_profile.start_date %}
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-clock me-2"></i>
+                        <span>{{ event_profile.event_duration_display }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Event Description -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Tentang Event/Organisasi</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0 lead">{{ event_profile.description }}</p>
+        </div>
+    </div>
+
+    <!-- Card 3: Contact Links -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-link me-2"></i>Hubungi Kami</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Email Link -->
+                <div class="col-md-4">
+                    <a href="mailto:{{ event_profile.email }}" 
+                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
+                        <i class="fas fa-envelope me-2 text-muted"></i>
+                        <span>Kirim Email</span>
+                    </a>
+                </div>
+                
+                <!-- Call Link (if phone is public) -->
+                {% if event_profile.get_public_phone %}
+                <div class="col-md-4">
+                    <a href="tel:{{ event_profile.get_public_phone }}" 
+                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
+                        <i class="fas fa-phone me-2 text-muted"></i>
+                        <span>Telepon</span>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Website Link (if provided) -->
+                {% if event_profile.website %}
+                <div class="col-md-4">
+                    <a href="{{ event_profile.website }}" 
+                       target="_blank"
+                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
+                        <i class="fas fa-globe me-2 text-muted"></i>
+                        <span>Kunjungi Website</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to top button -->
+<div class="position-fixed bottom-0 end-0 p-3">
+    <button type="button" class="btn btn-secondary rounded-circle" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .badge {
+        font-weight: normal;
+    }
+    
+    /* Ensure cover image maintains 4:1 aspect ratio */
+    .position-relative img {
+        border-radius: 0;
+    }
+    
+    /* Custom styling for contact buttons */
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-outline-secondary:hover .text-muted {
+        color: white !important;
+    }
+</style>
+{% endblock %}
