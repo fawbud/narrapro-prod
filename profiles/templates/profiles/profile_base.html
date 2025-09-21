@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Profile Header -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h3 mb-2">
+                            {% if is_own_profile %}
+                                {{ profile_user.get_full_name|default:profile_user.username }}
+                            {% else %}
+                                {{ profile_user.get_full_name|default:profile_user.username }}
+                            {% endif %}
+                        </h1>
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ profile_user.get_user_type_display }}</span>
+                            {% if profile_user.is_approved %}
+                                <span class="badge bg-success">Verified</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending Approval</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-envelope me-2"></i>{{ profile_user.email }}
+                        </p>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-calendar me-2"></i>Bergabung {{ profile_user.date_joined|date:"F Y" }}
+                        </p>
+                    </div>
+                    {% if is_own_profile %}
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'profiles:edit_profile' profile_user.username %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-1"></i>Edit Profil
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Pills -->
+        {% if is_own_profile %}
+        <ul class="nav nav-pills mb-4" id="profileNav">
+            <li class="nav-item">
+                <a class="nav-link {% if active_section == 'profile' %}active{% endif %}" 
+                   href="{% url 'profiles:profile_detail' profile_user.username %}">
+                    <i class="fas fa-user me-2"></i>Profil Anda
+                </a>
+            </li>
+            
+            {% if profile_user.user_type == 'event' %}
+            <li class="nav-item">
+                <a class="nav-link {% if active_section == 'lowongan' %}active{% endif %}" 
+                   href="{% url 'profiles:profile_lowongan' profile_user.username %}">
+                    <i class="fas fa-briefcase me-2"></i>Lowongan Anda
+                </a>
+            </li>
+            {% endif %}
+            
+            {% if profile_user.user_type == 'narasumber' %}
+            <li class="nav-item">
+                <a class="nav-link {% if active_section == 'lamaran' %}active{% endif %}" 
+                   href="{% url 'profiles:profile_lamaran' profile_user.username %}">
+                    <i class="fas fa-file-alt me-2"></i>Lamaran Anda
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="nav-item">
+                <a class="nav-link {% if active_section == 'booking' %}active{% endif %}" 
+                   href="{% url 'profiles:profile_booking' profile_user.username %}">
+                    <i class="fas fa-calendar-check me-2"></i>Booking Anda
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+
+        <!-- Page Content -->
+        {% block profile_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .nav-pills .nav-link {
+        color: #6c757d;
+        border-radius: 0.375rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-pills .nav-link:hover {
+        color: #495057;
+        background-color: #e9ecef;
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %}

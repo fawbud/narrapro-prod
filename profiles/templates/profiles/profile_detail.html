@@ -1,0 +1,469 @@
+{% extends 'profiles/profile_base.html' %}
+
+{% block title %}
+{% if is_own_profile %}
+Profil Anda
+{% else %}
+Profil {{ profile_user.get_full_name|default:profile_user.username }}
+{% endif %}
+- NarraPro
+{% endblock %}
+
+{% block profile_content %}
+{% if is_own_profile %}
+<!-- Profile Details Card -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detail Profil</h5>
+        <a href="{% url 'profiles:edit_profile' profile_user.username %}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-edit me-1"></i>Edit
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Basic Profile Information -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Nama Depan</label>
+                <p class="mb-0">{{ profile_user.first_name|default:"-" }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Nama Belakang</label>
+                <p class="mb-0">{{ profile_user.last_name|default:"-" }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Username</label>
+                <p class="mb-0">{{ profile_user.username }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Email</label>
+                <p class="mb-0">{{ profile_user.email }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Tipe User</label>
+                <p class="mb-0">{{ profile_user.get_user_type_display }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Status</label>
+                <p class="mb-0">
+                    {% if profile_user.is_approved %}
+                        <span class="badge bg-success">Approved</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pending Approval</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <!-- User Type Specific Information -->
+        {% if profile_user.user_type == 'narasumber' and narasumber_profile %}
+        <hr>
+        <h6 class="text-muted mb-3">Informasi Narasumber</h6>
+        <div class="row">
+            {% if narasumber_profile.profile_picture %}
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ narasumber_profile.profile_picture.url }}" 
+                     alt="Profile Picture" 
+                     class="img-fluid rounded-circle"
+                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+            {% else %}
+            <div class="col-md-12">
+            {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nama Lengkap</label>
+                        <p class="mb-0">{{ narasumber_profile.full_name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Area Keahlian</label>
+                        <p class="mb-0">{{ narasumber_profile.expertise_area.name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Pengalaman</label>
+                        <p class="mb-0">{{ narasumber_profile.experience_display }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Lokasi</label>
+                        <p class="mb-0">{{ narasumber_profile.location_display }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Bio</label>
+                        <p class="mb-0">{{ narasumber_profile.bio }}</p>
+                    </div>
+                    {% if narasumber_profile.portfolio_link %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Portfolio</label>
+                        <p class="mb-0">
+                            <a href="{{ narasumber_profile.portfolio_link }}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>Lihat Portfolio
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif profile_user.user_type == 'event' and event_profile %}
+        <hr>
+        <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
+        <div class="row">
+            {% if event_profile.profile_picture %}
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ event_profile.profile_picture.url }}" 
+                     alt="Profile Picture" 
+                     class="img-fluid rounded-circle"
+                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+            {% else %}
+            <div class="col-md-12">
+            {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nama Event/Organisasi</label>
+                        <p class="mb-0">{{ event_profile.name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Lokasi</label>
+                        <p class="mb-0">{{ event_profile.location_display }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Deskripsi</label>
+                        <p class="mb-0">{{ event_profile.description }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Kontak</label>
+                        <p class="mb-0">{{ event_profile.contact }}</p>
+                    </div>
+                    {% if event_profile.website %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Website</label>
+                        <p class="mb-0">
+                            <a href="{{ event_profile.website }}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>Kunjungi Website
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if event_profile.is_one_time_event %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Durasi Event</label>
+                        <p class="mb-0">{{ event_profile.event_duration_display }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Status Event</label>
+                        <p class="mb-0">
+                            <span class="badge bg-{% if event_profile.event_status == 'Active' %}success{% elif event_profile.event_status == 'Upcoming' %}primary{% else %}secondary{% endif %}">
+                                {{ event_profile.event_status }}
+                            </span>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif profile_user.user_type != '' %}
+        <hr>
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi. 
+            <a href="{% url 'profiles:edit_profile' profile_user.username %}" class="alert-link">Lengkapi profil Anda</a>
+        </div>
+        {% endif %}
+        
+        <hr>
+        
+        <div class="row">
+            <div class="col-12">
+                <h6 class="text-muted">Keamanan Akun</h6>
+                <a href="{% url 'profiles:change_password' profile_user.username %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-key me-1"></i>Ubah Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Public View (Not own profile) -->
+{% if profile_user.user_type == 'narasumber' and narasumber_profile %}
+<!-- Custom Narasumber Public Profile Layout -->
+
+<!-- Card 1: Main Profile Information -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <!-- Profile Picture -->
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                {% if narasumber_profile.profile_picture %}
+                <img src="{{ narasumber_profile.profile_picture.url }}" 
+                     alt="Profile Picture" 
+                     class="img-fluid rounded-circle border"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border"
+                     style="width: 150px; height: 150px; margin: 0 auto;">
+                    <i class="fas fa-user fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Profile Details -->
+            <div class="col-md-9">
+                <div class="row">
+                    <!-- Full Name and Username -->
+                    <div class="col-12 mb-2">
+                        <h3 class="mb-1">{{ narasumber_profile.full_name }}</h3>
+                        <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+                    </div>
+                    
+                    <!-- Labels Row -->
+                    <div class="col-12 mb-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-primary fs-6 px-3 py-2">{{ narasumber_profile.expertise_area.name }}</span>
+                            <span class="badge bg-success fs-6 px-3 py-2">{{ narasumber_profile.get_experience_level_display }}</span>
+                            <span class="badge bg-info fs-6 px-3 py-2">{{ narasumber_profile.years_of_experience }} Tahun</span>
+                            {% if profile_user.is_approved %}
+                                <span class="badge bg-warning fs-6 px-3 py-2"><i class="fas fa-check-circle me-1"></i>Verified</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Details -->
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            <span>{{ narasumber_profile.email }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if narasumber_profile.get_public_phone %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-phone text-success me-2"></i>
+                            <span>{{ narasumber_profile.get_public_phone }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Location -->
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <span>{{ narasumber_profile.location_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Join Date -->
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar text-info me-2"></i>
+                            <span>Bergabung {{ profile_user.date_joined|date:"F Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card 2: Bio -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Tentang Saya</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-0 lead">{{ narasumber_profile.bio }}</p>
+    </div>
+</div>
+
+<!-- Card 3: Contact Links -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-link me-2"></i>Hubungi Saya</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Email Link -->
+            <div class="col-md-4">
+                <a href="mailto:{{ narasumber_profile.email }}" 
+                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-envelope me-2"></i>
+                    <span>Kirim Email</span>
+                </a>
+            </div>
+            
+            <!-- Call Link (if phone is public) -->
+            {% if narasumber_profile.get_public_phone %}
+            <div class="col-md-4">
+                <a href="tel:{{ narasumber_profile.get_public_phone }}" 
+                   class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-phone me-2"></i>
+                    <span>Telepon</span>
+                </a>
+            </div>
+            {% endif %}
+            
+            <!-- Portfolio Link (if provided) -->
+            {% if narasumber_profile.portfolio_link %}
+            <div class="col-md-4">
+                <a href="{{ narasumber_profile.portfolio_link }}" 
+                   target="_blank"
+                   class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-briefcase me-2"></i>
+                    <span>Lihat Portfolio</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Social Media Links (if available) -->
+        {% if narasumber_profile.social_media_links %}
+        <hr>
+        <div class="text-center">
+            <h6 class="text-muted mb-3">Ikuti di Media Sosial</h6>
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                {% for platform, url in narasumber_profile.social_media_links.items %}
+                <a href="{{ url }}" target="_blank" 
+                   class="btn btn-sm btn-outline-secondary">
+                    <i class="fab fa-{{ platform|lower }} me-1"></i>{{ platform|title }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% elif profile_user.user_type == 'event' and event_profile %}
+<!-- Default Event Profile Layout (unchanged for now) -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Profil {{ profile_user.get_full_name|default:profile_user.username }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Basic Profile Information -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Nama</label>
+                <p class="mb-0">{{ profile_user.get_full_name|default:profile_user.username }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Username</label>
+                <p class="mb-0">{{ profile_user.username }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Tipe User</label>
+                <p class="mb-0">{{ profile_user.get_user_type_display }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Bergabung</label>
+                <p class="mb-0">{{ profile_user.date_joined|date:"F Y" }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Status</label>
+                <p class="mb-0">
+                    {% if profile_user.is_approved %}
+                        <span class="badge bg-success">Verified</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pending Approval</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Event Profile Details -->
+        <hr>
+        <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
+        <div class="row">
+            {% if event_profile.profile_picture %}
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ event_profile.profile_picture.url }}" 
+                     alt="Profile Picture" 
+                     class="img-fluid rounded-circle"
+                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+            {% else %}
+            <div class="col-md-12">
+            {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nama Event/Organisasi</label>
+                        <p class="mb-0">{{ event_profile.name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Lokasi</label>
+                        <p class="mb-0">{{ event_profile.location_display }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Deskripsi</label>
+                        <p class="mb-0">{{ event_profile.description }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Kontak</label>
+                        <p class="mb-0">{{ event_profile.contact }}</p>
+                    </div>
+                    {% if event_profile.website %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Website</label>
+                        <p class="mb-0">
+                            <a href="{{ event_profile.website }}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>Kunjungi Website
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Default Public Profile for other user types -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Profil {{ profile_user.get_full_name|default:profile_user.username }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Nama</label>
+                <p class="mb-0">{{ profile_user.get_full_name|default:profile_user.username }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Username</label>
+                <p class="mb-0">{{ profile_user.username }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Tipe User</label>
+                <p class="mb-0">{{ profile_user.get_user_type_display }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Bergabung</label>
+                <p class="mb-0">{{ profile_user.date_joined|date:"F Y" }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Status</label>
+                <p class="mb-0">
+                    {% if profile_user.is_approved %}
+                        <span class="badge bg-success">Verified</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pending Approval</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        {% if profile_user.user_type != '' %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
