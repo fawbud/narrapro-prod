@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - NarraPro{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h3 class="mb-4">Hasil pencarian untuk: <em>{{ query }}</em></h3>
+
+    <!-- Category Toggle -->
+    <div class="btn-group w-100 mb-4" role="group" aria-label="Kategori Hasil">
+        <a href="?q={{ query }}&category=lowongan"
+        class="btn border w-100 {% if category == 'lowongan' %}text-white{% endif %}"
+        style="border-color:#0C2D6B; {% if category == 'lowongan' %}background-color:#F26F21;{% else %}color:black;{% endif %}">
+        Lowongan
+        </a>
+        <a href="?q={{ query }}&category=event"
+        class="btn border w-100 {% if category == 'event' %}text-white{% endif %}"
+        style="border-color:#0C2D6B; {% if category == 'event' %}background-color:#F26F21;{% else %}color:black;{% endif %}">
+        Event
+        </a>
+        <a href="?q={{ query }}&category=narasumber"
+        class="btn border w-100 {% if category == 'narasumber' %}text-white{% endif %}"
+        style="border-color:#0C2D6B; {% if category == 'narasumber' %}background-color:#F26F21;{% else %}color:black;{% endif %}">
+        Narasumber
+        </a>
+    </div>
+
+    {% if not category or category == "lowongan" %}
+    <!-- Lowongan -->
+    <div id="sectionLowongan" class="mb-5">
+        <h4 class="mb-3">
+            Lowongan ({{ lowongans.start_index }}–{{ lowongans.end_index }} dari {{ lowongans.paginator.count }})
+        </h4>
+        {% if lowongans %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                {% if category == "lowongan" %}
+                    {% for l in lowongans %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ l.title }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ l.description|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge text-white rounded" style="background-color:#F26F21;">Lowongan</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for l in lowongans|slice:":8" %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ l.title }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ l.description|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge bg-success text-white rounded">Lowongan</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if category == "lowongan" %}
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if lowongans.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">Page {{ lowongans.number }} of {{ lowongans.paginator.num_pages }}</span></li>
+                        {% if lowongans.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% elif has_more.lowongan %}
+                <div class="text-center mt-3">
+                    <a href="?q={{ query }}&category=lowongan" class="btn" 
+                         style="border:1px solid #0C2D6B; color:#0C2D6B;">More Lowongan</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">Tidak ada lowongan ditemukan.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if not category or category == "event" %}
+    <!-- Event -->
+    <div id="sectionEvent" class="mb-5">
+        <h4 class="mb-3">
+            Event ({{ events.start_index }}–{{ events.end_index }} dari {{ events.paginator.count }})
+        </h4>
+        {% if events %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                {% if category == "event" %}
+                    {% for e in events %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {% if e.cover_image %}
+                            <img src="{{ e.cover_image.url }}" class="card-img-top" alt="{{ e.name }}">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ e.name }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ e.description|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge text-white rounded" style="background-color:#366ccf;">{{ e.location_display }}</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for e in events|slice:":8" %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {% if e.cover_image %}
+                            <img src="{{ e.cover_image.url }}" class="card-img-top" alt="{{ e.name }}">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ e.name }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ e.description|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge text-white rounded" style="background-color:#366ccf;">{{ e.location_display }}</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if category == "event" %}
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if events.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&category=event&page={{ events.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">Page {{ events.number }} of {{ events.paginator.num_pages }}</span></li>
+                        {% if events.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&category=event&page={{ events.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% elif has_more.event %}
+                <div class="text-center mt-3">
+                    <a href="?q={{ query }}&category=event" class="btn" 
+                        style="border:1px solid #0C2D6B; color:#0C2D6B;">More Event</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">Tidak ada event ditemukan.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if not category or category == "narasumber" %}
+    <!-- Narasumber -->
+    <div id="sectionNarasumber">
+
+        {% if category == "narasumber" %}
+        <!-- Filter Expertise -->
+        <div class="bg-light border rounded p-3 mb-4">
+            <form method="get" class="row align-items-start">
+                <input type="hidden" name="q" value="{{ query }}">
+                <input type="hidden" name="category" value="narasumber">
+
+                <!-- Checkbox Section (col-10) -->
+                <div class="col-12 col-md-10">
+                    <div class="d-flex flex-wrap gap-3">
+                        {% for ex in expertise_categories %}
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                type="checkbox"
+                                name="expertise"
+                                value="{{ ex.id }}"
+                                id="ex{{ ex.id }}"
+                                {% if ex.id in selected_expertise %}checked{% endif %}
+                                style="accent-color:#F26F21;">
+                            <label class="form-check-label" for="ex{{ ex.id }}">
+                                {{ ex.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+
+                <!-- Button Section (col-2) -->
+                <div class="col-12 col-md-2 text-md-end mt-3 mt-md-0">
+                    <button type="submit" class="btn btn-sm border-0 text-white" style="background-color:#F26F21;">Filter</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+
+        <h4 class="mb-3">
+            Narasumber ({{ narasumbers.start_index }}–{{ narasumbers.end_index }} dari {{ narasumbers.paginator.count }})
+        </h4>
+
+        {% if narasumbers %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                {% if category == "narasumber" %}
+                    {% for n in narasumbers %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ n.full_name }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ n.bio|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge text-white rounded" style="background-color:#6c757d;">{{ n.expertise_area.name }}</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for n in narasumbers|slice:":8" %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ n.full_name }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ n.bio|truncatewords:25 }}</p>
+                                <div class="mt-2">
+                                    <span class="badge text-white rounded" style="background-color:#6c757d;">{{ n.expertise_area.name }}</span>
+                                </div>
+                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0C2D6B;">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if category == "narasumber" %}
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-3">
+                <ul class="pagination justify-content-center">
+                    {% if narasumbers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&category=narasumber&page={{ narasumbers.previous_page_number }}{% for e in selected_expertise %}&expertise={{ e }}{% endfor %}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ narasumbers.number }} of {{ narasumbers.paginator.num_pages }}</span></li>
+                    {% if narasumbers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&category=narasumber&page={{ narasumbers.next_page_number }}{% for e in selected_expertise %}&expertise={{ e }}{% endfor %}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% elif has_more.narasumber %}
+                <div class="text-center mt-3">
+                    <a href="?q={{ query }}&category=narasumber" class="btn" 
+                         style="border:1px solid #0C2D6B; color:#0C2D6B;">More Narasumber</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">Tidak ada narasumber ditemukan.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
