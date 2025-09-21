@@ -1,0 +1,211 @@
+from django import forms
+from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
+from .models import User
+
+
+class UserProfileForm(forms.ModelForm):
+    """
+    Form for editing basic user profile information.
+    """
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'username']
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Depan'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Belakang'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email'
+            }),
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Username'
+            }),
+        }
+        labels = {
+            'first_name': 'Nama Depan',
+            'last_name': 'Nama Belakang',
+            'email': 'Email',
+            'username': 'Username',
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Email ini sudah digunakan oleh pengguna lain.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Username ini sudah digunakan oleh pengguna lain.")
+        return username
+
+
+class NarasumberProfileForm(forms.ModelForm):
+    """
+    Form for editing narasumber-specific profile information.
+    """
+    class Meta:
+        from narasumber.models import NarasumberProfile, ExpertiseCategory
+        model = NarasumberProfile
+        fields = [
+            'profile_picture', 'full_name', 'bio', 'expertise_area', 
+            'experience_level', 'years_of_experience', 'email', 
+            'phone_number', 'is_phone_public', 'location', 
+            'portfolio_link'
+        ]
+        widgets = {
+            'profile_picture': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'full_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Lengkap'
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Ceritakan tentang diri Anda dan pengalaman...'
+            }),
+            'expertise_area': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'experience_level': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'years_of_experience': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': 'Tahun'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email kontak'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nomor telepon'
+            }),
+            'is_phone_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'location': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'portfolio_link': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://portfolio-anda.com'
+            }),
+        }
+        labels = {
+            'profile_picture': 'Foto Profil',
+            'full_name': 'Nama Lengkap',
+            'bio': 'Biografi',
+            'expertise_area': 'Area Keahlian',
+            'experience_level': 'Level Pengalaman',
+            'years_of_experience': 'Tahun Pengalaman',
+            'email': 'Email Kontak',
+            'phone_number': 'Nomor Telepon',
+            'is_phone_public': 'Tampilkan nomor telepon di profil publik',
+            'location': 'Lokasi',
+            'portfolio_link': 'Link Portfolio',
+        }
+
+
+class EventProfileForm(forms.ModelForm):
+    """
+    Form for editing event organizer-specific profile information.
+    """
+    class Meta:
+        from event.models import EventProfile
+        model = EventProfile
+        fields = [
+            'name', 'description', 'location', 
+            'email', 'phone_number', 'is_phone_public', 'website', 
+            'cover_image', 'start_date', 'end_date'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Event atau Organisasi'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Deskripsi event atau organisasi...'
+            }),
+            'location': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email kontak'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nomor telepon (opsional)'
+            }),
+            'is_phone_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'website': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://website-anda.com'
+            }),
+            'cover_image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'start_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'end_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+        labels = {
+            'name': 'Nama Event/Organisasi',
+            'description': 'Deskripsi',
+            'location': 'Lokasi',
+            'email': 'Email Kontak',
+            'phone_number': 'Nomor Telepon',
+            'is_phone_public': 'Tampilkan nomor telepon di profil publik',
+            'website': 'Website',
+            'cover_image': 'Cover Image',
+            'start_date': 'Tanggal Mulai (Opsional)',
+            'end_date': 'Tanggal Selesai (Opsional)',
+        }
+
+
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    """
+    Custom password change form with styling.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add CSS classes to form fields
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'form-control'
+            })
+        
+        # Update labels to Indonesian
+        self.fields['old_password'].label = 'Password Lama'
+        self.fields['new_password1'].label = 'Password Baru'
+        self.fields['new_password2'].label = 'Konfirmasi Password Baru'
+        
+        # Update placeholders
+        self.fields['old_password'].widget.attrs['placeholder'] = 'Masukkan password lama'
+        self.fields['new_password1'].widget.attrs['placeholder'] = 'Masukkan password baru'
+        self.fields['new_password2'].widget.attrs['placeholder'] = 'Konfirmasi password baru'
