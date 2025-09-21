@@ -23,6 +23,21 @@ def event_cover_upload_path(instance, filename):
     return f"event_covers/{instance.user.id}/{unique_filename}"
 
 
+def event_profile_picture_upload_path(instance, filename):
+    """
+    Generate a unique upload path for event profile pictures.
+    Format: event_profiles/user_id/uuid_filename
+    """
+    # Get file extension
+    ext = filename.split('.')[-1].lower()
+    
+    # Generate unique filename
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    
+    # Create path with user ID for organization
+    return f"event_profiles/{instance.user.id}/{unique_filename}"
+
+
 class EventProfile(models.Model):
     """
     Profile model for event organizers containing detailed information
@@ -85,6 +100,14 @@ class EventProfile(models.Model):
         help_text="Name of the event or organization"
     )
     
+    # Profile picture
+    profile_picture = models.ImageField(
+        upload_to=event_profile_picture_upload_path,
+        blank=True,
+        null=True,
+        help_text="Profile picture for the event organizer (optional)"
+    )
+    
     description = models.TextField(
         help_text="Description of the event or organization"
     )
@@ -97,9 +120,20 @@ class EventProfile(models.Model):
     )
     
     # Contact information
-    contact = models.CharField(
-        max_length=200,
-        help_text="Contact information (phone, email, or other contact method)"
+    email = models.EmailField(
+        help_text="Contact email address"
+    )
+    
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="Phone number (optional)"
+    )
+    
+    is_phone_public = models.BooleanField(
+        default=False,
+        help_text="Whether to display phone number publicly"
     )
     
     # Website
@@ -147,6 +181,12 @@ class EventProfile(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.get_location_display()}"
+    
+    def get_public_phone(self):
+        """
+        Return phone number only if user wants it to be public.
+        """
+        return self.phone_number if self.is_phone_public else None
     
     def clean(self):
         """
