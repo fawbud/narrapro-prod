@@ -75,11 +75,15 @@ class NarasumberRegistrationForm(forms.ModelForm):
     class Meta:
         model = NarasumberProfile
         fields = [
-            'bio', 'expertise_area', 'experience_level', 
+            'profile_picture', 'bio', 'expertise_area', 'experience_level', 
             'years_of_experience', 'email', 'phone_number', 'is_phone_public',
             'location', 'portfolio_link'
         ]
         widgets = {
+            'profile_picture': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Tell us about yourself and your expertise...',
@@ -130,8 +134,8 @@ class EventRegistrationForm(forms.ModelForm):
     class Meta:
         model = EventProfile
         fields = [
-            'name', 'description', 'location', 'contact', 'website',
-            'cover_image', 'start_date', 'end_date'
+            'name', 'description', 'location', 'email', 'phone_number', 
+            'is_phone_public', 'website', 'cover_image', 'start_date', 'end_date'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -146,9 +150,16 @@ class EventRegistrationForm(forms.ModelForm):
             'location': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'contact': forms.TextInput(attrs={
+            'email': forms.EmailInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Contact Information (phone, email, etc.)'
+                'placeholder': 'Contact Email'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Phone Number (optional)'
+            }),
+            'is_phone_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             }),
             'website': forms.URLInput(attrs={
                 'class': 'form-control',
@@ -178,7 +189,7 @@ class CombinedRegistrationForm:
     
     def __init__(self, data=None, files=None):
         self.base_form = BaseUserRegistrationForm(data=data)
-        self.narasumber_form = NarasumberRegistrationForm(data=data) if data else None
+        self.narasumber_form = NarasumberRegistrationForm(data=data, files=files) if data else None
         self.event_form = EventRegistrationForm(data=data, files=files) if data else None
     
     def is_valid(self, user_type):
