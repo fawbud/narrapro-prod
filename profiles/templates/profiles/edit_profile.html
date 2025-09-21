@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profil - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Edit Profil</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Basic User Information -->
+                    <h6 class="text-muted mb-3">Informasi Dasar</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                {{ user_form.first_name.label }}
+                            </label>
+                            {{ user_form.first_name }}
+                            {% if user_form.first_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in user_form.first_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                                {{ user_form.last_name.label }}
+                            </label>
+                            {{ user_form.last_name }}
+                            {% if user_form.last_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in user_form.last_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ user_form.username.id_for_label }}" class="form-label">
+                                {{ user_form.username.label }}
+                            </label>
+                            {{ user_form.username }}
+                            {% if user_form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in user_form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                {{ user_form.email.label }}
+                            </label>
+                            {{ user_form.email }}
+                            {% if user_form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in user_form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tipe User</label>
+                        <p class="form-control-plaintext">{{ profile_user.get_user_type_display }}</p>
+                        <small class="text-muted">Tipe user tidak dapat diubah.</small>
+                    </div>
+                    
+                    <!-- User Type Specific Information -->
+                    {% if narasumber_form %}
+                    <hr class="my-4">
+                    <h6 class="text-muted mb-3">Informasi Narasumber</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.profile_picture.id_for_label }}" class="form-label">
+                                {{ narasumber_form.profile_picture.label }}
+                            </label>
+                            {{ narasumber_form.profile_picture }}
+                            {% if narasumber_form.profile_picture.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.profile_picture.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.full_name.id_for_label }}" class="form-label">
+                                {{ narasumber_form.full_name.label }}
+                            </label>
+                            {{ narasumber_form.full_name }}
+                            {% if narasumber_form.full_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.full_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.bio.id_for_label }}" class="form-label">
+                            {{ narasumber_form.bio.label }}
+                        </label>
+                        {{ narasumber_form.bio }}
+                        {% if narasumber_form.bio.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.bio.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.expertise_area.id_for_label }}" class="form-label">
+                                {{ narasumber_form.expertise_area.label }}
+                            </label>
+                            {{ narasumber_form.expertise_area }}
+                            {% if narasumber_form.expertise_area.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.expertise_area.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.experience_level.id_for_label }}" class="form-label">
+                                {{ narasumber_form.experience_level.label }}
+                            </label>
+                            {{ narasumber_form.experience_level }}
+                            {% if narasumber_form.experience_level.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.experience_level.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.years_of_experience.id_for_label }}" class="form-label">
+                                {{ narasumber_form.years_of_experience.label }}
+                            </label>
+                            {{ narasumber_form.years_of_experience }}
+                            {% if narasumber_form.years_of_experience.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.years_of_experience.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.location.id_for_label }}" class="form-label">
+                                {{ narasumber_form.location.label }}
+                            </label>
+                            {{ narasumber_form.location }}
+                            {% if narasumber_form.location.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.location.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.email.id_for_label }}" class="form-label">
+                                {{ narasumber_form.email.label }}
+                            </label>
+                            {{ narasumber_form.email }}
+                            {% if narasumber_form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.phone_number.id_for_label }}" class="form-label">
+                                {{ narasumber_form.phone_number.label }}
+                            </label>
+                            {{ narasumber_form.phone_number }}
+                            {% if narasumber_form.phone_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.phone_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ narasumber_form.is_phone_public }}
+                            <label class="form-check-label" for="{{ narasumber_form.is_phone_public.id_for_label }}">
+                                {{ narasumber_form.is_phone_public.label }}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.portfolio_link.id_for_label }}" class="form-label">
+                            {{ narasumber_form.portfolio_link.label }}
+                        </label>
+                        {{ narasumber_form.portfolio_link }}
+                        {% if narasumber_form.portfolio_link.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.portfolio_link.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% elif event_form %}
+                    <hr class="my-4">
+                    <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ event_form.name.id_for_label }}" class="form-label">
+                                {{ event_form.name.label }}
+                            </label>
+                            {{ event_form.name }}
+                            {% if event_form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ event_form.description.id_for_label }}" class="form-label">
+                            {{ event_form.description.label }}
+                        </label>
+                        {{ event_form.description }}
+                        {% if event_form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in event_form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.location.id_for_label }}" class="form-label">
+                                {{ event_form.location.label }}
+                            </label>
+                            {{ event_form.location }}
+                            {% if event_form.location.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.location.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.email.id_for_label }}" class="form-label">
+                                {{ event_form.email.label }}
+                            </label>
+                            {{ event_form.email }}
+                            {% if event_form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.phone_number.id_for_label }}" class="form-label">
+                                {{ event_form.phone_number.label }}
+                            </label>
+                            {{ event_form.phone_number }}
+                            {% if event_form.phone_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.phone_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                {{ event_form.is_phone_public }}
+                                <label for="{{ event_form.is_phone_public.id_for_label }}" class="form-check-label">
+                                    {{ event_form.is_phone_public.label }}
+                                </label>
+                            </div>
+                            {% if event_form.is_phone_public.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.is_phone_public.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ event_form.website.id_for_label }}" class="form-label">
+                            {{ event_form.website.label }}
+                        </label>
+                        {{ event_form.website }}
+                        {% if event_form.website.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in event_form.website.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ event_form.cover_image.id_for_label }}" class="form-label">
+                            {{ event_form.cover_image.label }}
+                        </label>
+                        {{ event_form.cover_image }}
+                        {% if event_form.cover_image.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in event_form.cover_image.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h6 class="text-muted mb-3">Tanggal Event (Opsional)</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.start_date.id_for_label }}" class="form-label">
+                                {{ event_form.start_date.label }}
+                            </label>
+                            {{ event_form.start_date }}
+                            {% if event_form.start_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.start_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.end_date.id_for_label }}" class="form-label">
+                                {{ event_form.end_date.label }}
+                            </label>
+                            {{ event_form.end_date }}
+                            {% if event_form.end_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.end_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'profiles:profile_detail' profile_user.username %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Kembali
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .form-control, .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+</style>
+{% endblock %}

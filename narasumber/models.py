@@ -2,8 +2,25 @@ from django.db import models
 from django.core.validators import MinValueValidator, URLValidator
 from django.contrib.auth import get_user_model
 import json
+import uuid
+import os
 
 User = get_user_model()
+
+
+def narasumber_profile_picture_upload_path(instance, filename):
+    """
+    Generate a unique upload path for narasumber profile pictures.
+    Format: narasumber_profiles/user_id/uuid_filename
+    """
+    # Get file extension
+    ext = filename.split('.')[-1].lower()
+    
+    # Generate unique filename
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    
+    # Create path with user ID for organization
+    return f"narasumber_profiles/{instance.user.id}/{unique_filename}"
 
 
 class ExpertiseCategory(models.Model):
@@ -101,6 +118,14 @@ class NarasumberProfile(models.Model):
     full_name = models.CharField(
         max_length=200,
         help_text="Full name of the narasumber"
+    )
+    
+    # Profile picture
+    profile_picture = models.ImageField(
+        upload_to=narasumber_profile_picture_upload_path,
+        blank=True,
+        null=True,
+        help_text="Profile picture for the narasumber (optional)"
     )
     
     bio = models.TextField(

@@ -1,0 +1,107 @@
+{% extends 'profiles/profile_base.html' %}
+
+{% block title %}Booking Anda - NarraPro{% endblock %}
+
+{% block profile_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            {% if profile_user.user_type == 'event' %}
+                Booking Keluar
+            {% else %}
+                Booking Masuk
+            {% endif %}
+        </h5>
+        <div>
+            <span class="badge bg-secondary">0 Booking</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Belum ada booking</h5>
+            <p class="text-muted">
+                {% if profile_user.user_type == 'event' %}
+                    Booking yang Anda lakukan akan muncul di sini.
+                {% else %}
+                    Booking yang diterima akan muncul di sini.
+                {% endif %}
+            </p>
+            <div class="mt-4">
+                {% if profile_user.user_type == 'event' %}
+                    <a href="{% url 'main:home' %}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Cari Narasumber
+                    </a>
+                {% else %}
+                    <p class="text-muted">Menunggu booking dari event organizer.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Future: This section will display bookings -->
+        <!-- 
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Event/Narasumber Name</h6>
+                        <p class="card-text small text-muted">Event details or narasumber info</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-warning">Pending</span>
+                            <small class="text-muted">Date: 2024-01-15</small>
+                        </div>
+                        <div class="mt-2">
+                            <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        -->
+    </div>
+</div>
+
+<!-- Quick Stats Card -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar fa-2x text-primary mb-2"></i>
+                <h5>0</h5>
+                <p class="text-muted mb-0">Total Booking</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h5>0</h5>
+                <p class="text-muted mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h5>0</h5>
+                <p class="text-muted mb-0">Confirmed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if profile_user.user_type == 'narasumber' %}
+<!-- Additional info for narasumber users -->
+<div class="alert alert-info mt-4">
+    <h6 class="alert-heading">
+        <i class="fas fa-info-circle me-2"></i>Informasi Booking
+    </h6>
+    <p class="mb-0">
+        Event organizer dapat mem-booking Anda sebagai narasumber untuk acara mereka. 
+        Booking yang masuk akan muncul di halaman ini dan Anda akan menerima notifikasi.
+    </p>
+</div>
+{% endif %}
+{% endblock %}
