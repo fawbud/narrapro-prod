@@ -35,32 +35,32 @@
                 <!-- Tags/Labels -->
                 <div class="col-12 mb-3">
                     <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.location_display }}</span>
+                        <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.location_display }}</span>
                         {% if profile_user.is_approved %}
-                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">
+                            <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">
                                 <i class="fas fa-check-circle me-1"></i>Verified
                             </span>
                         {% endif %}
                         {% if event_profile.is_one_time_event %}
-                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.event_status }}</span>
+                            <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.event_status }}</span>
                         {% else %}
-                            <span class="badge bg-secondary text-white px-3 py-1" style="font-size: 0.8rem;">Ongoing Events</span>
+                            <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">Ongoing Events</span>
                         {% endif %}
                     </div>
                 </div>
                 
                 <!-- Contact Details -->
                 <div class="col-md-6 mb-2">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="fas fa-envelope me-2"></i>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-envelope text-event me-2"></i>
                         <span>{{ event_profile.email }}</span>
                     </div>
                 </div>
                 
                 {% if event_profile.get_public_phone %}
                 <div class="col-md-6 mb-2">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="fas fa-phone me-2"></i>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-phone text-event me-2"></i>
                         <span>{{ event_profile.get_public_phone }}</span>
                     </div>
                 </div>
@@ -68,16 +68,16 @@
                 
                 <!-- Join Date -->
                 <div class="col-md-6 mb-2">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="fas fa-calendar me-2"></i>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar text-event me-2"></i>
                         <span>Bergabung {{ profile_user.date_joined|date:"F Y" }}</span>
                     </div>
                 </div>
                 
                 {% if event_profile.is_one_time_event and event_profile.start_date %}
                 <div class="col-md-6 mb-2">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="fas fa-clock me-2"></i>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-event me-2"></i>
                         <span>{{ event_profile.event_duration_display }}</span>
                     </div>
                 </div>
@@ -98,16 +98,16 @@
 
     <!-- Card 3: Contact Links -->
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-link me-2"></i>Hubungi Kami</h5>
+        <div class="card-header card-header-event">
+            <h5 class="mb-0"><i class="fas fa-link text-event me-2"></i>Hubungi Kami</h5>
         </div>
         <div class="card-body">
             <div class="row g-3">
                 <!-- Email Link -->
                 <div class="col-md-4">
                     <a href="mailto:{{ event_profile.email }}" 
-                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
-                        <i class="fas fa-envelope me-2 text-muted"></i>
+                       class="btn btn-outline-event w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-envelope text-event me-2"></i>
                         <span>Kirim Email</span>
                     </a>
                 </div>
@@ -116,8 +116,8 @@
                 {% if event_profile.get_public_phone %}
                 <div class="col-md-4">
                     <a href="tel:{{ event_profile.get_public_phone }}" 
-                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
-                        <i class="fas fa-phone me-2 text-muted"></i>
+                       class="btn btn-outline-event w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-phone text-event me-2"></i>
                         <span>Telepon</span>
                     </a>
                 </div>
@@ -128,9 +128,21 @@
                 <div class="col-md-4">
                     <a href="{{ event_profile.website }}" 
                        target="_blank"
-                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center text-dark">
-                        <i class="fas fa-globe me-2 text-muted"></i>
+                       class="btn btn-outline-event w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-globe text-event me-2"></i>
                         <span>Kunjungi Website</span>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- LinkedIn Link (if provided) -->
+                {% if event_profile.linkedin_url %}
+                <div class="col-md-4">
+                    <a href="{{ event_profile.linkedin_url }}" 
+                       target="_blank"
+                       class="btn btn-outline-event w-100 d-flex align-items-center justify-content-center">
+                        <i class="fab fa-linkedin text-event me-2"></i>
+                        <span>LinkedIn</span>
                     </a>
                 </div>
                 {% endif %}
@@ -165,13 +177,13 @@
     }
     
     /* Custom styling for contact buttons */
-    .btn-outline-secondary:hover {
-        background-color: #6c757d;
-        border-color: #6c757d;
+    .btn-outline-event:hover {
+        background-color: var(--event-color, #ef6911);
+        border-color: var(--event-color, #ef6911);
         color: white;
     }
     
-    .btn-outline-secondary:hover .text-muted {
+    .btn-outline-event:hover .text-event {
         color: white !important;
     }
 </style>
