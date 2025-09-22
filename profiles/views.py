@@ -343,3 +343,32 @@ def cancel_booking(request, username, booking_id):
         return redirect('profiles:profile_booking', username=request.user.username)
     
     return redirect('profiles:profile_booking', username=request.user.username)
+
+
+@login_required
+def update_booking_status(request, username, booking_id, action):
+    """
+    View for a narasumber to accept or decline a booking.
+    """
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Check if the user is the narasumber for this booking
+    if request.user != booking.narasumber:
+        raise Http404("You are not authorized to update this booking.")
+
+    # Check if the booking is pending
+    if booking.status != 'PENDING':
+        messages.error(request, "This booking can no longer be updated.")
+        return redirect('profiles:profile_booking', username=request.user.username)
+
+    if request.method == 'POST':
+        if action == 'accept':
+            booking.status = 'APPROVED'
+            messages.success(request, "The booking has been approved.")
+        elif action == 'decline':
+            booking.status = 'REJECTED'
+            messages.success(request, "The booking has been declined.")
+        booking.save()
+        return redirect('profiles:profile_booking', username=request.user.username)
+
+    return redirect('profiles:profile_booking', username=request.user.username)

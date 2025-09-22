@@ -56,6 +56,16 @@
                                 </form>
                                 {% endif %}
                             {% endif %}
+                            {% if profile_user.user_type == 'narasumber' and booking.status == 'PENDING' %}
+                                <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='accept' %}" method="post" style="display: inline;" class="ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Accept</button>
+                                </form>
+                                <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" style="display: inline;" class="ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Decline</button>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
