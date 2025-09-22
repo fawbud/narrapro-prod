@@ -6,6 +6,10 @@ from django.urls import reverse
 from django.http import Http404
 from .models import User
 from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm
+from narasumber.models import ExpertiseCategory
+from profiles.models import Booking
+from .forms import BookingForm
+from django.db.models import Q
 
 
 def myprofile_redirect(request):
@@ -232,15 +236,110 @@ def profile_booking(request, username):
     """
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
-    
+
     # Only allow access to own profile
     if not is_own_profile:
         raise Http404("You can only view your own bookings.")
-    
+
+    bookings = []
+    if profile_user.user_type == 'event':
+        bookings = profile_user.outgoing_bookings.all()
+    elif profile_user.user_type == 'narasumber':
+        bookings = profile_user.incoming_bookings.all()
+
+    total_bookings = bookings.count()
+    pending_bookings = bookings.filter(status='PENDING').count()
+    approved_bookings = bookings.filter(status='APPROVED').count()
+
     context = {
         'profile_user': profile_user,
         'is_own_profile': is_own_profile,
         'active_section': 'booking',
+        'bookings': bookings,
+        'total_bookings': total_bookings,
+        'pending_bookings': pending_bookings,
+        'approved_bookings': approved_bookings,
     }
-    
+
     return render(request, 'profiles/profile_booking.html', context)
+
+
+@login_required
+def book_narasumber(request, username):
+    """
+    View for event organizers to browse and book narasumber.
+    """
+    # is_approved = True later
+    narasumber_list = User.objects.filter(user_type='narasumber')
+    categories = ExpertiseCategory.objects.all()
+
+    # Search query
+    query = request.GET.get('q')
+    if query:
+        narasumber_list = narasumber_list.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(narasumber_profile__expertise_area__name__icontains=query)
+        ).distinct()
+
+    # Category filter
+    category_id = request.GET.get('category')
+    if category_id:
+        narasumber_list = narasumber_list.filter(narasumber_profile__expertise_area__id=category_id)
+
+    context = {
+        'narasumber_list': narasumber_list,
+        'categories': categories,
+    }
+    return render(request, 'profiles/book_narasumber.html', context)
+
+
+@login_required
+def create_booking(request, username, narasumber_id):
+    """
+    View for an event organizer to book a narasumber.
+    """
+    narasumber = get_object_or_404(User, id=narasumber_id, user_type='narasumber')
+    
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.event = request.user
+            booking.narasumber = narasumber
+            booking.save()
+            messages.success(request, f"Booking request sent to {narasumber.get_full_name()}.")
+            return redirect('profiles:profile_booking', username=request.user.username)
+    else:
+        form = BookingForm()
+        
+    context = {
+        'form': form,
+        'narasumber': narasumber,
+    }
+    return render(request, 'profiles/create_booking.html', context)
+
+
+@login_required
+def cancel_booking(request, username, booking_id):
+    """
+    View for an event organizer to cancel a booking.
+    """
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    # Check if the user is the event organizer for this booking
+    if request.user != booking.event:
+        raise Http404("You are not authorized to cancel this booking.")
+        
+    # Check if the booking can be canceled
+    if booking.status not in ['PENDING', 'APPROVED']:
+        messages.error(request, "This booking cannot be canceled.")
+        return redirect('profiles:profile_booking', username=request.user.username)
+
+    if request.method == 'POST':
+        booking.status = 'CANCELED'
+        booking.save()
+        messages.success(request, "The booking has been canceled.")
+        return redirect('profiles:profile_booking', username=request.user.username)
+    
+    return redirect('profiles:profile_booking', username=request.user.username)

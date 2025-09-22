@@ -13,10 +13,56 @@
             {% endif %}
         </h5>
         <div>
-            <span class="badge bg-secondary">0 Booking</span>
+            {% if profile_user.user_type == 'event' %}
+                <a href="{% url 'profiles:book_narasumber' username=request.user.username %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-search me-2"></i>Cari Narasumber
+                </a>
+            {% endif %}
+            <span class="badge bg-secondary ms-2">{{ bookings|length }} Booking</span>
         </div>
     </div>
     <div class="card-body">
+        {% if bookings %}
+        <div class="row">
+            {% for booking in bookings %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        {% if profile_user.user_type == 'event' %}
+                        <h6 class="card-title">{{ booking.narasumber.get_full_name }}</h6>
+                        <p class="card-text small text-muted">Booked for: {{ booking.booking_date|date:"d M Y, H:i" }}</p>
+                        {% else %}
+                        <h6 class="card-title">{{ booking.event.get_full_name }}</h6>
+                        <p class="card-text small text-muted">Booking from: {{ booking.event.event_profile.name }}</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge 
+                                {% if booking.status == 'PENDING' %}bg-warning
+                                {% elif booking.status == 'APPROVED' %}bg-success
+                                {% elif booking.status == 'REJECTED' %}bg-danger
+                                {% elif booking.status == 'CANCELED' %}bg-secondary
+                                {% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                            <small class="text-muted">Date: {{ booking.booking_date|date:"d M Y" }}</small>
+                        </div>
+                        <div class="mt-2">
+                            <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                            {% if profile_user.user_type == 'event' %}
+                                {% if booking.status == 'PENDING' or booking.status == 'APPROVED' %}
+                                <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post" style="display: inline;" class="ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
         <div class="text-center py-5">
             <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
             <h5 class="text-muted">Belum ada booking</h5>
@@ -28,36 +74,12 @@
                 {% endif %}
             </p>
             <div class="mt-4">
-                {% if profile_user.user_type == 'event' %}
-                    <a href="{% url 'main:home' %}" class="btn btn-primary">
-                        <i class="fas fa-search me-2"></i>Cari Narasumber
-                    </a>
-                {% else %}
+                {% if profile_user.user_type != 'event' %}
                     <p class="text-muted">Menunggu booking dari event organizer.</p>
                 {% endif %}
             </div>
         </div>
-        
-        <!-- Future: This section will display bookings -->
-        <!-- 
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title">Event/Narasumber Name</h6>
-                        <p class="card-text small text-muted">Event details or narasumber info</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge bg-warning">Pending</span>
-                            <small class="text-muted">Date: 2024-01-15</small>
-                        </div>
-                        <div class="mt-2">
-                            <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        -->
+        {% endif %}
     </div>
 </div>
 
@@ -67,7 +89,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-calendar fa-2x text-primary mb-2"></i>
-                <h5>0</h5>
+                <h5>{{ total_bookings }}</h5>
                 <p class="text-muted mb-0">Total Booking</p>
             </div>
         </div>
@@ -76,7 +98,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                <h5>0</h5>
+                <h5>{{ pending_bookings }}</h5>
                 <p class="text-muted mb-0">Pending</p>
             </div>
         </div>
@@ -85,7 +107,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                <h5>0</h5>
+                <h5>{{ approved_bookings }}</h5>
                 <p class="text-muted mb-0">Confirmed</p>
             </div>
         </div>

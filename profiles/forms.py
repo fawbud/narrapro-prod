@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
-from .models import User
+from .models import User, Booking
 
 
 class UserProfileForm(forms.ModelForm):
@@ -209,3 +209,8 @@ class PasswordChangeForm(DjangoPasswordChangeForm):
         self.fields['old_password'].widget.attrs['placeholder'] = 'Masukkan password lama'
         self.fields['new_password1'].widget.attrs['placeholder'] = 'Masukkan password baru'
         self.fields['new_password2'].widget.attrs['placeholder'] = 'Konfirmasi password baru'
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['booking_date', 'message']

@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 import uuid
+from django.core.validators import URLValidator
+import os
 
 
 class User(AbstractUser):
@@ -112,3 +114,52 @@ class User(AbstractUser):
             # Log the error in production
             print(f"Failed to send approval email to {self.email}: {str(e)}")
             return False
+
+class Booking(models.Model):
+    """
+    Model to represent a booking made by an event organizer for a narasumber.
+    """
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('CANCELED', 'Canceled'),
+    ]
+
+    event = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='outgoing_bookings',
+        limit_choices_to={'user_type': 'event'},
+        help_text="The event organizer making the booking"
+    )
+    narasumber = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='incoming_bookings',
+        limit_choices_to={'user_type': 'narasumber'},
+        help_text="The narasumber being booked"
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='PENDING',
+        help_text="The current status of the booking"
+    )
+    booking_date = models.DateTimeField(
+        help_text="The date and time of the booking"
+    )
+    message = models.TextField(
+        blank=True,
+        help_text="A message from the event organizer to the narasumber"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Booking"
+        verbose_name_plural = "Bookings"
+        ordering = ['-booking_date']
+
+    def __str__(self):
+        return f"Booking for {self.narasumber.get_full_name()} by {self.event.event_profile.name} on {self.booking_date}"
