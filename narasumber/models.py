@@ -183,10 +183,11 @@ class NarasumberProfile(models.Model):
         help_text="Portfolio website URL (optional)"
     )
     
-    social_media_links = models.JSONField(
-        default=dict,
+    linkedin_url = models.URLField(
         blank=True,
-        help_text="Social media links in JSON format (e.g., {'linkedin': 'url', 'twitter': 'url'})"
+        null=True,
+        validators=[URLValidator()],
+        help_text="LinkedIn profile URL (optional)"
     )
     
     # Timestamps
@@ -213,29 +214,6 @@ class NarasumberProfile(models.Model):
         Return phone number only if user wants it to be public.
         """
         return self.phone_number if self.is_phone_public else None
-    
-    def get_social_media_link(self, platform):
-        """
-        Get a specific social media link by platform name.
-        """
-        return self.social_media_links.get(platform, None)
-    
-    def add_social_media_link(self, platform, url):
-        """
-        Add or update a social media link.
-        """
-        if self.social_media_links is None:
-            self.social_media_links = {}
-        self.social_media_links[platform] = url
-        self.save(update_fields=['social_media_links'])
-    
-    def remove_social_media_link(self, platform):
-        """
-        Remove a social media link.
-        """
-        if self.social_media_links and platform in self.social_media_links:
-            del self.social_media_links[platform]
-            self.save(update_fields=['social_media_links'])
     
     @property
     def experience_display(self):

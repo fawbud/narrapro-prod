@@ -77,7 +77,7 @@ class NarasumberRegistrationForm(forms.ModelForm):
         fields = [
             'profile_picture', 'bio', 'expertise_area', 'experience_level', 
             'years_of_experience', 'email', 'phone_number', 'is_phone_public',
-            'location', 'portfolio_link'
+            'location', 'portfolio_link', 'linkedin_url'
         ]
         widgets = {
             'profile_picture': forms.FileInput(attrs={
@@ -118,6 +118,10 @@ class NarasumberRegistrationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Portfolio Website (optional)'
             }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'LinkedIn Profile (optional)'
+            }),
         }
     
     def __init__(self, *args, **kwargs):
@@ -135,7 +139,7 @@ class EventRegistrationForm(forms.ModelForm):
         model = EventProfile
         fields = [
             'name', 'description', 'location', 'email', 'phone_number', 
-            'is_phone_public', 'website', 'cover_image', 'start_date', 'end_date'
+            'is_phone_public', 'website', 'linkedin_url', 'cover_image', 'start_date', 'end_date'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -164,6 +168,10 @@ class EventRegistrationForm(forms.ModelForm):
             'website': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Website URL (optional)'
+            }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'LinkedIn Profile (optional)'
             }),
             'cover_image': forms.FileInput(attrs={
                 'class': 'form-control',

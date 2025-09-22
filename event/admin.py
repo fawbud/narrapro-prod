@@ -32,7 +32,7 @@ class EventProfileAdmin(admin.ModelAdmin):
         'description',
         'user__username',
         'user__email',
-        'contact'
+        'email'
     ]
     
     readonly_fields = ['created_at', 'updated_at', 'cover_image_preview_large']
@@ -42,7 +42,7 @@ class EventProfileAdmin(admin.ModelAdmin):
             'fields': ('user', 'name', 'description')
         }),
         ('Location & Contact', {
-            'fields': ('location', 'contact', 'website')
+            'fields': ('location', 'email', 'phone_number', 'is_phone_public', 'website', 'linkedin_url')
         }),
         ('Event Dates', {
             'fields': ('start_date', 'end_date'),
