@@ -84,7 +84,7 @@
                     <!-- User Type Specific Information -->
                     {% if narasumber_form %}
                     <hr class="my-4">
-                    <h6 class="text-muted mb-3">Informasi Narasumber</h6>
+                    <h6 class="text-narasumber mb-3"><i class="fas fa-user-graduate me-2"></i>Informasi Narasumber</h6>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -243,9 +243,27 @@
                         {% endif %}
                     </div>
                     
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.linkedin_url.id_for_label }}" class="form-label">
+                            {{ narasumber_form.linkedin_url.label }}
+                        </label>
+                        {{ narasumber_form.linkedin_url }}
+                        {% if narasumber_form.linkedin_url.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.linkedin_url.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Add your LinkedIn profile URL (optional). Example: https://linkedin.com/in/your-username
+                        </div>
+                    </div>
+                    
                     {% elif event_form %}
                     <hr class="my-4">
-                    <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
+                    <h6 class="text-event mb-3"><i class="fas fa-calendar-alt me-2"></i>Informasi Event Organizer</h6>
                     
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -351,6 +369,24 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ event_form.linkedin_url.id_for_label }}" class="form-label">
+                            {{ event_form.linkedin_url.label }}
+                        </label>
+                        {{ event_form.linkedin_url }}
+                        {% if event_form.linkedin_url.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in event_form.linkedin_url.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Add your LinkedIn profile URL (optional). Example: https://linkedin.com/in/your-username
+                        </div>
                     </div>
                     
                     <div class="mb-3">
