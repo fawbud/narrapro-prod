@@ -6,23 +6,27 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .forms import BaseUserRegistrationForm, NarasumberRegistrationForm, EventRegistrationForm, CombinedRegistrationForm
-from narasumber.models import ExpertiseCategory
+from narasumber.models import ExpertiseCategory,NarasumberProfile
+# from lowongan.models import Lowongan
 import json
 
 
 def home(request):
-    """
-    Home page that shows different content based on authentication status
-    """
-    if request.user.is_authenticated:
-        # Logged in home page
-        return render(request, 'main/home_authenticated.html', {
-            'user': request.user
-        })
-    else:
-        # Guest home page
-        return render(request, 'main/home_guest.html')
+    # Ambil data expertise categories
+    expertise_categories = ExpertiseCategory.objects.all()
 
+    # Ambil 6–8 narasumber terbaru
+    narasumbers = NarasumberProfile.objects.select_related("expertise_area").order_by("-created_at")[:8]
+
+    # Ambil 6–8 lowongan terbaru
+    # lowongans = Lowongan.objects.order_by("-created_at")[:8]
+
+    context = {
+        "expertise_categories": expertise_categories,
+        "narasumbers": narasumbers,
+        # "lowongans": lowongans,
+    }
+    return render(request, "main/home_authenticated.html", context)
 
 def register_view(request):
     """
