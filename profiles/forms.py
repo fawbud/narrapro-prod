@@ -52,6 +52,7 @@ class NarasumberProfileForm(forms.ModelForm):
     """
     Form for editing narasumber-specific profile information.
     """
+    
     class Meta:
         from narasumber.models import NarasumberProfile, ExpertiseCategory
         model = NarasumberProfile
@@ -59,7 +60,7 @@ class NarasumberProfileForm(forms.ModelForm):
             'profile_picture', 'full_name', 'bio', 'expertise_area', 
             'experience_level', 'years_of_experience', 'email', 
             'phone_number', 'is_phone_public', 'location', 
-            'portfolio_link'
+            'portfolio_link', 'linkedin_url'
         ]
         widgets = {
             'profile_picture': forms.FileInput(attrs={
@@ -104,6 +105,10 @@ class NarasumberProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://portfolio-anda.com'
             }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://linkedin.com/in/username'
+            }),
         }
         labels = {
             'profile_picture': 'Foto Profil',
@@ -117,6 +122,7 @@ class NarasumberProfileForm(forms.ModelForm):
             'is_phone_public': 'Tampilkan nomor telepon di profil publik',
             'location': 'Lokasi',
             'portfolio_link': 'Link Portfolio',
+            'linkedin_url': 'Link LinkedIn',
         }
 
 
@@ -124,13 +130,14 @@ class EventProfileForm(forms.ModelForm):
     """
     Form for editing event organizer-specific profile information.
     """
+    
     class Meta:
         from event.models import EventProfile
         model = EventProfile
         fields = [
             'name', 'description', 'location', 
             'email', 'phone_number', 'is_phone_public', 'website', 
-            'cover_image', 'start_date', 'end_date'
+            'linkedin_url', 'cover_image', 'start_date', 'end_date'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -160,6 +167,10 @@ class EventProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://website-anda.com'
             }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://linkedin.com/in/username'
+            }),
             'cover_image': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
@@ -181,6 +192,7 @@ class EventProfileForm(forms.ModelForm):
             'phone_number': 'Nomor Telepon',
             'is_phone_public': 'Tampilkan nomor telepon di profil publik',
             'website': 'Website',
+            'linkedin_url': 'Link LinkedIn',
             'cover_image': 'Cover Image',
             'start_date': 'Tanggal Mulai (Opsional)',
             'end_date': 'Tanggal Selesai (Opsional)',
