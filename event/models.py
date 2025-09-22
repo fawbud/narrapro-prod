@@ -144,6 +144,14 @@ class EventProfile(models.Model):
         help_text="Event or organization website URL (optional)"
     )
     
+    # LinkedIn profile
+    linkedin_url = models.URLField(
+        blank=True,
+        null=True,
+        validators=[URLValidator()],
+        help_text="LinkedIn profile URL (optional)"
+    )
+    
     # Cover image
     cover_image = models.ImageField(
         upload_to=event_cover_upload_path,
