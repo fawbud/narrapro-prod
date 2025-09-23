@@ -241,15 +241,57 @@ def profile_booking(request, username):
     if not is_own_profile:
         raise Http404("You can only view your own bookings.")
 
-    bookings = []
+    bookings_qs = []
     if profile_user.user_type == 'event':
-        bookings = profile_user.outgoing_bookings.all()
+        bookings_qs = profile_user.outgoing_bookings.all()
     elif profile_user.user_type == 'narasumber':
-        bookings = profile_user.incoming_bookings.all()
+        bookings_qs = profile_user.incoming_bookings.all()
 
-    total_bookings = bookings.count()
-    pending_bookings = bookings.filter(status='PENDING').count()
-    approved_bookings = bookings.filter(status='APPROVED').count()
+    status_options = [
+        ('PENDING', 'Menunggu'),
+        ('APPROVED', 'Disetujui'),
+        ('REJECTED', 'Ditolak'),
+        ('CANCELED', 'Dibatalkan'),
+    ]
+    all_statuses = [s[0] for s in status_options]
+
+    # Filtering
+    status_filters = request.GET.getlist('status')
+    if not request.GET:
+        status_filters = ['PENDING', 'APPROVED']
+
+    if status_filters:
+        bookings = bookings_qs.filter(status__in=status_filters)
+    else:
+        bookings = bookings_qs
+
+    total_bookings = bookings_qs.count()
+    pending_bookings = bookings_qs.filter(status='PENDING').count()
+    approved_bookings = bookings_qs.filter(status='APPROVED').count()
+
+    filters_data = []
+    for status, label in status_options:
+        next_filters = status_filters[:]
+        if status in next_filters:
+            next_filters.remove(status)
+        else:
+            next_filters.append(status)
+        
+        query_string = '&'.join([f'status={s}' for s in sorted(next_filters)])
+        
+        filters_data.append({
+            'status': status,
+            'label': label,
+            'query_string': '?' + query_string if query_string else '',
+            'is_active': status in status_filters,
+        })
+
+    all_selected = sorted(status_filters) == sorted(all_statuses)
+    
+    if all_selected:
+        semua_reset_qs = ''
+    else:
+        semua_reset_qs = '?' + '&'.join([f'status={s}' for s in all_statuses])
 
     context = {
         'profile_user': profile_user,
@@ -259,6 +301,10 @@ def profile_booking(request, username):
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings,
         'approved_bookings': approved_bookings,
+        'status_filters': status_filters,
+        'filters_data': filters_data,
+        'all_selected': all_selected,
+        'semua_reset_qs': semua_reset_qs,
     }
 
     return render(request, 'profiles/profile_booking.html', context)

@@ -23,6 +23,27 @@
             {% endif %}
         </div>
     </div>
+    <div class="card-body border-bottom">
+        <div class="d-flex justify-content-end">
+            {% if all_selected %}
+                <a href="{% url 'profiles:profile_booking' username=request.user.username %}{{ semua_reset_qs }}" 
+                   class="btn btn-sm rounded me-2 btn-outline-secondary">
+                    Reset
+                </a>
+            {% else %}
+                <a href="{% url 'profiles:profile_booking' username=request.user.username %}{{ semua_reset_qs }}" 
+                   class="btn btn-sm rounded me-2 btn-link text-decoration-none text-secondary">
+                    Semua
+                </a>
+            {% endif %}
+            {% for f in filters_data %}
+                <a href="{% url 'profiles:profile_booking' username=request.user.username %}{{ f.query_string }}" 
+                   class="btn btn-sm rounded me-1 {% if f.is_active %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ f.label }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
     <div class="card-body">
         {% if bookings %}
         <div class="row">
