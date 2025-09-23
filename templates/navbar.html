@@ -36,6 +36,18 @@
 			</div>
 		</form>
 
+		<!-- Navigation Links -->
+		<div class="navbar-nav ms-3">
+			<a class="nav-link" href="{% url 'lowongan:list' %}">Browse Lowongan</a>
+			{% if user.is_authenticated %}
+				{% if user.user_type == 'event' %}
+					<a class="nav-link" href="{% url 'lowongan:my_lowongan' %}">My Lowongan</a>
+				{% elif user.user_type == 'narasumber' %}
+					<a class="nav-link" href="{% url 'lowongan:my_applications' %}">My Applications</a>
+				{% endif %}
+			{% endif %}
+		</div>
+
 		<div class="navbar-nav ms-auto">
 			{% if user.is_authenticated %}
 				<span class="navbar-text me-3">

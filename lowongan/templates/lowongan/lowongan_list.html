@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Lowongan Opportunities - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">Browse Lowongan Opportunities</h1>
+            {% if user.is_authenticated and user.user_type == 'event' %}
+                <a href="{% url 'lowongan:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Lowongan
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        {{ filter_form.search }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.job_type }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.expertise_category }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.location }}
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check">
+                            {{ filter_form.is_remote }}
+                            <label class="form-check-label" for="{{ filter_form.is_remote.id_for_label }}">
+                                Remote OK
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results count -->
+        <div class="mb-3">
+            <small class="text-muted">{{ total_count }} opportunities found</small>
+        </div>
+
+        <!-- Lowongan List -->
+        <div class="row">
+            {% for lowongan in lowongan_page %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ lowongan.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ lowongan.get_job_type_display }}</h6>
+
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">{{ lowongan.expertise_category.name }}</span>
+                                {% if lowongan.is_remote %}
+                                    <span class="badge bg-success">Remote</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="card-text">
+                                {{ lowongan.description|truncatewords:20 }}
+                            </p>
+
+                            <div class="text-muted small mb-2">
+                                <div><i class="fas fa-map-marker-alt"></i> {{ lowongan.location_display }}</div>
+                                <div><i class="fas fa-calendar"></i> {{ lowongan.event_date }}</div>
+                                <div><i class="fas fa-clock"></i> {{ lowongan.duration_hours }} hours</div>
+                                {% if lowongan.budget_amount %}
+                                    <div><i class="fas fa-money-bill"></i> IDR {{ lowongan.budget_amount|floatformat:0 }}{% if lowongan.budget_negotiable %} (negotiable){% endif %}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-muted small mb-2">
+                                <strong>Deadline:</strong> {{ lowongan.application_deadline }}
+                                {% if lowongan.days_until_deadline < 7 %}
+                                    <span class="text-danger">({{ lowongan.days_until_deadline }} days left)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'lowongan:detail' lowongan.id %}" class="btn btn-outline-primary btn-sm">
+                                View Details
+                            </a>
+                            {% if user.is_authenticated and user.user_type == 'narasumber' %}
+                                <a href="{% url 'lowongan:apply' lowongan.id %}" class="btn btn-primary btn-sm ms-2">
+                                    Apply Now
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4>No opportunities found</h4>
+                        <p class="text-muted">Try adjusting your filters or check back later for new opportunities.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if lowongan_page.has_other_pages %}
+            <nav aria-label="Lowongan pagination">
+                <ul class="pagination justify-content-center">
+                    {% if lowongan_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ lowongan_page.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in lowongan_page.paginator.page_range %}
+                        {% if lowongan_page.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > lowongan_page.number|add:'-3' and num < lowongan_page.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if lowongan_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ lowongan_page.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
