@@ -86,11 +86,11 @@
                     <span class="input-group-text bg-white border-0">
                         <i class="bi bi-search text-muted"></i>
                     </span>
-                    <input 
+                    <input
                         id="globalSearch"
-                        type="text" 
-                        class="form-control border-0 shadow-none" 
-                        placeholder="Cari lowongan, event, dan narasumber" 
+                        type="text"
+                        class="form-control border-0 shadow-none"
+                        placeholder="Cari lowongan, event, dan narasumber"
                         aria-label="Search"
                         value="{{ request.GET.q|default:'' }}"
                         autocomplete="off"
@@ -98,8 +98,8 @@
                 </div>
 
                 <!-- Popup Preview -->
-                <div id="searchPopup" 
-                    class="position-absolute start-0 mt-2 w-100 bg-white rounded-3 shadow-lg d-none" 
+                <div id="searchPopup"
+                    class="position-absolute start-0 mt-2 w-100 bg-white rounded-3 shadow-lg d-none"
                     style="max-height: 300px; overflow-y: auto; z-index:1060;">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">🔎 Hasil pencarian akan muncul di sini...</li>
@@ -108,10 +108,22 @@
             </form>
         </div>
 
+        <!-- Navigation Links -->
+        <div class="navbar-nav d-none d-lg-flex ms-3">
+            <a class="nav-link" href="{% url 'lowongan:list' %}">Browse Lowongan</a>
+            {% if user.is_authenticated %}
+                {% if user.user_type == 'event' %}
+                    <a class="nav-link" href="{% url 'lowongan:my_lowongan' %}">My Lowongan</a>
+                {% elif user.user_type == 'narasumber' %}
+                    <a class="nav-link" href="{% url 'lowongan:my_applications' %}">My Applications</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
         <!-- Right Side -->
         <div class="d-flex align-items-center ms-3">
             {% if user.is_authenticated %}
-                {% if user.role == "event" %}
+                {% if user.user_type == "event" %}
                 <a href="{% url 'lowongan:create' %}" class="btn btn-create d-none d-lg-inline me-3">+ Buat Lowongan</a>
                 {% endif %}
 
@@ -126,7 +138,18 @@
                         <i class="bi bi-list fs-3"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                        <!-- Mobile Navigation Links -->
+                        <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:list' %}"><i class="bi bi-briefcase me-2"></i>Browse Lowongan</a></li>
+                        {% if user.is_authenticated %}
+                            {% if user.user_type == 'event' %}
+                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_lowongan' %}"><i class="bi bi-folder me-2"></i>My Lowongan</a></li>
+                            {% elif user.user_type == 'narasumber' %}
+                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_applications' %}"><i class="bi bi-file-text me-2"></i>My Applications</a></li>
+                            {% endif %}
+                            <li class="d-lg-none"><hr class="dropdown-divider"></li>
+                        {% endif %}
+                        <!-- Profile & Logout -->
+                        <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.username %}"><i class="bi bi-person me-2"></i>My Profile</a></li>
                         <li><a class="dropdown-item" href="{% url 'main:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>
@@ -135,6 +158,8 @@
                 <div class="dropdown">
                     <a class="nav-link d-lg-none" href="#" data-bs-toggle="dropdown"><i class="bi bi-list fs-3"></i></a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <a class="dropdown-item" href="{% url 'lowongan:list' %}"><i class="bi bi-briefcase me-2"></i>Browse Lowongan</a>
+                        <hr class="dropdown-divider">
                         <a class="dropdown-item" href="{% url 'main:login' %}">Login</a>
                         <a class="dropdown-item" href="{% url 'main:register' %}">Register</a>
                     </div>
