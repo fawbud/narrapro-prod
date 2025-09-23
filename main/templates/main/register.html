@@ -144,6 +144,15 @@
 						if (data.success) {
 							roleSpecificFields.innerHTML = data.html;
 							submitBtn.disabled = false;
+							
+							console.log('🔵 AJAX content loaded successfully');
+							// Initialize social media widgets for newly loaded content
+							if (window.initializeSocialMediaWidget) {
+								console.log('🔵 Calling initializeSocialMediaWidget for AJAX content');
+								window.initializeSocialMediaWidget(roleSpecificFields);
+							} else {
+								console.error('🔴 initializeSocialMediaWidget function not found!');
+							}
 						} else {
 							roleSpecificFields.innerHTML = `
                             <div class="alert alert-danger">

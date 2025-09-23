@@ -80,7 +80,7 @@ class NarasumberProfileAdmin(admin.ModelAdmin):
             'fields': ('location',)
         }),
         ('Online Presence', {
-            'fields': ('portfolio_link', 'social_media_links'),
+            'fields': ('portfolio_link', 'linkedin_url'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -123,9 +123,6 @@ class NarasumberProfileAdmin(admin.ModelAdmin):
         """
         Custom save method to handle any additional processing.
         """
-        # Ensure social_media_links is initialized as dict if None
-        if obj.social_media_links is None:
-            obj.social_media_links = {}
         super().save_model(request, obj, form, change)
     
     actions = ['make_phone_public', 'make_phone_private']
