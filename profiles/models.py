@@ -120,10 +120,10 @@ class Booking(models.Model):
     Model to represent a booking made by an event organizer for a narasumber.
     """
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('APPROVED', 'Approved'),
-        ('REJECTED', 'Rejected'),
-        ('CANCELED', 'Canceled'),
+        ('PENDING', 'Menunggu'),
+        ('APPROVED', 'Disetujui'),
+        ('REJECTED', 'Ditolak'),
+        ('CANCELED', 'Dibatalkan'),
     ]
 
     event = models.ForeignKey(

@@ -372,3 +372,29 @@ def update_booking_status(request, username, booking_id, action):
         return redirect('profiles:profile_booking', username=request.user.username)
 
     return redirect('profiles:profile_booking', username=request.user.username)
+
+@login_required
+def booking_detail(request, username, booking_id):
+    """
+    Booking detail view.
+    """
+    profile_user = get_object_or_404(User, username=username)
+    is_own_profile = request.user.username == profile_user.username
+
+    if not is_own_profile:
+        raise Http404("You can only view your own bookings.")
+
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Authorization check
+    if request.user != booking.event and request.user != booking.narasumber:
+        raise Http404("You are not authorized to view this booking.")
+
+    context = {
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'booking': booking,
+        'active_section': 'booking',
+    }
+
+    return render(request, 'profiles/booking_detail.html', context)
