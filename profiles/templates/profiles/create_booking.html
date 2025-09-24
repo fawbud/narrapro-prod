@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ narasumber.get_full_name }} - NarraPro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'profiles:profile_booking' username=request.user.username %}">Booking</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'profiles:book_narasumber' username=request.user.username %}">Cari Narasumber</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Book {{ narasumber.get_full_name }}</li>
+                </ol>
+            </nav>
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <img src="{{ narasumber.narasumber_profile.profile_picture.url|default:'/static/images/default-avatar.png' }}" 
+                         alt="{{ narasumber.get_full_name }}" 
+                         class="rounded-circle me-3" 
+                         width="40" 
+                         height="40"
+                         style="object-fit: cover;">
+                    <h4 class="mb-0">Book {{ narasumber.get_full_name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Fill out the form below to send a booking request to {{ narasumber.get_full_name }}.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_booking_date" class="form-label">Booking Date and Time</label>
+                            <input type="datetime-local" name="booking_date" class="form-control" required id="id_booking_date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_message" class="form-label">Message</label>
+                            <textarea name="message" cols="40" rows="4" class="form-control" id="id_message"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Send Booking Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
