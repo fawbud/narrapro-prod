@@ -3,6 +3,7 @@
 {% block title %}Applications for {{ lowongan.title }} - NarraPro{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="row">
     <div class="col-12">
         <!-- Header -->
@@ -214,17 +215,30 @@ function updateApplicationStatus(applicationId, newStatus) {
     const statusText = newStatus === 'ACCEPTED' ? 'accept' : 'reject';
 
     if (confirm(`Are you sure you want to ${statusText} this application?`)) {
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page and try again.');
+            return;
+        }
+
         fetch(`/lowongan/applications/${applicationId}/update-status/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                'X-CSRFToken': csrfToken.value
             },
             body: `status=${newStatus}`
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
+                alert(`Application ${statusText}ed successfully!`);
                 location.reload();
             } else {
                 alert('Failed to update status: ' + JSON.stringify(data.errors));
@@ -232,7 +246,7 @@ function updateApplicationStatus(applicationId, newStatus) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating status');
+            alert('An error occurred while updating status: ' + error.message);
         });
     }
 }

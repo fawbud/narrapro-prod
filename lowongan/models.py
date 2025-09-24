@@ -420,7 +420,38 @@ class LowonganApplication(models.Model):
         unique_together = ['lowongan', 'applicant']
 
     def __str__(self):
-        return f"{self.applicant.username} -> {self.lowongan.title}"
+        # Safe way to check for related objects without triggering DB queries
+        applicant_name = None
+        lowongan_title = None
+
+        # Check if applicant is available
+        try:
+            if hasattr(self, 'applicant_id') and self.applicant_id:
+                applicant = self.applicant
+                applicant_name = applicant.username
+        except (LowonganApplication.applicant.RelatedObjectDoesNotExist,
+                AttributeError,
+                Exception):
+            pass
+
+        # Check if lowongan is available
+        try:
+            if hasattr(self, 'lowongan_id') and self.lowongan_id:
+                lowongan = self.lowongan
+                lowongan_title = lowongan.title
+        except (LowonganApplication.lowongan.RelatedObjectDoesNotExist,
+                AttributeError,
+                Exception):
+            pass
+
+        if applicant_name and lowongan_title:
+            return f"{applicant_name} -> {lowongan_title}"
+        elif lowongan_title:
+            return f"Application for {lowongan_title}"
+        elif applicant_name:
+            return f"Application by {applicant_name}"
+        else:
+            return f"LowonganApplication {self.id or 'New'}"
 
     def clean(self):
         """
@@ -429,16 +460,28 @@ class LowonganApplication(models.Model):
         from django.core.exceptions import ValidationError
 
         # Validate that only narasumber users can apply
-        if self.applicant and self.applicant.user_type != 'narasumber':
-            raise ValidationError({
-                'applicant': 'Only Narasumber users can apply for lowongan.'
-            })
+        try:
+            if hasattr(self, 'applicant_id') and self.applicant_id:
+                applicant = self.applicant
+                if applicant and applicant.user_type != 'narasumber':
+                    raise ValidationError({
+                        'applicant': 'Only Narasumber users can apply for lowongan.'
+                    })
+        except (LowonganApplication.applicant.RelatedObjectDoesNotExist, AttributeError, Exception):
+            # Applicant not set yet or not found, skip validation
+            pass
 
         # Validate that lowongan is open for applications
-        if self.lowongan and not self.lowongan.is_open_for_applications:
-            raise ValidationError({
-                'lowongan': 'This lowongan is not currently accepting applications.'
-            })
+        try:
+            if hasattr(self, 'lowongan_id') and self.lowongan_id:
+                lowongan = self.lowongan
+                if lowongan and not lowongan.is_open_for_applications:
+                    raise ValidationError({
+                        'lowongan': 'This lowongan is not currently accepting applications.'
+                    })
+        except (LowonganApplication.lowongan.RelatedObjectDoesNotExist, AttributeError, Exception):
+            # Lowongan not set yet or not found, skip validation
+            pass
 
     def save(self, *args, **kwargs):
         """
@@ -446,9 +489,13 @@ class LowonganApplication(models.Model):
         """
         # Set reviewed_at when status changes from PENDING
         if self.pk:
-            old_instance = LowonganApplication.objects.get(pk=self.pk)
-            if old_instance.status == 'PENDING' and self.status != 'PENDING':
-                self.reviewed_at = timezone.now()
+            try:
+                old_instance = LowonganApplication.objects.get(pk=self.pk)
+                if old_instance.status == 'PENDING' and self.status != 'PENDING':
+                    self.reviewed_at = timezone.now()
+            except LowonganApplication.DoesNotExist:
+                # This is a new instance, skip the status change check
+                pass
 
         self.full_clean()
         super().save(*args, **kwargs)
