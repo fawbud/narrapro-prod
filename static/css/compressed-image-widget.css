@@ -1,0 +1,500 @@
+/**
+ * Compressed Image Widget Styles
+ * CSS styles for the image compression widget components
+ * 
+ * @version 1.0.0
+ * @author NarraPro Development Team
+ */
+
+/* Main widget container */
+.compressed-image-widget {
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Drop zone styles */
+.image-drop-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+    position: relative;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-drop-zone:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.image-drop-zone.drag-over {
+    border-color: #10b981;
+    background-color: #ecfdf5;
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.drop-zone-icon {
+    color: #6b7280;
+    transition: color 0.3s ease;
+}
+
+.image-drop-zone:hover .drop-zone-icon {
+    color: #3b82f6;
+}
+
+.image-drop-zone.drag-over .drop-zone-icon {
+    color: #10b981;
+}
+
+.drop-zone-text p {
+    margin: 0;
+    color: #374151;
+}
+
+.drop-zone-text strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.drop-zone-subtext {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Preview container */
+.image-preview-container {
+    margin: 1rem 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-header h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.remove-image {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.remove-image:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.preview-image {
+    padding: 1rem;
+    text-align: center;
+    background-color: #f9fafb;
+}
+
+.preview-image img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-info {
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border-top: 1px solid #e5e7eb;
+}
+
+.file-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #374151;
+    flex: 1;
+    min-width: 150px;
+}
+
+.file-size {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.compression-ratio {
+    color: #10b981;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: #ecfdf5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #d1fae5;
+}
+
+/* Progress container */
+.compression-progress {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* Compression info */
+.compression-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #ecfdf5;
+    border: 1px solid #d1fae5;
+    border-radius: 8px;
+}
+
+.compression-stats h5 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid #d1fae5;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #047857;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 0.875rem;
+    color: #065f46;
+    font-weight: 600;
+}
+
+/* Error container */
+.compression-error {
+    margin: 1rem 0;
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #991b1b;
+}
+
+.error-icon {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.error-text {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.error-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.error-close:hover {
+    background-color: #fee2e2;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    .compressed-image-widget {
+        max-width: 100%;
+    }
+    
+    .image-drop-zone {
+        padding: 1.5rem 1rem;
+        min-height: 120px;
+    }
+    
+    .drop-zone-content {
+        gap: 0.75rem;
+    }
+    
+    .drop-zone-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .drop-zone-text p {
+        font-size: 0.875rem;
+    }
+    
+    .drop-zone-subtext {
+        font-size: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .file-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .preview-image img {
+        max-height: 200px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .compressed-image-widget {
+        color: #f3f4f6;
+    }
+    
+    .image-drop-zone {
+        background-color: #1f2937;
+        border-color: #4b5563;
+    }
+    
+    .image-drop-zone:hover {
+        background-color: #1e3a8a;
+        border-color: #3b82f6;
+    }
+    
+    .image-drop-zone.drag-over {
+        background-color: #064e3b;
+        border-color: #10b981;
+    }
+    
+    .drop-zone-text p {
+        color: #d1d5db;
+    }
+    
+    .drop-zone-text strong {
+        color: #f9fafb;
+    }
+    
+    .image-preview-container {
+        background-color: #1f2937;
+        border-color: #4b5563;
+    }
+    
+    .preview-header {
+        background-color: #374151;
+        border-color: #4b5563;
+    }
+    
+    .preview-header h4 {
+        color: #d1d5db;
+    }
+    
+    .preview-image {
+        background-color: #111827;
+    }
+    
+    .preview-info {
+        background-color: #1f2937;
+        border-color: #4b5563;
+    }
+    
+    .file-name {
+        color: #d1d5db;
+    }
+    
+    .compression-progress {
+        background-color: #1f2937;
+        border-color: #4b5563;
+    }
+    
+    .compression-info {
+        background-color: #064e3b;
+        border-color: #047857;
+    }
+    
+    .compression-stats h5 {
+        color: #10b981;
+    }
+    
+    .stat-item {
+        background-color: #1f2937;
+        border-color: #047857;
+    }
+    
+    .stat-label {
+        color: #34d399;
+    }
+    
+    .stat-value {
+        color: #10b981;
+    }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Apply animations */
+.compression-progress {
+    animation: fadeIn 0.3s ease;
+}
+
+.compression-info {
+    animation: slideIn 0.4s ease;
+}
+
+.image-preview-container {
+    animation: fadeIn 0.3s ease;
+}
+
+.compression-error {
+    animation: slideIn 0.3s ease;
+}
+
+.progress-fill {
+    animation: pulse 2s infinite;
+}
+
+/* Loading state */
+.compressed-image-widget.loading .image-drop-zone {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.compressed-image-widget.loading .drop-zone-content::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
