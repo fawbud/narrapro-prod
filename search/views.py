@@ -5,14 +5,17 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from lowongan.models import Lowongan
 from narasumber.models import *
 from event.models import *
 from django.db.models import Q
 from django.core.paginator import Paginator
 import json
 
-@login_required
 def search_preview(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "You must log in to access this page.")
+        return redirect('/login')
     """
     Return JSON search preview results for popup suggestions.
     """
@@ -62,17 +65,17 @@ def search_preview(request):
                 "subtitle": narsum.expertise_area.name,
             })
 
-    # elif category == "lowongan":
-    #     lowongan_matches = Lowongan.objects.filter(
-    #         Q(title__icontains=query) | Q(description__icontains=query)
-    #     )[:5]
-    #     for low in lowongan_matches:
-    #         results.append({
-    #             "type": "lowongan",
-    #             "id": low.id,
-    #             "title": low.title,
-    #             "subtitle": low.company_name if hasattr(low, "company_name") else "",
-    #         })
+    elif category == "lowongan":
+        lowongan_matches = Lowongan.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:5]
+        for low in lowongan_matches:
+            results.append({
+                "type": "lowongan",
+                "id": low.id,
+                "title": low.title,
+                "subtitle": low.company_name if hasattr(low, "company_name") else "",
+            })
 
     else:
         # --- Default: search all categories (preview) ---
@@ -98,22 +101,25 @@ def search_preview(request):
                 "subtitle": narsum.expertise_area.name,
             })
 
-        # lowongan_matches = Lowongan.objects.filter(
-        #     Q(title__icontains=query) | Q(description__icontains=query)
-        # )[:3]
-        # for low in lowongan_matches:
-        #     results.append({
-        #         "type": "lowongan",
-        #         "id": low.id,
-        #         "title": low.title,
-        #         "subtitle": low.company_name if hasattr(low, "company_name") else "",
-        #     })
+        lowongan_matches = Lowongan.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:3]
+        for low in lowongan_matches:
+            results.append({
+                "type": "lowongan",
+                "id": low.id,
+                "title": low.title,
+                "subtitle": low.company_name if hasattr(low, "company_name") else "",
+            })
 
     return JsonResponse({"results": results})
 
 
-@login_required
 def search_result_page(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "You must log in to access this page.")
+        return redirect('/login')
+    
     query = request.GET.get("q", "").strip()
     category = request.GET.get("category", "").lower()
     page_number = request.GET.get("page", 1)
@@ -168,16 +174,16 @@ def search_result_page(request):
         pagination_obj = events
 
     # =============== LOWONGAN ===============
-    # elif category == "lowongan":
-    #     qs = Lowongan.objects.all()
-    #     if query:
-    #         qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+    elif category == "lowongan":
+        qs = Lowongan.objects.all()
+        if query:
+            qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
 
-    #     qs = qs.order_by("-created_at")
-    #     lowongans_count = qs.count()
-    #     paginator = Paginator(qs, 25)
-    #     lowongans = paginator.get_page(page_number)
-    #     pagination_obj = lowongans
+        qs = qs.order_by("-created_at")
+        lowongans_count = qs.count()
+        paginator = Paginator(qs, 25)
+        lowongans = paginator.get_page(page_number)
+        pagination_obj = lowongans
 
     # =============== ALL CATEGORIES (preview) ===============
     else:
@@ -193,11 +199,11 @@ def search_result_page(request):
         narasumbers_count = narsum_qs.count()
         narasumbers = narsum_qs.order_by("-created_at")[:9]
 
-        # lowongan_qs = Lowongan.objects.all()
-        # if query:
-        #     lowongan_qs = lowongan_qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        # lowongans_count = lowongan_qs.count()
-        # lowongans = lowongan_qs.order_by("-created_at")[:9]
+        lowongan_qs = Lowongan.objects.all()
+        if query:
+            lowongan_qs = lowongan_qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        lowongans_count = lowongan_qs.count()
+        lowongans = lowongan_qs.order_by("-created_at")[:9]
 
         has_more["event"] = event_qs.count() > 8
         has_more["narasumber"] = narsum_qs.count() > 8
