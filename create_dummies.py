@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 
 from narasumber.models import ExpertiseCategory, NarasumberProfile
 from event.models import EventProfile  # SESUAIKAN jika letak model berbeda
+from lowongan.models import Lowongan 
 
 User = get_user_model()
 
@@ -121,11 +122,11 @@ for i in range(10):
         "", "https://portfolio.example.com", "https://mywork.example.org", None
     ]) or None
 
-    social_media = {
-        "linkedin": f"https://www.linkedin.com/in/{full_name.replace(' ', '').lower()}",
-        "twitter": f"https://x.com/{full_name.split()[0].lower()}{random.randint(1,999)}",
-        "github": f"https://github.com/{full_name.split()[0].lower()}"
-    }
+    # social_media = {
+    #     "linkedin": f"https://www.linkedin.com/in/{full_name.replace(' ', '').lower()}",
+    #     "twitter": f"https://x.com/{full_name.split()[0].lower()}{random.randint(1,999)}",
+    #     "github": f"https://github.com/{full_name.split()[0].lower()}"
+    # }
 
     # Buat profile (boleh langsung create karena tidak ada field wajib file)
     profile = NarasumberProfile.objects.create(
@@ -140,7 +141,7 @@ for i in range(10):
         is_phone_public=is_phone_public,
         location=location,
         portfolio_link=portfolio_link,
-        social_media_links=social_media,
+        # social_media_links=social_media,
     )
 
     # Tambahkan foto profil dummy (opsional)
@@ -237,5 +238,67 @@ for i in range(10):
 
 print(f"Total Events created in this run: {created_events}")
 print(f"Total Events in DB: {EventProfile.objects.count()}\n")
+
+print("Creating 10 Lowongan (Job Opportunities)...")
+created_lowongan = 0
+
+# ambil semua Event users (karena hanya mereka boleh buat lowongan)
+event_users = User.objects.filter(user_type="event")
+if not event_users.exists():
+    raise RuntimeError("Tidak ada user dengan user_type=event. Jalankan seed Event dulu.")
+
+# ambil expertise categories
+categories = list(ExpertiseCategory.objects.all())
+if not categories:
+    raise RuntimeError("Tidak ada ExpertiseCategory. Jalankan seed kategori dulu.")
+
+today = timezone.now().date()
+
+for i in range(10):
+    creator = random.choice(event_users)
+    category = random.choice(categories)
+
+    title = f"Lowongan {random.choice(['Speaker', 'Moderator', 'Trainer', 'Consultant'])} #{random.randint(100,999)}"
+    description = (
+        f"{title} untuk acara {random.choice(event_names)}. "
+        "Kami mencari narasumber berpengalaman yang siap tampil profesional."
+    )
+
+    # event date in the future
+    event_date = today + timedelta(days=random.randint(10, 90))
+    application_deadline = event_date - timedelta(days=random.randint(3, 7))
+
+    lowongan = Lowongan(
+        title=title,
+        description=description,
+        created_by=creator,
+        job_type=random.choice([c[0] for c in Lowongan.JOB_TYPE_CHOICES]),
+        expertise_category=category,
+        experience_level_required=random.choice([c[0] for c in Lowongan.EXPERIENCE_LEVEL_CHOICES]),
+        location=random.choice([c[0] for c in Lowongan.PROVINCE_CHOICES]),
+        is_remote=random.choice([True, False]),
+        event_date=event_date,
+        duration_hours=random.randint(1, 8),
+        budget_amount=random.choice([None, random.randint(500000, 5000000)]),
+        budget_negotiable=random.choice([True, False]),
+        application_deadline=application_deadline,
+        max_applicants=random.choice([None, random.randint(3, 20)]),
+        requirements=random.choice([
+            "",
+            "Minimal pengalaman 2 tahun di bidang terkait.",
+            "Mampu presentasi di depan publik.",
+            "Punya portofolio relevan."
+        ]),
+        contact_email=creator.email,
+        contact_phone=random.choice([None, f"+62{random.randint(81100000000, 81999999999)}"]),
+        status=random.choice(["OPEN", "DRAFT", "CLOSED"]),
+    )
+    lowongan.save()
+
+    created_lowongan += 1
+    print(f"✓ Lowongan created: {title} | Status: {lowongan.status}")
+
+print(f"Total Lowongan created in this run: {created_lowongan}")
+print(f"Total Lowongan in DB: {Lowongan.objects.count()}\n")
 
 print("Done.")
