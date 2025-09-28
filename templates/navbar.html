@@ -141,14 +141,6 @@
                     />
                 </div>
 
-                <!-- Popup Preview -->
-                <div id="searchPopup"
-                    class="position-absolute start-0 mt-2 w-100 bg-white rounded-3 shadow-lg d-none"
-                    style="max-height: 300px; overflow-y: auto; z-index:1060;">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">🔎 Hasil pencarian akan muncul di sini...</li>
-                    </ul>
-                </div>
             </form>
         </div>
 
@@ -216,81 +208,10 @@
     </div>
 </nav>
 
-<!-- Overlay -->
-<div id="overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index:1050;"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("globalSearch");
-    const popup = document.getElementById("searchPopup");
-    const overlay = document.getElementById("overlay");
-
-    let typingTimer;
-
-    const loadingTemplate = `
-        <div class="d-flex justify-content-center align-items-center p-3">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    `;
-
-    const successTemplate = `
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">Lowongan: Backend Developer</li>
-            <li class="list-group-item">Event: Konferensi AI 2025</li>
-            <li class="list-group-item">Narasumber: Budi Santoso</li>
-        </ul>
-    `;
-
-    // Show popup + overlay on focus
-    searchInput.addEventListener("focus", () => {
-        popup.classList.remove("d-none");
-        overlay.classList.remove("d-none");
-        popup.innerHTML = successTemplate;
-    });
-
-    // On input typing → debounce
-    searchInput.addEventListener("input", () => {
-        clearTimeout(typingTimer);
-
-        typingTimer = setTimeout(() => {
-            const query = searchInput.value.trim();
-            if (!query) {
-                popup.innerHTML = successTemplate;
-                return;
-            }
-
-            popup.innerHTML = loadingTemplate;
-
-            fetch(`/search/preview/?q=${encodeURIComponent(query)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.results && data.results.length > 0) {
-                        let html = `<ul class="list-group list-group-flush">`;
-                        data.results.forEach((item) => {
-                            html += `
-                                <li class="list-group-item">
-                                    <strong>[${item.type}]</strong> ${item.title}<br/>
-                                    <small class="text-muted">${item.subtitle || ""}</small>
-                                </li>
-                            `;
-                        });
-                        html += `</ul>`;
-                        popup.innerHTML = html;
-                    } else {
-                        popup.innerHTML = `
-                            <div class="p-3 text-muted">Tidak ada hasil ditemukan</div>
-                        `;
-                    }
-                })
-                .catch(() => {
-                    popup.innerHTML = `
-                        <div class="p-3 text-danger">Terjadi kesalahan</div>
-                    `;
-                });
-        }, 1000);
-    });
 
     searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
@@ -302,19 +223,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 params.delete("page");
                 window.location.href = `/search/result/?${params.toString()}`;
             }
-        }
-    });
-
-    overlay.addEventListener("click", () => {
-        popup.classList.add("d-none");
-        overlay.classList.add("d-none");
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            popup.classList.add("d-none");
-            overlay.classList.add("d-none");
-            searchInput.blur();
         }
     });
 });
