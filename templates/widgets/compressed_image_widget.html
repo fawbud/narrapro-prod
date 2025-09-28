@@ -1,0 +1,90 @@
+{% comment %}
+Compressed Image Widget Template
+Django template for rendering the image compression widget
+
+Usage:
+    This template is automatically used by the CompressedImageWidget class.
+    It provides the HTML structure and JavaScript initialization for the
+    client-side image compression functionality.
+
+@version 1.0.0
+@author NarraPro Development Team
+{% endcomment %}
+
+<div class="compressed-image-widget" data-field-name="{{ widget.name }}">
+    {% comment %} Compression options script (hidden from user) {% endcomment %}
+    <script type="application/json" class="compression-options">{{ widget.compression_options|safe }}</script>
+    
+    {% comment %} Widget will be enhanced with JavaScript {% endcomment %}
+    <div class="widget-placeholder">
+        <div class="loading-message">
+            <div class="loading-spinner"></div>
+            <p>Initializing image compressor...</p>
+        </div>
+    </div>
+    
+    {% comment %} Fallback content for users without JavaScript {% endcomment %}
+    <noscript>
+        <div class="no-js-fallback">
+            <div class="alert alert-warning">
+                <strong>JavaScript Required:</strong> 
+                Image compression requires JavaScript to be enabled. 
+                Without compression, uploaded images may be larger than optimal.
+            </div>
+        </div>
+    </noscript>
+</div>
+
+<style>
+/* Minimal styling for template-specific elements */
+.widget-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-height: 100px;
+}
+
+.loading-message {
+    text-align: center;
+    color: #6b7280;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-message p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.no-js-fallback {
+    margin: 1rem 0;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border: 1px solid;
+}
+
+.alert-warning {
+    color: #92400e;
+    background-color: #fef3c7;
+    border-color: #fbbf24;
+}
+</style>

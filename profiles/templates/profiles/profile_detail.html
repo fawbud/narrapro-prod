@@ -110,8 +110,8 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
         <div class="row">
             {% if event_profile.profile_picture %}
             <div class="col-md-3 mb-3 text-center">
-                <img src="{{ event_profile.profile_picture.url }}" 
-                     alt="Profile Picture" 
+                <img src="{{ event_profile.profile_picture.url }}"
+                     alt="Profile Picture"
                      class="img-fluid rounded-circle"
                      style="max-width: 150px; max-height: 150px; object-fit: cover;">
             </div>
@@ -134,7 +134,7 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Kontak</label>
-                        <p class="mb-0">{{ event_profile.contact }}</p>
+                        <p class="mb-0">{{ event_profile.email }}</p>
                     </div>
                     {% if event_profile.website %}
                     <div class="col-md-6 mb-3">
@@ -160,6 +160,27 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                         </p>
                     </div>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Lowongan Management -->
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-briefcase me-2"></i>Manajemen Lowongan
+                </h6>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a href="{% url 'lowongan:create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Buat Lowongan
+                    </a>
+                    <a href="{% url 'lowongan:my_lowongan' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-list me-1"></i>Kelola Lowongan
+                    </a>
+                    <a href="{% url 'profiles:profile_lowongan' profile_user.username %}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-dashboard me-1"></i>Dashboard
+                    </a>
                 </div>
             </div>
         </div>

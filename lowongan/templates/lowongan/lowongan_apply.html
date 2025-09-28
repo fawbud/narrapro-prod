@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for {{ lowongan.title }} - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Apply for Position</h3>
+            </div>
+            <div class="card-body">
+                <!-- Lowongan Summary -->
+                <div class="border rounded p-3 mb-4 bg-light">
+                    <h5 class="text-primary">{{ lowongan.title }}</h5>
+                    <p class="mb-1"><strong>{{ lowongan.get_job_type_display }}</strong> • {{ lowongan.expertise_category.name }}</p>
+                    <p class="mb-1">📅 {{ lowongan.event_date }} • ⏰ {{ lowongan.duration_hours }} hours</p>
+                    <p class="mb-0">📍 {{ lowongan.location_display }}{% if lowongan.is_remote %} (Remote OK){% endif %}</p>
+                    {% if lowongan.budget_amount %}
+                    <p class="mb-0">💰 IDR {{ lowongan.budget_amount|floatformat:0 }}{% if lowongan.budget_negotiable %} (negotiable){% endif %}</p>
+                    {% endif %}
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label for="{{ form.cover_letter.id_for_label }}" class="form-label">
+                            {{ form.cover_letter.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.cover_letter }}
+                        {% if form.cover_letter.errors %}
+                            <div class="text-danger">{{ form.cover_letter.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            Tell the organizer why you're interested and what qualifications you bring to this opportunity.
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.proposed_rate.id_for_label }}" class="form-label">
+                                {{ form.proposed_rate.label }}
+                            </label>
+                            {{ form.proposed_rate }}
+                            {% if form.proposed_rate.errors %}
+                                <div class="text-danger">{{ form.proposed_rate.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Your proposed compensation rate in IDR (optional)
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.availability_notes.id_for_label }}" class="form-label">
+                                {{ form.availability_notes.label }}
+                            </label>
+                            {{ form.availability_notes }}
+                            {% if form.availability_notes.errors %}
+                                <div class="text-danger">{{ form.availability_notes.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Any notes about your availability or scheduling preferences
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Application Tips:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Be specific about your relevant experience</li>
+                            <li>Mention any previous speaking/training experience</li>
+                            <li>Include portfolio links if relevant</li>
+                            <li>Be clear about your availability and requirements</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'lowongan:detail' lowongan.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Details
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Application Deadline -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Application Deadline</h6>
+            </div>
+            <div class="card-body">
+                <p class="h5 text-primary mb-2">{{ lowongan.application_deadline }}</p>
+                {% if lowongan.days_until_deadline > 0 %}
+                    <p class="text-muted mb-0">{{ lowongan.days_until_deadline }} days remaining</p>
+                    {% if lowongan.days_until_deadline <= 7 %}
+                        <small class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Deadline approaching!</small>
+                    {% endif %}
+                {% else %}
+                    <p class="text-danger mb-0"><i class="fas fa-times-circle me-1"></i>Deadline passed</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-list-check me-2"></i>Requirements</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-user-graduate text-success me-2"></i>
+                        {{ lowongan.get_experience_level_required_display }} Level
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-briefcase text-success me-2"></i>
+                        {{ lowongan.expertise_category.name }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-hourglass-half text-success me-2"></i>
+                        {{ lowongan.duration_hours }} hours commitment
+                    </li>
+                    {% if lowongan.max_applicants %}
+                    <li class="mb-0">
+                        <i class="fas fa-users text-warning me-2"></i>
+                        Max {{ lowongan.max_applicants }} applicants
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Event Organizer -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Event Organizer</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if lowongan.created_by.event_profile and lowongan.created_by.event_profile.profile_picture %}
+                        <img src="{{ lowongan.created_by.event_profile.profile_picture.url }}"
+                             alt="Organizer"
+                             class="rounded-circle me-3"
+                             style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-user text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">
+                            {% if lowongan.created_by.event_profile %}
+                                {{ lowongan.created_by.event_profile.name }}
+                            {% else %}
+                                {{ lowongan.created_by.get_full_name|default:lowongan.created_by.username }}
+                            {% endif %}
+                        </h6>
+                        <small class="text-muted">@{{ lowongan.created_by.username }}</small>
+                    </div>
+                </div>
+
+                <a href="{% url 'profiles:profile_detail' lowongan.created_by.username %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-user me-1"></i>View Organizer Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

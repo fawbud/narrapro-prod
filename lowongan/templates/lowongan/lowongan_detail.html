@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lowongan.title }} - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Main Lowongan Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-1">{{ lowongan.title }}</h1>
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ lowongan.get_job_type_display }}</span>
+                            <span class="badge bg-secondary">{{ lowongan.expertise_category.name }}</span>
+                            {% if lowongan.status == 'DRAFT' %}
+                                <span class="badge bg-warning">{{ lowongan.get_status_display }}</span>
+                            {% elif lowongan.status == 'OPEN' %}
+                                <span class="badge bg-success">{{ lowongan.get_status_display }}</span>
+                            {% elif lowongan.status == 'CLOSED' %}
+                                <span class="badge bg-danger">{{ lowongan.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ lowongan.get_status_display }}</span>
+                            {% endif %}
+                            {% if lowongan.is_remote %}
+                                <span class="badge bg-info">Remote</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user == lowongan.created_by %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog"></i> Manage
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'lowongan:edit' lowongan.id %}">
+                                <i class="fas fa-edit me-2"></i>Edit Lowongan
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'lowongan:applications' lowongan.id %}">
+                                <i class="fas fa-users me-2"></i>View Applications ({{ lowongan.get_applications_count }})
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'lowongan:delete' lowongan.id %}">
+                                <i class="fas fa-trash me-2"></i>Delete
+                            </a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Event Details</h6>
+                        <p><i class="fas fa-calendar text-primary me-2"></i><strong>Date:</strong> {{ lowongan.event_date }}</p>
+                        {% if lowongan.event_time %}
+                        <p><i class="fas fa-clock text-primary me-2"></i><strong>Time:</strong> {{ lowongan.event_time }}</p>
+                        {% endif %}
+                        <p><i class="fas fa-hourglass-half text-primary me-2"></i><strong>Duration:</strong> {{ lowongan.duration_hours }} hours</p>
+                        <p><i class="fas fa-map-marker-alt text-primary me-2"></i><strong>Location:</strong> {{ lowongan.location_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Requirements</h6>
+                        <p><i class="fas fa-user-graduate text-success me-2"></i><strong>Experience Level:</strong> {{ lowongan.get_experience_level_required_display }}</p>
+                        <p><i class="fas fa-briefcase text-success me-2"></i><strong>Category:</strong> {{ lowongan.expertise_category.name }}</p>
+                        {% if lowongan.budget_amount %}
+                        <p><i class="fas fa-money-bill text-success me-2"></i><strong>Budget:</strong> IDR {{ lowongan.budget_amount|floatformat:0 }}{% if lowongan.budget_negotiable %} (negotiable){% endif %}</p>
+                        {% endif %}
+                        {% if lowongan.max_applicants %}
+                        <p><i class="fas fa-users text-success me-2"></i><strong>Max Applicants:</strong> {{ lowongan.max_applicants }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted border-bottom pb-2">Description</h6>
+                    <div class="lead">{{ lowongan.description|linebreaks }}</div>
+                </div>
+
+                {% if lowongan.requirements %}
+                <div class="mb-4">
+                    <h6 class="text-muted border-bottom pb-2">Additional Requirements</h6>
+                    <div>{{ lowongan.requirements|linebreaks }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Application Status -->
+        {% if user.is_authenticated and user.user_type == 'narasumber' %}
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if user_has_applied %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>You have already applied for this position</strong>
+                        <div class="mt-2">
+                            <p class="mb-1"><strong>Status:</strong>
+                                <span class="badge bg-{% if user_application.status == 'PENDING' %}warning{% elif user_application.status == 'ACCEPTED' %}success{% elif user_application.status == 'REJECTED' %}danger{% else %}secondary{% endif %}">
+                                    {{ user_application.get_status_display }}
+                                </span>
+                            </p>
+                            <p class="mb-0"><strong>Applied:</strong> {{ user_application.applied_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                {% elif user_can_apply %}
+                    <div class="text-center">
+                        <h5 class="text-success">Ready to Apply?</h5>
+                        <p class="text-muted">This opportunity matches your profile. Submit your application now!</p>
+                        <a href="{% url 'lowongan:apply' lowongan.id %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Apply Now
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Cannot Apply</strong>
+                        {% if not lowongan.is_open_for_applications %}
+                            <p class="mb-0">This position is no longer accepting applications.</p>
+                        {% else %}
+                            <p class="mb-0">You may have already applied or this position has specific requirements.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif not user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5>Interested in This Opportunity?</h5>
+                <p class="text-muted">Sign in to apply for this position</p>
+                <a href="{% url 'main:login' %}" class="btn btn-primary me-2">Sign In</a>
+                <a href="{% url 'main:register' %}" class="btn btn-outline-primary">Register</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Application Deadline -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Application Deadline</h6>
+            </div>
+            <div class="card-body">
+                <p class="h5 text-primary mb-2">{{ lowongan.application_deadline }}</p>
+                {% if lowongan.days_until_deadline > 0 %}
+                    <p class="text-muted mb-0">{{ lowongan.days_until_deadline }} days remaining</p>
+                    {% if lowongan.days_until_deadline <= 7 %}
+                        <small class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Deadline approaching!</small>
+                    {% endif %}
+                {% else %}
+                    <p class="text-danger mb-0"><i class="fas fa-times-circle me-1"></i>Deadline passed</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Event Organizer -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Event Organizer</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if lowongan.created_by.event_profile and lowongan.created_by.event_profile.profile_picture %}
+                        <img src="{{ lowongan.created_by.event_profile.profile_picture.url }}"
+                             alt="Organizer"
+                             class="rounded-circle me-3"
+                             style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-user text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">
+                            {% if lowongan.created_by.event_profile %}
+                                {{ lowongan.created_by.event_profile.name }}
+                            {% else %}
+                                {{ lowongan.created_by.get_full_name|default:lowongan.created_by.username }}
+                            {% endif %}
+                        </h6>
+                        <small class="text-muted">@{{ lowongan.created_by.username }}</small>
+                    </div>
+                </div>
+
+                {% if lowongan.created_by.event_profile %}
+                    <p class="small mb-2">{{ lowongan.created_by.event_profile.description|truncatewords:20 }}</p>
+                    {% if lowongan.created_by.event_profile.website %}
+                    <a href="{{ lowongan.created_by.event_profile.website }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>Visit Website
+                    </a>
+                    {% endif %}
+                {% endif %}
+
+                <a href="{% url 'profiles:profile_detail' lowongan.created_by.username %}" class="btn btn-sm btn-outline-secondary ms-2">
+                    <i class="fas fa-user me-1"></i>View Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-envelope me-2"></i>Contact Information</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <i class="fas fa-envelope text-primary me-2"></i>
+                    <a href="mailto:{{ lowongan.contact_email }}">{{ lowongan.contact_email }}</a>
+                </p>
+                {% if lowongan.contact_phone %}
+                <p class="mb-0">
+                    <i class="fas fa-phone text-success me-2"></i>
+                    <a href="tel:{{ lowongan.contact_phone }}">{{ lowongan.contact_phone }}</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Application Stats (for creator) -->
+        {% if user.is_authenticated and user == lowongan.created_by %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Application Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ lowongan.get_applications_count }}</h4>
+                        <small class="text-muted">Total Applications</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">{{ lowongan.days_until_deadline }}</h4>
+                        <small class="text-muted">Days Left</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'lowongan:applications' lowongan.id %}" class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-users me-1"></i>View All Applications
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Share -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-share me-2"></i>Share This Opportunity</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard()">
+                        <i class="fas fa-copy me-1"></i>Copy Link
+                    </button>
+                    <a href="mailto:?subject={{ lowongan.title|urlencode }}&body=Check out this opportunity: {{ request.build_absolute_uri }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-envelope me-1"></i>Share via Email
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        alert('Link copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - NarraPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ title }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Basic Information -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Basic Information</legend>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Job Details -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Job Details</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.job_type.id_for_label }}" class="form-label">{{ form.job_type.label }}</label>
+                                {{ form.job_type }}
+                                {% if form.job_type.errors %}
+                                    <div class="text-danger">{{ form.job_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.expertise_category.id_for_label }}" class="form-label">{{ form.expertise_category.label }}</label>
+                                {{ form.expertise_category }}
+                                {% if form.expertise_category.errors %}
+                                    <div class="text-danger">{{ form.expertise_category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.experience_level_required.id_for_label }}" class="form-label">{{ form.experience_level_required.label }}</label>
+                                {{ form.experience_level_required }}
+                                {% if form.experience_level_required.errors %}
+                                    <div class="text-danger">{{ form.experience_level_required.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.duration_hours.id_for_label }}" class="form-label">{{ form.duration_hours.label }}</label>
+                                {{ form.duration_hours }}
+                                {% if form.duration_hours.errors %}
+                                    <div class="text-danger">{{ form.duration_hours.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.requirements.id_for_label }}" class="form-label">{{ form.requirements.label }}</label>
+                                {{ form.requirements }}
+                                {% if form.requirements.errors %}
+                                    <div class="text-danger">{{ form.requirements.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Location and Timing -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Location and Timing</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">{{ form.location.label }}</label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="text-danger">{{ form.location.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.is_remote }}
+                                    <label class="form-check-label" for="{{ form.is_remote.id_for_label }}">
+                                        {{ form.is_remote.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.event_date.id_for_label }}" class="form-label">{{ form.event_date.label }}</label>
+                                {{ form.event_date }}
+                                {% if form.event_date.errors %}
+                                    <div class="text-danger">{{ form.event_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.event_time.id_for_label }}" class="form-label">{{ form.event_time.label }}</label>
+                                {{ form.event_time }}
+                                {% if form.event_time.errors %}
+                                    <div class="text-danger">{{ form.event_time.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Application Details -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Application Details</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.application_deadline.id_for_label }}" class="form-label">{{ form.application_deadline.label }}</label>
+                                {{ form.application_deadline }}
+                                {% if form.application_deadline.errors %}
+                                    <div class="text-danger">{{ form.application_deadline.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.max_applicants.id_for_label }}" class="form-label">{{ form.max_applicants.label }}</label>
+                                {{ form.max_applicants }}
+                                {% if form.max_applicants.errors %}
+                                    <div class="text-danger">{{ form.max_applicants.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Compensation -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Compensation</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.budget_amount.id_for_label }}" class="form-label">{{ form.budget_amount.label }}</label>
+                                {{ form.budget_amount }}
+                                {% if form.budget_amount.errors %}
+                                    <div class="text-danger">{{ form.budget_amount.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.budget_negotiable }}
+                                    <label class="form-check-label" for="{{ form.budget_negotiable.id_for_label }}">
+                                        {{ form.budget_negotiable.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Contact Information -->
+                    <fieldset class="mb-4">
+                        <legend class="h5 border-bottom pb-2">Contact Information</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_email.id_for_label }}" class="form-label">{{ form.contact_email.label }}</label>
+                                {{ form.contact_email }}
+                                {% if form.contact_email.errors %}
+                                    <div class="text-danger">{{ form.contact_email.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_phone.id_for_label }}" class="form-label">{{ form.contact_phone.label }}</label>
+                                {{ form.contact_phone }}
+                                {% if form.contact_phone.errors %}
+                                    <div class="text-danger">{{ form.contact_phone.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'lowongan:my_lowongan' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if lowongan %}Update Lowongan{% else %}Create Lowongan{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Applications for {{ lowongan.title }} - NarraPro{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">Applications</h1>
+                <p class="text-muted mb-0">{{ lowongan.title }}</p>
+            </div>
+            <div>
+                <a href="{% url 'lowongan:detail' lowongan.id %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-eye me-1"></i>View Lowongan
+                </a>
+                <a href="{% url 'lowongan:edit' lowongan.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i>Edit Lowongan
+                </a>
+            </div>
+        </div>
+
+        <!-- Lowongan Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="text-primary">{{ lowongan.title }}</h5>
+                        <p class="mb-1"><strong>{{ lowongan.get_job_type_display }}</strong> • {{ lowongan.expertise_category.name }}</p>
+                        <p class="mb-0">📅 {{ lowongan.event_date }} • ⏰ {{ lowongan.duration_hours }} hours • 📍 {{ lowongan.location_display }}</p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-primary">{{ applications_page.paginator.count }}</h4>
+                                <small class="text-muted">Total Applications</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-warning">{{ lowongan.days_until_deadline }}</h4>
+                                <small class="text-muted">Days Left</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Filter by Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All Applications</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="{% url 'lowongan:applications' lowongan.id %}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Applications List -->
+        {% for application in applications_page %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            {% if application.applicant.narasumber_profile and application.applicant.narasumber_profile.profile_picture %}
+                                <img src="{{ application.applicant.narasumber_profile.profile_picture.url }}"
+                                     alt="Applicant"
+                                     class="rounded-circle"
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-user fa-lg text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="mb-1">
+                                {% if application.applicant.narasumber_profile %}
+                                    {{ application.applicant.narasumber_profile.full_name }}
+                                {% else %}
+                                    {{ application.applicant.get_full_name|default:application.applicant.username }}
+                                {% endif %}
+                            </h6>
+                            <p class="text-muted mb-1">@{{ application.applicant.username }}</p>
+
+                            {% if application.applicant.narasumber_profile %}
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary">{{ application.applicant.narasumber_profile.expertise_area.name }}</span>
+                                    <span class="badge bg-info">{{ application.applicant.narasumber_profile.get_experience_level_display }}</span>
+                                    <span class="badge bg-success">{{ application.applicant.narasumber_profile.years_of_experience }} years</span>
+                                </div>
+                            {% endif %}
+
+                            <p class="mb-1"><small class="text-muted">Applied: {{ application.applied_at|date:"M d, Y H:i" }}</small></p>
+                            {% if application.proposed_rate %}
+                                <p class="mb-0"><small class="text-muted">Proposed Rate: IDR {{ application.proposed_rate|floatformat:0 }}</small></p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-2 text-center">
+                            <span class="badge bg-{% if application.status == 'PENDING' %}warning{% elif application.status == 'ACCEPTED' %}success{% elif application.status == 'REJECTED' %}danger{% else %}secondary{% endif %} fs-6">
+                                {{ application.get_status_display }}
+                            </span>
+                            {% if application.reviewed_at %}
+                                <p class="text-muted small mb-0 mt-1">
+                                    Reviewed: {{ application.reviewed_at|date:"M d" }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-2 text-end">
+                            <div class="btn-group-vertical gap-1">
+                                <a href="{% url 'lowongan:application_detail' application.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <a href="{% url 'profiles:profile_detail' application.applicant.username %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-user"></i> View Profile
+                                </a>
+                            </div>
+
+                            <!-- Quick Status Update -->
+                            {% if application.status == 'PENDING' %}
+                            <div class="mt-2">
+                                <div class="btn-group-vertical w-100">
+                                    <button class="btn btn-sm btn-success" onclick="updateApplicationStatus('{{ application.id }}', 'ACCEPTED')">
+                                        <i class="fas fa-check"></i> Accept
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="updateApplicationStatus('{{ application.id }}', 'REJECTED')">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Cover Letter Preview -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="border-top pt-3">
+                                <h6 class="text-muted">Cover Letter:</h6>
+                                <p class="mb-0">{{ application.cover_letter|truncatewords:50|linebreaks }}</p>
+                                {% if application.cover_letter|wordcount > 50 %}
+                                    <a href="{% url 'lowongan:application_detail' application.id %}" class="text-primary">Read more...</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4>No Applications Yet</h4>
+                {% if status_filter %}
+                    <p class="text-muted">No applications with status "{{ status_filter }}" found.</p>
+                    <a href="{% url 'lowongan:applications' lowongan.id %}" class="btn btn-outline-primary">View All Applications</a>
+                {% else %}
+                    <p class="text-muted">When people apply for this lowongan, they will appear here.</p>
+                    <a href="{% url 'lowongan:detail' lowongan.id %}" class="btn btn-outline-primary">View Lowongan Details</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if applications_page.has_other_pages %}
+            <nav aria-label="Applications pagination">
+                <ul class="pagination justify-content-center">
+                    {% if applications_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ applications_page.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in applications_page.paginator.page_range %}
+                        {% if applications_page.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > applications_page.number|add:'-3' and num < applications_page.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if applications_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ applications_page.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Status Update Script -->
+<script>
+function updateApplicationStatus(applicationId, newStatus) {
+    const statusText = newStatus === 'ACCEPTED' ? 'accept' : 'reject';
+
+    if (confirm(`Are you sure you want to ${statusText} this application?`)) {
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page and try again.');
+            return;
+        }
+
+        fetch(`/lowongan/applications/${applicationId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken.value
+            },
+            body: `status=${newStatus}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert(`Application ${statusText}ed successfully!`);
+                location.reload();
+            } else {
+                alert('Failed to update status: ' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating status: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}

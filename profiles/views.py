@@ -212,20 +212,48 @@ def profile_lowongan(request, username):
     """
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
-    
+
     # Only allow access to own profile or if user is event
     if not is_own_profile:
         raise Http404("You can only view your own job postings.")
-    
+
     if profile_user.user_type != 'event':
         raise Http404("This page is only available for event users.")
-    
+
+    # Import lowongan models
+    from lowongan.models import Lowongan, LowonganApplication
+
+    # Get user's lowongan
+    user_lowongan = Lowongan.objects.filter(created_by=profile_user)
+
+    # Calculate statistics
+    stats = {
+        'total_lowongan': user_lowongan.count(),
+        'open_lowongan': user_lowongan.filter(status='OPEN').count(),
+        'draft_lowongan': user_lowongan.filter(status='DRAFT').count(),
+        'total_applications': LowonganApplication.objects.filter(
+            lowongan__created_by=profile_user
+        ).count(),
+    }
+
+    # Get recent lowongan (last 5)
+    recent_lowongan = user_lowongan.select_related('expertise_category').order_by('-created_at')[:5]
+
+    # Get recent applications (last 5)
+    recent_applications = LowonganApplication.objects.filter(
+        lowongan__created_by=profile_user
+    ).select_related('applicant', 'lowongan').order_by('-applied_at')[:5]
+
     context = {
         'profile_user': profile_user,
         'is_own_profile': is_own_profile,
         'active_section': 'lowongan',
+        'stats': stats,
+        'recent_lowongan': recent_lowongan,
+        'recent_applications': recent_applications,
+        'total_lowongan': stats['total_lowongan'],
     }
-    
+
     return render(request, 'profiles/profile_lowongan.html', context)
 
 

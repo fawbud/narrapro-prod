@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - NarraPro{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Application Details -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="mb-1">Application Details</h3>
+                        <p class="text-muted mb-0">{{ application.lowongan.title }}</p>
+                    </div>
+                    <span class="badge bg-{% if application.status == 'PENDING' %}warning{% elif application.status == 'ACCEPTED' %}success{% elif application.status == 'REJECTED' %}danger{% else %}secondary{% endif %} fs-6">
+                        {{ application.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Cover Letter -->
+                <div class="mb-4">
+                    <h6 class="text-muted border-bottom pb-2">Cover Letter</h6>
+                    <div class="lead">{{ application.cover_letter|linebreaks }}</div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="row">
+                    {% if application.proposed_rate %}
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">Proposed Rate</h6>
+                        <p class="h5 text-success">IDR {{ application.proposed_rate|floatformat:0 }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">Application Date</h6>
+                        <p>{{ application.applied_at|date:"F d, Y \a\t H:i" }}</p>
+                    </div>
+
+                    {% if application.reviewed_at %}
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">Reviewed Date</h6>
+                        <p>{{ application.reviewed_at|date:"F d, Y \a\t H:i" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if application.availability_notes %}
+                <div class="mb-4">
+                    <h6 class="text-muted border-bottom pb-2">Availability Notes</h6>
+                    <p>{{ application.availability_notes|linebreaks }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons for Event Organizer -->
+                {% if application.status == 'PENDING' %}
+                <div class="border-top pt-3">
+                    <h6 class="text-muted mb-3">Review Application</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success" onclick="updateApplicationStatus('{{ application.id }}', 'ACCEPTED')">
+                            <i class="fas fa-check me-1"></i>Accept Application
+                        </button>
+                        <button class="btn btn-danger" onclick="updateApplicationStatus('{{ application.id }}', 'REJECTED')">
+                            <i class="fas fa-times me-1"></i>Reject Application
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Applicant Profile -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Applicant Profile</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    {% if application.applicant.narasumber_profile and application.applicant.narasumber_profile.profile_picture %}
+                        <img src="{{ application.applicant.narasumber_profile.profile_picture.url }}"
+                             alt="Applicant"
+                             class="rounded-circle"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                             style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="text-center mb-3">
+                    <h6 class="mb-1">
+                        {% if application.applicant.narasumber_profile %}
+                            {{ application.applicant.narasumber_profile.full_name }}
+                        {% else %}
+                            {{ application.applicant.get_full_name|default:application.applicant.username }}
+                        {% endif %}
+                    </h6>
+                    <p class="text-muted mb-0">@{{ application.applicant.username }}</p>
+                </div>
+
+                {% if application.applicant.narasumber_profile %}
+                    <div class="mb-3">
+                        <div class="d-flex flex-wrap gap-1 justify-content-center">
+                            <span class="badge bg-primary">{{ application.applicant.narasumber_profile.expertise_area.name }}</span>
+                            <span class="badge bg-success">{{ application.applicant.narasumber_profile.get_experience_level_display }}</span>
+                            <span class="badge bg-info">{{ application.applicant.narasumber_profile.years_of_experience }} years</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="small">{{ application.applicant.narasumber_profile.bio|truncatewords:30 }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ application.applicant.narasumber_profile.location_display }}</p>
+                        <p class="mb-0"><i class="fas fa-envelope text-primary me-2"></i>{{ application.applicant.narasumber_profile.email }}</p>
+                    </div>
+                {% endif %}
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'profiles:profile_detail' application.applicant.username %}" class="btn btn-primary">
+                        <i class="fas fa-user me-1"></i>View Full Profile
+                    </a>
+                    <a href="mailto:{{ application.applicant.email }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-envelope me-1"></i>Send Email
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lowongan Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-briefcase me-2"></i>Lowongan Details</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="text-primary">{{ application.lowongan.title }}</h6>
+                <p class="small text-muted mb-2">{{ application.lowongan.get_job_type_display }} • {{ application.lowongan.expertise_category.name }}</p>
+
+                <div class="small">
+                    <p class="mb-1"><i class="fas fa-calendar text-primary me-2"></i>{{ application.lowongan.event_date }}</p>
+                    <p class="mb-1"><i class="fas fa-clock text-primary me-2"></i>{{ application.lowongan.duration_hours }} hours</p>
+                    <p class="mb-1"><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ application.lowongan.location_display }}</p>
+                    {% if application.lowongan.budget_amount %}
+                        <p class="mb-1"><i class="fas fa-money-bill text-success me-2"></i>IDR {{ application.lowongan.budget_amount|floatformat:0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="mt-3">
+                    <a href="{% url 'lowongan:detail' application.lowongan.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Lowongan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'lowongan:applications' application.lowongan.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Applications
+                    </a>
+                    <a href="{% url 'lowongan:my_lowongan' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-1"></i>My Lowongan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Update Script -->
+<script>
+function updateApplicationStatus(applicationId, newStatus) {
+    const statusText = newStatus === 'ACCEPTED' ? 'accept' : 'reject';
+
+    if (confirm(`Are you sure you want to ${statusText} this application?`)) {
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page and try again.');
+            return;
+        }
+
+        fetch(`/lowongan/applications/${applicationId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken.value
+            },
+            body: `status=${newStatus}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert(`Application ${statusText}ed successfully!`);
+                location.reload();
+            } else {
+                alert('Failed to update status: ' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating status: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}
