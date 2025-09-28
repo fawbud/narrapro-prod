@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from .models import Lowongan, LowonganApplication
@@ -105,6 +106,9 @@ def lowongan_apply(request, lowongan_id):
     """
     View for narasumber users to apply for lowongan
     """
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
     lowongan = get_object_or_404(Lowongan, id=lowongan_id)
 
     if request.user.user_type != 'narasumber':
@@ -184,6 +188,10 @@ def lowongan_create(request):
     if request.user.user_type != 'event':
         messages.error(request, 'Only Event users can create lowongan.')
         return redirect('main:home')
+    
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
 
     if request.method == 'POST':
         form = LowonganForm(request.POST, user=request.user)

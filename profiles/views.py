@@ -343,8 +343,12 @@ def book_narasumber(request, username):
     """
     View for event organizers to browse and book narasumber.
     """
-    # is_approved = True later
-    narasumber_list = User.objects.filter(user_type='narasumber')
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        # Redirect back to the previous page, or home if referrer is not available
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
+    
+    narasumber_list = User.objects.filter(user_type='narasumber', is_approved=True)
     categories = ExpertiseCategory.objects.all()
 
     # Search query
@@ -373,6 +377,11 @@ def create_booking(request, username, narasumber_id):
     """
     View for an event organizer to book a narasumber.
     """
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        # Redirect back to the previous page, or home if referrer is not available
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
+
     narasumber = get_object_or_404(User, id=narasumber_id, user_type='narasumber')
     
     if request.method == 'POST':

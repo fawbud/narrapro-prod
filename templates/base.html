@@ -25,7 +25,7 @@
 
 		<!-- Messages -->
 		{% if messages %}
-		<div class="container mt-3">
+		<div class="container mt-3" id="message-container">
 			{% for message in messages %}
 			<div
 				class="alert alert-{{ message.tags }} alert-dismissible fade show"
@@ -48,6 +48,9 @@
 			{% endblock %}
 		</main>
 
+		<!-- Approval Modal -->
+		{% include "partials/approval_modal.html" %}
+
 		<!-- Footer -->
 		<footer class="bg-dark text-white py-4 mt-auto">
 			<div class="container text-center">
@@ -57,5 +60,25 @@
 
 		{% block extra_js %}
 		{% endblock %}
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				const messageContainer = document.getElementById('message-container');
+				if (messageContainer) {
+					const messages = messageContainer.querySelectorAll('.alert');
+					let unapproved = false;
+					messages.forEach(function(message) {
+						if (message.textContent.trim() === 'unapproved_user') {
+							unapproved = true;
+							message.style.display = 'none'; // Hide the raw message
+						}
+					});
+
+					if (unapproved) {
+						var myModal = new bootstrap.Modal(document.getElementById('approvalModal'));
+						myModal.show();
+					}
+				}
+			});
+		</script>
 	</body>
 </html>
