@@ -203,7 +203,7 @@ class EventRegistrationForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         # Set initial location choices based on event_type
         if self.instance and self.instance.pk:
             event_type = self.instance.event_type
@@ -211,7 +211,11 @@ class EventRegistrationForm(forms.ModelForm):
             event_type = self.data['event_type']
         else:
             event_type = 'offline'  # Default
-        
+
+        # Set initial value for event_type if not set
+        if not self.instance.pk and not self.data:
+            self.fields['event_type'].initial = 'offline'
+
         # Update location choices based on event type
         self.fields['location'].choices = EventProfile.get_location_choices_for_event_type(event_type)
 

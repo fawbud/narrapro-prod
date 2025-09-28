@@ -3,24 +3,27 @@
  * based on the selected event type (Online, Offline, Hybrid)
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+function initializeEventFormHandler(container) {
+    container = container || document;
+
     // Try to find elements with multiple possible IDs (for registration and edit forms)
-    const eventTypeSelect = document.getElementById('event_type_select') || 
-                           document.getElementById('id_event_type') ||
-                           document.querySelector('select[name="event_type"]');
-    const locationSelect = document.getElementById('location_select') || 
-                          document.getElementById('id_location') ||
-                          document.querySelector('select[name="location"]');
-    
+    const eventTypeSelect = container.querySelector('#event_type_select') ||
+                           container.querySelector('#id_event_type') ||
+                           container.querySelector('select[name="event_type"]');
+    const locationSelect = container.querySelector('#location_select') ||
+                          container.querySelector('#id_location') ||
+                          container.querySelector('select[name="location"]');
+
     if (!eventTypeSelect || !locationSelect) {
         console.log('Event form elements not found:', {
             eventTypeSelect: !!eventTypeSelect,
-            locationSelect: !!locationSelect
+            locationSelect: !!locationSelect,
+            container: container
         });
         return; // Elements not found, exit
     }
-    
-    console.log('Event form handler initialized');
+
+    console.log('Event form handler initialized for container:', container);
     
     // Location choices for different event types
     const locationChoices = {
@@ -120,23 +123,23 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     function updateLocationChoices() {
-        const selectedEventType = eventTypeSelect.value;
+        const selectedEventType = eventTypeSelect.value || 'offline'; // Default to offline if empty
         const currentLocationValue = locationSelect.value;
-        
+
         console.log('Updating location choices for event type:', selectedEventType);
-        
+
         // Clear current options
         locationSelect.innerHTML = '';
-        
+
         // Add default option
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
         defaultOption.textContent = '-- Pilih ' + (selectedEventType === 'online' ? 'Platform' : 'Lokasi') + ' --';
         locationSelect.appendChild(defaultOption);
-        
+
         // Add appropriate choices based on event type
         const choices = locationChoices[selectedEventType] || locationChoices['offline'];
-        
+
         console.log('Using choices:', choices.length);
         
         choices.forEach(function(choice) {
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const locationLabel = document.querySelector('label[for="id_location"]') ||
                              document.querySelector('label[for="location_select"]') ||
                              document.querySelector('label[for="' + locationSelect.id + '"]');
-                             
+
         if (locationLabel) {
             if (selectedEventType === 'online') {
                 locationLabel.textContent = 'Platform Online *';
@@ -168,7 +171,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update location choices when event type changes
     eventTypeSelect.addEventListener('change', updateLocationChoices);
-    
+
     // Initialize on page load
     updateLocationChoices();
+}
+
+// Make function globally available
+window.initializeEventFormHandler = initializeEventFormHandler;
+
+// Also initialize on DOM ready for non-AJAX pages (like edit profile)
+document.addEventListener('DOMContentLoaded', function() {
+    initializeEventFormHandler();
 });
