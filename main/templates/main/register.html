@@ -120,8 +120,14 @@
 />
 {% endblock %}
 
+{% block extra_head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auto-crop-widget.css' %}">
+{% endblock %}
+
 {% block extra_js %}
 {% load static %}
+<script src="{% static 'js/auto-crop-widget.js' %}"></script>
 <script src="{% static 'js/education-form-handler.js' %}"></script>
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -157,6 +163,29 @@
 							} else {
 								console.error('🔴 initializeSocialMediaWidget function not found!');
 							}
+
+							// Initialize auto-crop widgets for newly loaded content
+							setTimeout(() => {
+								// Profile picture widgets (1:1 ratio, 1MB)
+								const profileWidgets = roleSpecificFields.querySelectorAll('.enhanced-image-widget[data-type="profile"]');
+								profileWidgets.forEach((widget) => {
+									new AutoCropWidget(widget, {
+										aspectRatio: 1,
+										maxSizeKB: 1024,
+										outputWidth: 800
+									});
+								});
+
+								// Cover image widgets (4:1 ratio, 4MB)
+								const coverWidgets = roleSpecificFields.querySelectorAll('.enhanced-image-widget[data-type="cover"]');
+								coverWidgets.forEach((widget) => {
+									new AutoCropWidget(widget, {
+										aspectRatio: 4,
+										maxSizeKB: 4096,
+										outputWidth: 1200
+									});
+								});
+							}, 150);
 
 							// Initialize education forms for narasumber
 							if (selectedType === 'narasumber' && window.initializeEducationForms) {

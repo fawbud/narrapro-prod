@@ -285,20 +285,7 @@ class CombinedRegistrationForm:
         education_entries = []
         if not hasattr(self, 'data') or not self.data:
             return education_entries
-    
-    def validate_education_entries(self):
-        """
-        Validate that at least one complete education entry is provided
-        """
-        education_entries = self._extract_education_data()
-        
-        # Check if at least one entry has both degree and school
-        for entry in education_entries:
-            if entry.get('degree') and entry.get('school_university'):
-                return True
-        
-        return len(education_entries) == 0  # Allow no education entries, but not incomplete ones
-            
+
         i = 0
         while f'education-{i}-degree' in self.data:
             entry = {
@@ -307,7 +294,7 @@ class CombinedRegistrationForm:
                 'field_of_study': self.data.get(f'education-{i}-field_of_study', ''),
                 'graduation_year': self.data.get(f'education-{i}-graduation_year', None)
             }
-            
+
             # Convert empty string to None for graduation_year
             if entry['graduation_year'] == '':
                 entry['graduation_year'] = None
@@ -316,11 +303,24 @@ class CombinedRegistrationForm:
                     entry['graduation_year'] = int(entry['graduation_year'])
                 except ValueError:
                     entry['graduation_year'] = None
-            
+
             education_entries.append(entry)
             i += 1
-            
+
         return education_entries
+
+    def validate_education_entries(self):
+        """
+        Validate that at least one complete education entry is provided
+        """
+        education_entries = self._extract_education_data()
+
+        # Check if at least one entry has both degree and school
+        for entry in education_entries:
+            if entry.get('degree') and entry.get('school_university'):
+                return True
+
+        return len(education_entries) == 0  # Allow no education entries, but not incomplete ones
     
     def get_errors(self, user_type):
         """

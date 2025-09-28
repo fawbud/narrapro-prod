@@ -86,34 +86,38 @@
                     <hr class="my-4">
                     <h6 class="text-narasumber mb-3"><i class="fas fa-user-graduate me-2"></i>Informasi Narasumber</h6>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ narasumber_form.profile_picture.id_for_label }}" class="form-label">
-                                {{ narasumber_form.profile_picture.label }}
-                            </label>
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.profile_picture.id_for_label }}" class="form-label">
+                            {{ narasumber_form.profile_picture.label }}
+                        </label>
+                        <div class="enhanced-image-widget" data-type="profile">
                             {{ narasumber_form.profile_picture }}
-                            {% if narasumber_form.profile_picture.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in narasumber_form.profile_picture.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ narasumber_form.full_name.id_for_label }}" class="form-label">
-                                {{ narasumber_form.full_name.label }}
-                            </label>
-                            {{ narasumber_form.full_name }}
-                            {% if narasumber_form.full_name.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in narasumber_form.full_name.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+                        {% if narasumber_form.profile_picture.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.profile_picture.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a professional photo. Image will be automatically cropped to 1:1 ratio and compressed to max 1MB.
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.full_name.id_for_label }}" class="form-label">
+                            {{ narasumber_form.full_name.label }}
+                        </label>
+                        {{ narasumber_form.full_name }}
+                        {% if narasumber_form.full_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.full_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
@@ -541,7 +545,9 @@
                         <label for="{{ event_form.cover_image.id_for_label }}" class="form-label">
                             {{ event_form.cover_image.label }}
                         </label>
-                        {{ event_form.cover_image }}
+                        <div class="enhanced-image-widget" data-type="cover">
+                            {{ event_form.cover_image }}
+                        </div>
                         {% if event_form.cover_image.errors %}
                             <div class="text-danger small mt-1">
                                 {% for error in event_form.cover_image.errors %}
@@ -549,6 +555,10 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a cover image for your event or organization. Image will be automatically cropped to 4:1 ratio and compressed to max 4MB.
+                        </div>
                     </div>
                     
                     <h6 class="text-muted mb-3">Tanggal Event (Opsional)</h6>
@@ -600,6 +610,7 @@
 
 {% block extra_js %}
 {% load static %}
+<script src="{% static 'js/auto-crop-widget.js' %}"></script>
 <script src="{% static 'js/event-form-handler.js' %}"></script>
 <script src="{% static 'js/education-form-handler.js' %}"></script>
 <script>
@@ -743,6 +754,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auto-crop-widget.css' %}">
 <style>
     .form-control, .form-select {
         border: 1px solid #ced4da;

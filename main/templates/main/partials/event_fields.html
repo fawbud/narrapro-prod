@@ -88,9 +88,11 @@
 			<label for="{{ form.cover_image.id_for_label }}" class="form-label"
 				>Cover Image *</label
 			>
-			{{ form.cover_image }}
+			<div class="enhanced-image-widget" data-type="cover">
+				{{ form.cover_image }}
+			</div>
 			<div class="form-text">
-				Upload a cover image for your event or organization (JPG, PNG, etc.)
+				Upload a cover image for your event or organization. Image will be automatically cropped to 4:1 ratio and compressed to max 4MB.
 			</div>
 		</div>
 
