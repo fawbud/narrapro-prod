@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
 from .models import User
-from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm
-from narasumber.models import ExpertiseCategory
+from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
+from narasumber.models import ExpertiseCategory, Education
+from django.forms import inlineformset_factory
 from profiles.models import Booking
 from .forms import BookingForm
 from django.db.models import Q
@@ -101,12 +102,25 @@ def edit_profile(request, username):
         user_form = UserProfileForm(request.POST, instance=user)
         narasumber_form = None
         event_form = None
+        education_formset = None
         
         # Create user-type specific forms
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(
                 request.POST, 
                 request.FILES, 
+                instance=narasumber_profile
+            )
+            # Create education formset
+            EducationFormSet = inlineformset_factory(
+                NarasumberProfile, 
+                Education, 
+                form=EducationForm,
+                extra=1, 
+                can_delete=True
+            )
+            education_formset = EducationFormSet(
+                request.POST,
                 instance=narasumber_profile
             )
         elif user.user_type == 'event' and event_profile:
@@ -122,6 +136,8 @@ def edit_profile(request, username):
             forms_valid = forms_valid and narasumber_form.is_valid()
         if event_form:
             forms_valid = forms_valid and event_form.is_valid()
+        if education_formset:
+            forms_valid = forms_valid and education_formset.is_valid()
         
         if forms_valid:
             user_form.save()
@@ -129,15 +145,27 @@ def edit_profile(request, username):
                 narasumber_form.save()
             if event_form:
                 event_form.save()
+            if education_formset:
+                education_formset.save()
             messages.success(request, 'Profil Anda berhasil diperbarui!')
             return redirect('profiles:profile_detail', username=user.username)
     else:
         user_form = UserProfileForm(instance=user)
         narasumber_form = None
         event_form = None
+        education_formset = None
         
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(instance=narasumber_profile)
+            # Create education formset for GET requests
+            EducationFormSet = inlineformset_factory(
+                NarasumberProfile, 
+                Education, 
+                form=EducationForm,
+                extra=1, 
+                can_delete=True
+            )
+            education_formset = EducationFormSet(instance=narasumber_profile)
         elif user.user_type == 'event' and event_profile:
             event_form = EventProfileForm(instance=event_profile)
     
@@ -145,6 +173,7 @@ def edit_profile(request, username):
         'user_form': user_form,
         'narasumber_form': narasumber_form,
         'event_form': event_form,
+        'education_formset': education_formset,
         'profile_user': user,
         'narasumber_profile': narasumber_profile,
         'event_profile': event_profile,

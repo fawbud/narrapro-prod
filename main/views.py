@@ -41,7 +41,12 @@ def register_view(request):
             files=request.FILES
         )
         
-        if combined_form.is_valid(user_type):
+        # Additional validation for education entries if narasumber
+        education_valid = True
+        if user_type == 'narasumber':
+            education_valid = combined_form.validate_education_entries()
+        
+        if combined_form.is_valid(user_type) and education_valid:
             try:
                 user, profile = combined_form.save(user_type)
                 messages.success(
@@ -57,6 +62,10 @@ def register_view(request):
             for field, error_list in errors.items():
                 for error in error_list:
                     messages.error(request, f'{field}: {error}')
+            
+            # Add education validation errors
+            if not education_valid:
+                messages.error(request, 'Please provide at least one complete education entry with degree and school/university.')
     
     # For GET requests or form errors, show the registration form
     base_form = BaseUserRegistrationForm()

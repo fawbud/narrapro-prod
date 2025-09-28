@@ -98,6 +98,57 @@
 		</div>
 	</div>
 
+	<!-- Education Section -->
+	<hr class="my-4">
+	<h6 class="text-narasumber mb-3">
+		<i class="fas fa-graduation-cap me-2"></i>
+		Riwayat Pendidikan
+	</h6>
+	
+	<div id="education-forms">
+		<div class="border rounded p-3 mb-3 education-entry">
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Jenjang Pendidikan *</label>
+					<select name="education-0-degree" class="form-select" required>
+						<option value="">-- Pilih Jenjang --</option>
+						<option value="SMA">SMA/SMK/Sederajat</option>
+						<option value="D3">Diploma 3 (D3)</option>
+						<option value="S1">Sarjana (S1)</option>
+						<option value="S2">Magister (S2)</option>
+						<option value="S3">Doktor (S3)</option>
+						<option value="Certificate">Sertifikat Profesional</option>
+						<option value="Other">Lainnya</option>
+					</select>
+				</div>
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Sekolah/Universitas *</label>
+					<input type="text" name="education-0-school_university" class="form-control" placeholder="Nama Sekolah/Universitas" required>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Jurusan/Bidang Studi</label>
+					<input type="text" name="education-0-field_of_study" class="form-control" placeholder="Jurusan/Bidang Studi (opsional)">
+				</div>
+				<div class="col-md-6 mb-3">
+					<label class="form-label">Tahun Lulus</label>
+					<input type="number" name="education-0-graduation_year" class="form-control" placeholder="Tahun Lulus (opsional)" min="1950" max="2030">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="mb-3">
+		<button type="button" id="add-education-btn" class="btn btn-outline-primary btn-sm">
+			<i class="fas fa-plus me-1"></i>Tambah Pendidikan
+		</button>
+		<small class="text-muted ms-2">
+			<i class="fas fa-info-circle me-1"></i>
+			Anda dapat menambahkan hingga 5 riwayat pendidikan
+		</small>
+	</div>
+
 	<div class="mt-3">
 		<small class="text-muted">
 			<i class="fas fa-info-circle me-1"></i>
@@ -107,3 +158,4 @@
 		</small>
 	</div>
 </div>
+
