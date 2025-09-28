@@ -313,6 +313,14 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                     <span>Kirim Email</span>
                 </a>
             </div>
+
+            {% if user.is_authenticated and user.user_type == 'event' and profile_user.user_type == 'narasumber' %}
+            <div class="col-md-4">
+                <a href="{% url 'profiles:create_booking' username=user.username narasumber_id=profile_user.id %}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-calendar-check me-2"></i>Book Narasumber
+                </a>
+            </div>
+            {% endif %}
             
             <!-- Call Link (if phone is public) -->
             {% if narasumber_profile.get_public_phone %}
