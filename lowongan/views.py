@@ -108,11 +108,11 @@ def lowongan_apply(request, lowongan_id):
     lowongan = get_object_or_404(Lowongan, id=lowongan_id)
 
     if request.user.user_type != 'narasumber':
-        messages.error(request, 'Only Narasumber users can apply for lowongan.')
+        messages.error(request, 'Hanya narasumber yang bisa melamar lowongan.')
         return redirect('lowongan:detail', lowongan_id=lowongan_id)
 
     if not lowongan.can_user_apply(request.user):
-        messages.error(request, 'You cannot apply for this lowongan.')
+        messages.error(request, 'Anda tidak bisa melamar lowongan ini.')
         return redirect('lowongan:detail', lowongan_id=lowongan_id)
 
     if request.method == 'POST':
@@ -123,7 +123,7 @@ def lowongan_apply(request, lowongan_id):
         )
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your application has been submitted successfully!')
+            messages.success(request, 'Lamaran Anda telah di-submit!')
             return redirect('lowongan:detail', lowongan_id=lowongan_id)
     else:
         form = LowonganApplicationForm(user=request.user, lowongan=lowongan)
@@ -189,7 +189,7 @@ def lowongan_create(request):
         form = LowonganForm(request.POST, user=request.user)
         if form.is_valid():
             lowongan = form.save()
-            messages.success(request, f'Lowongan "{lowongan.title}" has been created successfully!')
+            messages.success(request, f'Lowongan "{lowongan.title}" berhasil dibuat!')
             return redirect('lowongan:my_lowongan')
     else:
         form = LowonganForm(user=request.user)
@@ -213,7 +213,7 @@ def lowongan_edit(request, lowongan_id):
         form = LowonganForm(request.POST, instance=lowongan, user=request.user)
         if form.is_valid():
             lowongan = form.save()
-            messages.success(request, f'Lowongan "{lowongan.title}" has been updated successfully!')
+            messages.success(request, f'Lowongan "{lowongan.title}" berhasil di-update!')
             return redirect('lowongan:my_lowongan')
     else:
         form = LowonganForm(instance=lowongan, user=request.user)
@@ -237,7 +237,7 @@ def lowongan_delete(request, lowongan_id):
     if request.method == 'POST':
         title = lowongan.title
         lowongan.delete()
-        messages.success(request, f'Lowongan "{title}" has been deleted successfully!')
+        messages.success(request, f'Lowongan "{title}" berhasil dihapus!')
         return redirect('lowongan:my_lowongan')
 
     context = {
@@ -348,33 +348,4 @@ def application_update_status(request, application_id):
         })
 
 
-@login_required
-def my_applications(request):
-    """
-    View for Narasumber users to see their applications
-    """
-    if request.user.user_type != 'narasumber':
-        messages.error(request, 'Only Narasumber users can access this page.')
-        return redirect('main:home')
-
-    applications_qs = LowonganApplication.objects.filter(
-        applicant=request.user
-    ).select_related('lowongan', 'lowongan__created_by').order_by('-applied_at')
-
-    # Filter by status
-    status_filter = request.GET.get('status')
-    if status_filter:
-        applications_qs = applications_qs.filter(status=status_filter)
-
-    # Pagination
-    paginator = Paginator(applications_qs, 10)
-    page_number = request.GET.get('page')
-    applications_page = paginator.get_page(page_number)
-
-    context = {
-        'applications_page': applications_page,
-        'status_filter': status_filter,
-        'status_choices': LowonganApplication.STATUS_CHOICES,
-    }
-
-    return render(request, 'lowongan/my_applications.html', context)
+# my_applications view moved to profiles app at profiles.views.profile_lamaran
