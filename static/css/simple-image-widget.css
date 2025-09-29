@@ -1,0 +1,117 @@
+/**
+ * Simple Image Widget Styles
+ */
+
+.simple-drop-zone {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.simple-drop-zone:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+    transform: translateY(-1px);
+}
+
+.drop-content {
+    color: #6c757d;
+}
+
+.drop-content i {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.simple-drop-zone:hover .drop-content i {
+    color: #007bff;
+}
+
+.drop-content p {
+    margin: 0.5rem 0;
+    font-weight: 500;
+    color: #495057;
+}
+
+.drop-content small {
+    font-size: 0.85rem;
+}
+
+/* Message styles */
+.image-success .alert,
+.image-error .alert {
+    border-radius: 6px;
+    font-size: 0.9rem;
+    padding: 0.75rem;
+}
+
+.image-success .alert {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border-color: #c3e6cb;
+}
+
+.image-error .alert {
+    background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+    border-color: #f1b0b7;
+}
+
+/* Button styles */
+.remove-btn,
+.close-btn {
+    border: none;
+    background: transparent;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background: rgba(25, 135, 84, 0.1);
+}
+
+.close-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .simple-drop-zone {
+        padding: 1.5rem;
+    }
+
+    .drop-content i {
+        font-size: 1.5rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .simple-drop-zone {
+        background: #343a40;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+
+    .simple-drop-zone:hover {
+        background: #1a365d;
+        border-color: #4299e1;
+    }
+
+    .drop-content {
+        color: #adb5bd;
+    }
+
+    .drop-content p {
+        color: #ffffff;
+    }
+
+    .simple-drop-zone:hover .drop-content i {
+        color: #4299e1;
+    }
+}

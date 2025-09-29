@@ -3,71 +3,219 @@
 {% block title %}Lamaran Anda - NarraPro{% endblock %}
 
 {% block profile_content %}
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Lamaran Anda</h5>
-        <div>
-            <span class="badge bg-secondary">0 Lamaran</span>
-        </div>
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Lamaran Anda</h4>
+        <p class="text-muted mb-0">Lacak lamaran lowongan dan statusnya</p>
     </div>
-    <div class="card-body">
-        <div class="text-center py-5">
-            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">Belum ada lamaran</h5>
-            <p class="text-muted">Lamaran yang Anda kirim akan muncul di sini.</p>
-            <div class="mt-4">
-                <a href="{% url 'main:home' %}" class="btn btn-primary">
-                    <i class="fas fa-search me-2"></i>Cari Lowongan
-                </a>
+    <div>
+        <a href="{% url 'lowongan:list' %}" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i>Jelajahi Kesempatan
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_applications }}</h4>
+                <small class="text-muted">Total Lamaran</small>
             </div>
         </div>
-        
-        <!-- Future: This section will display user's applications -->
-        <!-- 
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card border-left-primary">
-                    <div class="card-body">
-                        <h6 class="card-title">Job Title</h6>
-                        <p class="card-text small text-muted">Company Name</p>
-                        <span class="badge bg-warning">Pending</span>
-                        <p class="card-text small mt-2">Applied on: Date</p>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-warning">{{ pending_applications }}</h4>
+                <small class="text-muted">Menunggu Review</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-success">{{ accepted_applications }}</h4>
+                <small class="text-muted">Diterima</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-danger">{{ rejected_applications }}</h4>
+                <small class="text-muted">Ditolak</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filter berdasarkan Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Semua Lamaran</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a href="{% url 'profiles:profile_lamaran' profile_user.username %}" class="btn btn-outline-secondary">Hapus</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Applications List -->
+{% for application in applications_page %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="text-primary mb-1">
+                                <a href="{% url 'lowongan:detail' application.lowongan.id %}" class="text-decoration-none">
+                                    {{ application.lowongan.title }}
+                                </a>
+                            </h5>
+                            <p class="text-muted mb-2">{{ application.lowongan.get_job_type_display }} • {{ application.lowongan.expertise_category.name }}</p>
+
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>Acara: {{ application.lowongan.event_date }}
+                                    <i class="fas fa-map-marker-alt ms-2 me-1"></i>{{ application.lowongan.location_display }}
+                                    <i class="fas fa-clock ms-2 me-1"></i>{{ application.lowongan.duration_hours }} jam
+                                </small>
+                            </div>
+
+                            <p class="mb-1"><small class="text-muted">Melamar: {{ application.applied_at|date:"M d, Y H:i" }}</small></p>
+                            {% if application.reviewed_at %}
+                                <p class="mb-1"><small class="text-muted">Direview: {{ application.reviewed_at|date:"M d, Y H:i" }}</small></p>
+                            {% endif %}
+                            {% if application.proposed_rate %}
+                                <p class="mb-0"><small class="text-muted">Tarif yang Diusulkan: IDR {{ application.proposed_rate|floatformat:0 }}</small></p>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-end">
+                            <span class="badge bg-{% if application.status == 'PENDING' %}warning{% elif application.status == 'ACCEPTED' %}success{% elif application.status == 'REJECTED' %}danger{% else %}secondary{% endif %} fs-6 mb-2">
+                                {{ application.get_status_display }}
+                            </span>
+                            <div>
+                                <a href="{% url 'profiles:application_detail' profile_user.username application.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cover Letter Preview -->
+                    <div class="border-top pt-3 mt-3">
+                        <h6 class="text-muted">Surat Lamaran:</h6>
+                        <p class="mb-0">{{ application.cover_letter|truncatewords:30|linebreaks }}</p>
+                        {% if application.cover_letter|wordcount > 30 %}
+                            <a href="{% url 'profiles:application_detail' profile_user.username application.id %}" class="text-primary">Baca selengkapnya...</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Organizer Info -->
+                    <div class="border rounded p-3 bg-light">
+                        <h6 class="text-muted mb-2"><i class="fas fa-user me-1"></i>Penyelenggara Acara</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            {% if application.lowongan.created_by.event_profile and application.lowongan.created_by.event_profile.profile_picture %}
+                                <img src="{{ application.lowongan.created_by.event_profile.profile_picture.url }}"
+                                     alt="Organizer"
+                                     class="rounded-circle me-2"
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 40px; height: 40px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">
+                                    {% if application.lowongan.created_by.event_profile %}
+                                        {{ application.lowongan.created_by.event_profile.name }}
+                                    {% else %}
+                                        {{ application.lowongan.created_by.get_full_name|default:application.lowongan.created_by.username }}
+                                    {% endif %}
+                                </h6>
+                                <small class="text-muted">@{{ application.lowongan.created_by.username }}</small>
+                            </div>
+                        </div>
+                        <a href="{% url 'profiles:profile_detail' application.lowongan.created_by.username %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-user me-1"></i>Lihat Profil
+                        </a>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-3">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'lowongan:detail' application.lowongan.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-briefcase me-1"></i>Lihat Lowongan
+                            </a>
+                            <a href="mailto:{{ application.lowongan.contact_email }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-envelope me-1"></i>Hubungi Penyelenggara
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        -->
     </div>
-</div>
+{% empty %}
+    <div class="text-center py-5">
+        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+        <h4>Belum Ada Lamaran</h4>
+        {% if status_filter %}
+            <p class="text-muted">Tidak ada lamaran dengan status "{{ status_filter }}" ditemukan.</p>
+            <a href="{% url 'profiles:profile_lamaran' profile_user.username %}" class="btn btn-outline-primary">Lihat Semua Lamaran</a>
+        {% else %}
+            <p class="text-muted">Ketika Anda melamar kesempatan lowongan, mereka akan muncul di sini.</p>
+            <a href="{% url 'lowongan:list' %}" class="btn btn-outline-primary">Jelajahi Kesempatan</a>
+        {% endif %}
+    </div>
+{% endfor %}
 
-<!-- Quick Stats Card -->
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-paper-plane fa-2x text-primary mb-2"></i>
-                <h5>0</h5>
-                <p class="text-muted mb-0">Total Lamaran</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                <h5>0</h5>
-                <p class="text-muted mb-0">Dalam Review</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                <h5>0</h5>
-                <p class="text-muted mb-0">Diterima</p>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Pagination -->
+{% if applications_page.has_other_pages %}
+    <nav aria-label="Applications pagination">
+        <ul class="pagination justify-content-center">
+            {% if applications_page.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ applications_page.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for num in applications_page.paginator.page_range %}
+                {% if applications_page.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > applications_page.number|add:'-3' and num < applications_page.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if applications_page.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ applications_page.next_page_number }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
 {% endblock %}

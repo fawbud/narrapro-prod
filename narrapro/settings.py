@@ -212,3 +212,5 @@ if DEBUG:
 
 # NPM CONFIGURATION
 NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd" # Adjust this path if necessary
+
+LOGIN_URL = 'main:login'

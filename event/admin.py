@@ -12,6 +12,7 @@ class EventProfileAdmin(admin.ModelAdmin):
     list_display = [
         'name',
         'user_username',
+        'event_type',
         'location_display',
         'event_status_display',
         'event_duration_display',
@@ -21,6 +22,7 @@ class EventProfileAdmin(admin.ModelAdmin):
     ]
     
     list_filter = [
+        'event_type',
         'location',
         'created_at',
         'start_date',
@@ -41,8 +43,11 @@ class EventProfileAdmin(admin.ModelAdmin):
         ('User Information', {
             'fields': ('user', 'name', 'description')
         }),
-        ('Location & Contact', {
-            'fields': ('location', 'email', 'phone_number', 'is_phone_public', 'website', 'linkedin_url')
+        ('Event Details', {
+            'fields': ('event_type', 'location', 'target_audience')
+        }),
+        ('Contact Information', {
+            'fields': ('email', 'phone_number', 'is_phone_public', 'website', 'linkedin_url')
         }),
         ('Event Dates', {
             'fields': ('start_date', 'end_date'),

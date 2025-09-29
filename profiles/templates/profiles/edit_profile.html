@@ -86,34 +86,38 @@
                     <hr class="my-4">
                     <h6 class="text-narasumber mb-3"><i class="fas fa-user-graduate me-2"></i>Informasi Narasumber</h6>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ narasumber_form.profile_picture.id_for_label }}" class="form-label">
-                                {{ narasumber_form.profile_picture.label }}
-                            </label>
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.profile_picture.id_for_label }}" class="form-label">
+                            {{ narasumber_form.profile_picture.label }}
+                        </label>
+                        <div class="enhanced-image-widget" data-type="profile">
                             {{ narasumber_form.profile_picture }}
-                            {% if narasumber_form.profile_picture.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in narasumber_form.profile_picture.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ narasumber_form.full_name.id_for_label }}" class="form-label">
-                                {{ narasumber_form.full_name.label }}
-                            </label>
-                            {{ narasumber_form.full_name }}
-                            {% if narasumber_form.full_name.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in narasumber_form.full_name.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+                        {% if narasumber_form.profile_picture.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.profile_picture.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a professional photo. Image will be automatically cropped to 1:1 ratio and compressed to max 1MB.
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ narasumber_form.full_name.id_for_label }}" class="form-label">
+                            {{ narasumber_form.full_name.label }}
+                        </label>
+                        {{ narasumber_form.full_name }}
+                        {% if narasumber_form.full_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in narasumber_form.full_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
@@ -261,6 +265,120 @@
                         </div>
                     </div>
                     
+                    <!-- Education Section -->
+                    {% if education_formset %}
+                    <hr class="my-4">
+                    <h6 class="text-narasumber mb-3"><i class="fas fa-graduation-cap me-2"></i>Riwayat Pendidikan</h6>
+                    {{ education_formset.management_form }}
+                    
+                    <div id="education-formset">
+                        {% for form in education_formset %}
+                        <div class="border rounded p-3 mb-3 education-form" data-form-index="{{ forloop.counter0 }}" {% if forloop.last %}style="border-color: #0d6efd !important;"{% endif %}>
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    {% if forloop.first %}
+                                        Pendidikan Utama
+                                    {% else %}
+                                        Pendidikan {{ forloop.counter }}
+                                    {% endif %}
+                                </h6>
+                                {% if not forloop.first %}
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-education-form-btn">
+                                        <i class="fas fa-trash me-1"></i>Hapus
+                                    </button>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.degree.id_for_label }}" class="form-label">
+                                        {{ form.degree.label }}
+                                    </label>
+                                    {{ form.degree }}
+                                    {% if form.degree.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.degree.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.school_university.id_for_label }}" class="form-label">
+                                        {{ form.school_university.label }}
+                                    </label>
+                                    {{ form.school_university }}
+                                    {% if form.school_university.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.school_university.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.field_of_study.id_for_label }}" class="form-label">
+                                        {{ form.field_of_study.label }}
+                                    </label>
+                                    {{ form.field_of_study }}
+                                    {% if form.field_of_study.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.field_of_study.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.graduation_year.id_for_label }}" class="form-label">
+                                        {{ form.graduation_year.label }}
+                                    </label>
+                                    {{ form.graduation_year }}
+                                    {% if form.graduation_year.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.graduation_year.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden DELETE field (will be set via JavaScript) -->
+                            {% if form.DELETE %}
+                                <div style="display: none;">
+                                    {{ form.DELETE }}
+                                </div>
+                            {% endif %}
+                            
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-muted small mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Anda dapat menambah, mengedit, atau menghapus entry pendidikan. Kosongkan field yang tidak relevan.
+                    </div>
+                    
+                    <button type="button" id="add-education-form" class="btn btn-outline-primary btn-sm mb-3">
+                        <i class="fas fa-plus me-1"></i>Tambah Pendidikan Baru
+                    </button>
+                    {% endif %}
+                    
                     {% elif event_form %}
                     <hr class="my-4">
                     <h6 class="text-event mb-3"><i class="fas fa-calendar-alt me-2"></i>Informasi Event Organizer</h6>
@@ -297,6 +415,20 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label for="{{ event_form.event_type.id_for_label }}" class="form-label">
+                                {{ event_form.event_type.label }}
+                            </label>
+                            {{ event_form.event_type }}
+                            {% if event_form.event_type.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in event_form.event_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
                             <label for="{{ event_form.location.id_for_label }}" class="form-label">
                                 {{ event_form.location.label }}
                             </label>
@@ -309,6 +441,26 @@
                                 </div>
                             {% endif %}
                         </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ event_form.target_audience.id_for_label }}" class="form-label">
+                            {{ event_form.target_audience.label }}
+                        </label>
+                        {{ event_form.target_audience }}
+                        {% if event_form.target_audience.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in event_form.target_audience.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Describe your intended audience (e.g., "Professionals, Students, General Public")
+                        </div>
+                    </div>
+                    
+                    <div class="row">
                         
                         <div class="col-md-6 mb-3">
                             <label for="{{ event_form.email.id_for_label }}" class="form-label">
@@ -393,7 +545,9 @@
                         <label for="{{ event_form.cover_image.id_for_label }}" class="form-label">
                             {{ event_form.cover_image.label }}
                         </label>
-                        {{ event_form.cover_image }}
+                        <div class="enhanced-image-widget" data-type="cover">
+                            {{ event_form.cover_image }}
+                        </div>
                         {% if event_form.cover_image.errors %}
                             <div class="text-danger small mt-1">
                                 {% for error in event_form.cover_image.errors %}
@@ -401,6 +555,10 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a cover image for your event or organization. Image will be automatically cropped to 4:1 ratio and compressed to max 4MB.
+                        </div>
                     </div>
                     
                     <h6 class="text-muted mb-3">Tanggal Event (Opsional)</h6>
@@ -450,8 +608,154 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/auto-crop-widget.js' %}"></script>
+<script src="{% static 'js/event-form-handler.js' %}"></script>
+<script src="{% static 'js/education-form-handler.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addEducationBtn = document.getElementById('add-education-form');
+    const educationFormset = document.getElementById('education-formset');
+    const maxForms = 5;
+    
+    console.log('Edit profile education handler initialized', {
+        addEducationBtn: !!addEducationBtn,
+        educationFormset: !!educationFormset
+    });
+    
+    function updateAddButtonVisibility() {
+        if (!addEducationBtn || !educationFormset) return;
+
+        const currentForms = educationFormset.querySelectorAll('.education-form:not([style*="display: none"])').length;
+        if (currentForms >= maxForms) {
+            addEducationBtn.style.display = 'none';
+        } else {
+            addEducationBtn.style.display = 'inline-block';
+        }
+        console.log('Updated add button visibility', { currentForms, maxForms, visible: currentForms < maxForms });
+    }
+    
+    function updateFormTitles() {
+        const forms = educationFormset.querySelectorAll('.education-form:not([style*="display: none"])');
+        forms.forEach((form, index) => {
+            const title = form.querySelector('h6');
+            if (title) {
+                title.textContent = index === 0 ? 'Pendidikan Utama' : `Pendidikan ${index + 1}`;
+            }
+        });
+    }
+    
+    if (addEducationBtn && educationFormset) {
+        addEducationBtn.addEventListener('click', function() {
+            const totalForms = document.querySelector('#id_educations-TOTAL_FORMS');
+            if (!totalForms) return;
+
+            const visibleForms = educationFormset.querySelectorAll('.education-form:not([style*="display: none"])').length;
+            const formCount = parseInt(totalForms.value);
+            console.log('Add education clicked', { formCount, visibleForms, maxForms });
+
+            if (visibleForms < maxForms) {
+                const emptyFormTemplate = educationFormset.querySelector('.education-form:last-child').cloneNode(true);
+                
+                // Update form indices
+                const inputs = emptyFormTemplate.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    const id = input.getAttribute('id');
+                    
+                    if (name) {
+                        input.setAttribute('name', name.replace(/educations-\d+/, `educations-${formCount}`));
+                    }
+                    if (id) {
+                        input.setAttribute('id', id.replace(/id_educations-\d+/, `id_educations-${formCount}`));
+                    }
+                    
+                    // Clear values
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+                
+                // Update labels
+                const labels = emptyFormTemplate.querySelectorAll('label');
+                labels.forEach(label => {
+                    const forAttr = label.getAttribute('for');
+                    if (forAttr) {
+                        label.setAttribute('for', forAttr.replace(/id_educations-\d+/, `id_educations-${formCount}`));
+                    }
+                });
+                
+                // Update data attributes
+                emptyFormTemplate.setAttribute('data-form-index', formCount);
+                
+                // Highlight new form and add remove button
+                emptyFormTemplate.style.borderColor = '#0d6efd';
+                const titleDiv = emptyFormTemplate.querySelector('.d-flex');
+                if (titleDiv && !titleDiv.querySelector('.remove-education-form-btn')) {
+                    titleDiv.innerHTML = `
+                        <h6 class="mb-0">Pendidikan ${visibleForms + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-education-form-btn">
+                            <i class="fas fa-trash me-1"></i>Hapus
+                        </button>
+                    `;
+                }
+
+                educationFormset.appendChild(emptyFormTemplate);
+                totalForms.value = formCount + 1;
+
+                updateFormTitles();
+                updateAddButtonVisibility();
+            }
+        });
+        
+        // Handle remove education
+        educationFormset.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-education-form-btn') || e.target.parentElement.classList.contains('remove-education-form-btn')) {
+                const educationForm = e.target.closest('.education-form');
+                const totalForms = document.querySelector('#id_educations-TOTAL_FORMS');
+
+                if (educationForm && totalForms) {
+                    console.log('Removing education form');
+
+                    // Check if this is an existing form (has data) - mark for deletion
+                    const deleteInput = educationForm.querySelector('input[name$="-DELETE"]');
+                    if (deleteInput) {
+                        const hasId = educationForm.querySelector('input[name$="-id"]');
+                        if (hasId && hasId.value) {
+                            // Existing form - mark for deletion and hide immediately
+                            deleteInput.checked = true;
+                            educationForm.style.display = 'none';
+                        } else {
+                            // New form - actually remove
+                            educationForm.remove();
+                            totalForms.value = parseInt(totalForms.value) - 1;
+                        }
+                    } else {
+                        // No delete input - just remove
+                        educationForm.remove();
+                        totalForms.value = parseInt(totalForms.value) - 1;
+                    }
+
+                    updateFormTitles();
+                    updateAddButtonVisibility();
+                }
+            }
+        });
+    }
+    
+    // Initial setup
+    updateAddButtonVisibility();
+});
+</script>
+{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auto-crop-widget.css' %}">
 <style>
     .form-control, .form-select {
         border: 1px solid #ced4da;

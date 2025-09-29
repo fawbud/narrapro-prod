@@ -35,7 +35,7 @@
                 <!-- Tags/Labels -->
                 <div class="col-12 mb-3">
                     <div class="d-flex flex-wrap gap-2">
-                        <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.location_display }}</span>
+                        <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">{{ event_profile.get_event_type_display }} - {{ event_profile.location_display }}</span>
                         {% if profile_user.is_approved %}
                             <span class="badge badge-event px-3 py-1" style="font-size: 0.8rem;">
                                 <i class="fas fa-check-circle me-1"></i>Verified
@@ -92,7 +92,10 @@
             <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Tentang Event/Organisasi</h5>
         </div>
         <div class="card-body">
-            <p class="mb-0 lead">{{ event_profile.description }}</p>
+            <p class="mb-3 lead">{{ event_profile.description }}</p>
+            {% if event_profile.target_audience %}
+            <p class="mb-0 text-muted"><strong>Target Audiens:</strong> {{ event_profile.target_audience }}</p>
+            {% endif %}
         </div>
     </div>
 

@@ -260,7 +260,7 @@ def profile_edit(request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profile updated successfully!')
+            messages.success(request, 'Profil berhasil di-update!')
             return redirect('profile')
     else:
         form = ProfileForm(instance=request.user)
@@ -285,7 +285,7 @@ def create_event(request):
                         'settings': field.widget.compression_options
                     })
             
-            messages.success(request, 'Event created successfully!')
+            messages.success(request, 'Event berhasil dibuat!')
             return redirect('event_detail', pk=event.pk)
     else:
         form = EventForm()

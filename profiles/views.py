@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
 from .models import User
-from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm
-from narasumber.models import ExpertiseCategory
+from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
+from narasumber.models import ExpertiseCategory, Education
+from django.forms import inlineformset_factory
 from profiles.models import Booking
 from .forms import BookingForm
 from django.db.models import Q
@@ -101,12 +102,25 @@ def edit_profile(request, username):
         user_form = UserProfileForm(request.POST, instance=user)
         narasumber_form = None
         event_form = None
+        education_formset = None
         
         # Create user-type specific forms
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(
                 request.POST, 
                 request.FILES, 
+                instance=narasumber_profile
+            )
+            # Create education formset
+            EducationFormSet = inlineformset_factory(
+                NarasumberProfile, 
+                Education, 
+                form=EducationForm,
+                extra=1, 
+                can_delete=True
+            )
+            education_formset = EducationFormSet(
+                request.POST,
                 instance=narasumber_profile
             )
         elif user.user_type == 'event' and event_profile:
@@ -122,6 +136,8 @@ def edit_profile(request, username):
             forms_valid = forms_valid and narasumber_form.is_valid()
         if event_form:
             forms_valid = forms_valid and event_form.is_valid()
+        if education_formset:
+            forms_valid = forms_valid and education_formset.is_valid()
         
         if forms_valid:
             user_form.save()
@@ -129,15 +145,27 @@ def edit_profile(request, username):
                 narasumber_form.save()
             if event_form:
                 event_form.save()
+            if education_formset:
+                education_formset.save()
             messages.success(request, 'Profil Anda berhasil diperbarui!')
             return redirect('profiles:profile_detail', username=user.username)
     else:
         user_form = UserProfileForm(instance=user)
         narasumber_form = None
         event_form = None
+        education_formset = None
         
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(instance=narasumber_profile)
+            # Create education formset for GET requests
+            EducationFormSet = inlineformset_factory(
+                NarasumberProfile, 
+                Education, 
+                form=EducationForm,
+                extra=1, 
+                can_delete=True
+            )
+            education_formset = EducationFormSet(instance=narasumber_profile)
         elif user.user_type == 'event' and event_profile:
             event_form = EventProfileForm(instance=event_profile)
     
@@ -145,6 +173,7 @@ def edit_profile(request, username):
         'user_form': user_form,
         'narasumber_form': narasumber_form,
         'event_form': event_form,
+        'education_formset': education_formset,
         'profile_user': user,
         'narasumber_profile': narasumber_profile,
         'event_profile': event_profile,
@@ -186,22 +215,52 @@ def profile_lamaran(request, username):
     """
     Profile lamaran view - shows user's applications (for narasumber users).
     """
+    from lowongan.models import LowonganApplication
+    from django.core.paginator import Paginator
+
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
-    
+
     # Only allow access to own profile or if user is narasumber
     if not is_own_profile:
         raise Http404("You can only view your own applications.")
-    
+
     if profile_user.user_type != 'narasumber':
         raise Http404("This page is only available for narasumber users.")
-    
+
+    applications_qs = LowonganApplication.objects.filter(
+        applicant=profile_user
+    ).select_related('lowongan', 'lowongan__created_by').order_by('-applied_at')
+
+    # Filter by status
+    status_filter = request.GET.get('status')
+    if status_filter:
+        applications_qs = applications_qs.filter(status=status_filter)
+
+    # Calculate statistics
+    total_applications = LowonganApplication.objects.filter(applicant=profile_user).count()
+    pending_applications = LowonganApplication.objects.filter(applicant=profile_user, status='PENDING').count()
+    accepted_applications = LowonganApplication.objects.filter(applicant=profile_user, status='ACCEPTED').count()
+    rejected_applications = LowonganApplication.objects.filter(applicant=profile_user, status='REJECTED').count()
+
+    # Pagination
+    paginator = Paginator(applications_qs, 10)
+    page_number = request.GET.get('page')
+    applications_page = paginator.get_page(page_number)
+
     context = {
         'profile_user': profile_user,
         'is_own_profile': is_own_profile,
         'active_section': 'lamaran',
+        'applications_page': applications_page,
+        'status_filter': status_filter,
+        'status_choices': LowonganApplication.STATUS_CHOICES,
+        'total_applications': total_applications,
+        'pending_applications': pending_applications,
+        'accepted_applications': accepted_applications,
+        'rejected_applications': rejected_applications,
     }
-    
+
     return render(request, 'profiles/profile_lamaran.html', context)
 
 
@@ -481,3 +540,36 @@ def booking_detail(request, username, booking_id):
     }
 
     return render(request, 'profiles/booking_detail.html', context)
+
+
+@login_required
+def application_detail(request, username, application_id):
+    """
+    View for narasumber users to see their own application details
+    """
+    from lowongan.models import LowonganApplication
+
+    profile_user = get_object_or_404(User, username=username)
+    is_own_profile = request.user.username == profile_user.username
+
+    # Only allow access to own profile
+    if not is_own_profile:
+        raise Http404("You can only view your own applications.")
+
+    if profile_user.user_type != 'narasumber':
+        raise Http404("This page is only available for narasumber users.")
+
+    application = get_object_or_404(
+        LowonganApplication.objects.select_related('applicant', 'lowongan'),
+        id=application_id,
+        applicant=profile_user
+    )
+
+    context = {
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'application': application,
+        'active_section': 'lamaran',
+    }
+
+    return render(request, 'profiles/application_detail.html', context)

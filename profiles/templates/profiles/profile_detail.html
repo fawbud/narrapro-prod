@@ -101,24 +101,60 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                         </p>
                     </div>
                     {% endif %}
+                    {% if narasumber_profile.linkedin_url %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">LinkedIn</label>
+                        <p class="mb-0">
+                            <a href="{{ narasumber_profile.linkedin_url }}" target="_blank" class="text-decoration-none">
+                                <i class="fab fa-linkedin me-1"></i>Lihat LinkedIn
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Education Section -->
+        {% if narasumber_profile.educations.all %}
+        <hr>
+        <h6 class="text-muted mb-3">Riwayat Edukasi</h6>
+        <div class="row">
+            <div class="col-12">
+                {% for education in narasumber_profile.educations.all %}
+                <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <h6 class="mb-1 fw-bold">{{ education.school_university }} - {{ education.get_degree_display }}</h6>
+                    {% if education.field_of_study or education.graduation_year %}
+                    <p class="mb-0 text-muted">
+                        {% if education.field_of_study %}{{ education.field_of_study }}{% endif %}{% if education.field_of_study and education.graduation_year %} - {% endif %}{% if education.graduation_year %}Lulus {{ education.graduation_year }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% elif profile_user.user_type == 'event' and event_profile %}
         <hr>
         <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
-        <div class="row">
-            {% if event_profile.profile_picture %}
-            <div class="col-md-3 mb-3 text-center">
-                <img src="{{ event_profile.profile_picture.url }}"
-                     alt="Profile Picture"
-                     class="img-fluid rounded-circle"
-                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+
+        <!-- Event Cover Image -->
+        {% if event_profile.cover_image %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <label class="form-label text-muted">Cover Image</label>
+                <div class="position-relative" style="padding-bottom: 25%; overflow: hidden; border-radius: 0.375rem; border: 1px solid #dee2e6;">
+                    <img src="{{ event_profile.cover_image.url }}"
+                         alt="Event Cover"
+                         class="position-absolute w-100 h-100"
+                         style="object-fit: cover; top: 0; left: 0; border-radius: 0.375rem;">
+                </div>
             </div>
-            <div class="col-md-9">
-            {% else %}
+        </div>
+        {% endif %}
+
+        <div class="row">
             <div class="col-md-12">
-            {% endif %}
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Nama Event/Organisasi</label>
