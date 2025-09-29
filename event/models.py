@@ -165,10 +165,12 @@ class EventProfile(models.Model):
         help_text="LinkedIn profile URL (optional)"
     )
     
-    # Cover image (required)
+    # Cover image (optional, but recommended)
     cover_image = models.ImageField(
         upload_to=event_cover_upload_path,
-        help_text="Cover image for the event or organization (required)"
+        blank=True,
+        null=True,
+        help_text="Cover image for the event or organization (recommended)"
     )
     
     # Event dates (nullable for one-time events)
@@ -215,28 +217,35 @@ class EventProfile(models.Model):
         and location is appropriate for event type.
         """
         from django.core.exceptions import ValidationError
-        
+        import os
+
+        print(f"DEBUG EventProfile.clean(): event_type={self.event_type}, location={self.location}")
+
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
                 raise ValidationError({
                     'end_date': 'End date must be after start date.'
                 })
-        
-        # Validate location based on event type
+
+        # Validate location based on event type - with better error handling
         if self.event_type == 'online':
             # For online events, location should be from online platform choices
             valid_platforms = [choice[0] for choice in self.ONLINE_PLATFORM_CHOICES]
-            if self.location not in valid_platforms:
+            if self.location and self.location not in valid_platforms:
+                print(f"DEBUG EventProfile.clean(): Online validation failed. location='{self.location}', valid_platforms={valid_platforms[:5]}...")
                 raise ValidationError({
-                    'location': 'Please select a valid online platform for online events.'
+                    'location': f'Please select a valid online platform for online events. Current: "{self.location}"'
                 })
         elif self.event_type in ['offline', 'hybrid']:
             # For offline/hybrid events, location should be from province choices
             valid_provinces = [choice[0] for choice in self.PROVINCE_CHOICES]
-            if self.location not in valid_provinces:
+            if self.location and self.location not in valid_provinces:
+                print(f"DEBUG EventProfile.clean(): Offline/hybrid validation failed. location='{self.location}', valid_provinces={valid_provinces[:5]}...")
                 raise ValidationError({
-                    'location': 'Please select a valid province for offline/hybrid events.'
+                    'location': f'Please select a valid province for offline/hybrid events. Current: "{self.location}"'
                 })
+
+        print(f"DEBUG EventProfile.clean(): Validation PASSED")
     
     def save(self, *args, **kwargs):
         """

@@ -220,7 +220,7 @@ class EventProfileForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         # Set initial location choices based on event_type
         if self.instance and self.instance.pk:
             event_type = self.instance.event_type
@@ -228,15 +228,45 @@ class EventProfileForm(forms.ModelForm):
             event_type = self.data['event_type']
         else:
             event_type = 'offline'  # Default
-        
+
         # Update location choices based on event type
         from event.models import EventProfile
         self.fields['location'].choices = EventProfile.get_location_choices_for_event_type(event_type)
-        
-        # Make cover_image optional for existing instances (editing)
+
+        # Debug logging
+        print(f"DEBUG EventProfileForm: event_type={event_type}, location_choices_count={len(self.fields['location'].choices)}")
+
+        # Cover image is now always optional (model was updated)
+        self.fields['cover_image'].required = False
+
         if self.instance and self.instance.pk and self.instance.cover_image:
-            self.fields['cover_image'].required = False
             self.fields['cover_image'].help_text = 'Leave empty to keep current image'
+            print(f"DEBUG EventProfileForm: Made cover_image optional for existing instance")
+        else:
+            self.fields['cover_image'].help_text = 'Upload a cover image for your event (recommended)'
+            print(f"DEBUG EventProfileForm: cover_image is optional for new instance")
+
+    def clean(self):
+        """Custom validation with better error messages"""
+        cleaned_data = super().clean()
+        event_type = cleaned_data.get('event_type')
+        location = cleaned_data.get('location')
+
+        print(f"DEBUG EventProfileForm.clean(): event_type={event_type}, location={location}")
+
+        if event_type and location:
+            # Check if location is valid for the event type
+            from event.models import EventProfile
+            valid_locations = [choice[0] for choice in EventProfile.get_location_choices_for_event_type(event_type)]
+
+            if location not in valid_locations:
+                error_msg = f"Location '{location}' is not valid for {event_type} events. Please select a valid option."
+                print(f"DEBUG EventProfileForm.clean(): VALIDATION ERROR - {error_msg}")
+                self.add_error('location', error_msg)
+            else:
+                print(f"DEBUG EventProfileForm.clean(): Location validation PASSED")
+
+        return cleaned_data
 
 
 class PasswordChangeForm(DjangoPasswordChangeForm):
