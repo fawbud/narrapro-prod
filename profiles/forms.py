@@ -126,6 +126,13 @@ class NarasumberProfileForm(forms.ModelForm):
             'linkedin_url': 'Link LinkedIn',
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add help text for existing profile pictures
+        if self.instance and self.instance.pk and self.instance.profile_picture:
+            self.fields['profile_picture'].help_text = 'Leave empty to keep current profile picture'
+
 
 class EventProfileForm(forms.ModelForm):
     """
@@ -225,6 +232,11 @@ class EventProfileForm(forms.ModelForm):
         # Update location choices based on event type
         from event.models import EventProfile
         self.fields['location'].choices = EventProfile.get_location_choices_for_event_type(event_type)
+        
+        # Make cover_image optional for existing instances (editing)
+        if self.instance and self.instance.pk and self.instance.cover_image:
+            self.fields['cover_image'].required = False
+            self.fields['cover_image'].help_text = 'Leave empty to keep current image'
 
 
 class PasswordChangeForm(DjangoPasswordChangeForm):
