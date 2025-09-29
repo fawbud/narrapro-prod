@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+
 from django.conf import settings
 import uuid
 from django.core.validators import URLValidator
@@ -75,44 +76,81 @@ class User(AbstractUser):
     def send_approval_email(self):
         """
         Send an email to the user when their account is approved.
-        This method uses Resend SMTP via django-anymail.
+        This method uses Resend SMTP via django-anymail and includes the Narrapro logo.
         """
         if not self.is_approved:
-            raise ValueError("Cannot send approval email to unapproved user")
+            raise ValueError("Tidak dapat mengirim email persetujui untuk pengguna yang belum disetujui")
+
+        subject = "Akun NarraPro Anda Telah Disetujui!"
+        logo_url = "https://narrapro.up.railway.app/static/images/narrapro-logo.png"
+
+        # Format the approval date with the correct timezone
+        if self.approval_date:
+            local_approval_date = self.approval_date.astimezone(timezone.get_current_timezone())
+            formatted_approval_date = f"{local_approval_date.strftime('%d %B %Y pukul %H:%M')} WIB"
+        else:
+            formatted_approval_date = 'N/A'
+
+        # Plain text version
+        text_message = f"""
+        Yth. {self.first_name or self.username},
         
-        subject = "Your NarraPro Account Has Been Approved!"
+        Kabar baik! Akun NarraPro Anda telah disetujui oleh tim admin kami.
         
-        message = f"""
-        Dear {self.first_name or self.username},
-        
-        Great news! Your NarraPro account has been approved by our admin team.
-        
-        Account Details:
+        Detail Akun:
         - Username: {self.username}
         - Email: {self.email}
-        - User Type: {self.get_user_type_display()}
-        - Approved on: {self.approval_date.strftime('%B %d, %Y at %I:%M %p') if self.approval_date else 'N/A'}
+        - Tipe Pengguna: {self.get_user_type_display()}
+        - Disetujui pada: {formatted_approval_date}
         
-        You can now access all features available to {self.get_user_type_display().lower()} users.
+        Anda sekarang dapat mengakses semua fitur yang tersedia untuk pengguna {self.get_user_type_display().lower()}.
         
-        Welcome to NarraPro!
+        Selamat datang di NarraPro!
         
-        Best regards,
-        The NarraPro Team
+        Hormat kami,
+        Tim NarraPro
         """
-        
+
+        # HTML version
+        html_message = f"""
+        <html>
+            <body style="font-family: sans-serif;">
+                <img src="{logo_url}" alt="Narrapro Logo" style="max-width: 150px; margin-bottom: 20px;">
+                <p>Yth. {self.first_name or self.username},</p>
+                <p>Kabar baik! Akun NarraPro Anda telah disetujui oleh tim admin kami.</p>
+                
+                <p><b>Detail Akun:</b></p>
+                <ul>
+                    <li>Username: {self.username}</li>
+                    <li>Email: {self.email}</li>
+                    <li>Tipe Pengguna: {self.get_user_type_display()}</li>
+                    <li>Disetujui pada: {formatted_approval_date}</li>
+                </ul>
+                
+                <p>Anda sekarang dapat mengakses semua fitur yang tersedia untuk pengguna {self.get_user_type_display().lower()}.</p>
+                
+                <p>Selamat datang di NarraPro!</p>
+                
+                <p>Hormat kami,<br>
+                Tim NarraPro</p>
+            </body>
+        </html>
+        """
+
         try:
-            send_mail(
+            # Create email message
+            msg = EmailMultiAlternatives(
                 subject=subject,
-                message=message,
-                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@narrapro.com'),
-                recipient_list=[self.email],
-                fail_silently=False,
+                body=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[self.email]
             )
+            msg.attach_alternative(html_message, "text/html")
+            msg.send(fail_silently=False)
             return True
         except Exception as e:
             # Log the error in production
-            print(f"Failed to send approval email to {self.email}: {str(e)}")
+            print(f"Gagal mengirim email persetujuan ke {self.email}: {str(e)}")
             return False
 
 class Booking(models.Model):
