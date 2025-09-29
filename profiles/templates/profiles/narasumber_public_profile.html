@@ -92,11 +92,42 @@
                     <h5 class="mb-0"><i class="fas fa-user-circle text-muted me-2"></i>Tentang Saya</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0 lead">{{ narasumber_profile.bio }}</p>
+                    <p class="mb-3 lead">{{ narasumber_profile.bio }}</p>
+                    {% if narasumber_profile.portfolio_link %}
+                    <div class="text-end">
+                        <a href="{{ narasumber_profile.portfolio_link }}"
+                           target="_blank"
+                           class="btn btn-outline-narasumber">
+                            <i class="fas fa-briefcase text-narasumber me-2"></i>
+                            Buka Portfolio
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Card 3: Contact Links -->
+            <!-- Card 3: Education History -->
+            {% if narasumber_profile.educations.all %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-graduation-cap text-muted me-2"></i>Riwayat Edukasi</h5>
+                </div>
+                <div class="card-body">
+                    {% for education in narasumber_profile.educations.all %}
+                    <div class="education-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <h6 class="mb-1 fw-bold">{{ education.school_university }} - {{ education.get_degree_display }}</h6>
+                        {% if education.field_of_study or education.graduation_year %}
+                        <p class="mb-0 text-muted">
+                            {% if education.field_of_study %}{{ education.field_of_study }}{% endif %}{% if education.field_of_study and education.graduation_year %} - {% endif %}{% if education.graduation_year %}Lulus {{ education.graduation_year }}{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 4: Contact Links -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header card-header-narasumber">
                     <h5 class="mb-0"><i class="fas fa-link text-narasumber me-2"></i>Hubungi Saya</h5>
@@ -131,17 +162,6 @@
                         </div>
                         {% endif %}
                         
-                        <!-- Portfolio Link (if provided) -->
-                        {% if narasumber_profile.portfolio_link %}
-                        <div class="col-md-4">
-                            <a href="{{ narasumber_profile.portfolio_link }}" 
-                               target="_blank"
-                               class="btn btn-outline-narasumber w-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-briefcase text-narasumber me-2"></i>
-                                <span>Lihat Portfolio</span>
-                            </a>
-                        </div>
-                        {% endif %}
                         
                         <!-- LinkedIn Link (if provided) -->
                         {% if narasumber_profile.linkedin_url %}
