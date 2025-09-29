@@ -152,15 +152,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # This production code might break development mode, so we check whether we're in DEBUG mode
 if not DEBUG:
-    # Use WhiteNoise for serving static files in production
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Storage Configuration
 if os.getenv("PRODUCTION") == "true":
@@ -215,5 +212,3 @@ if DEBUG:
 
 # NPM CONFIGURATION
 NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd" # Adjust this path if necessary
-
-LOGIN_URL = 'main:login'
