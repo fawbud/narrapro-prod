@@ -137,18 +137,24 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
         {% elif profile_user.user_type == 'event' and event_profile %}
         <hr>
         <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
-        <div class="row">
-            {% if event_profile.profile_picture %}
-            <div class="col-md-3 mb-3 text-center">
-                <img src="{{ event_profile.profile_picture.url }}"
-                     alt="Profile Picture"
-                     class="img-fluid rounded-circle"
-                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+
+        <!-- Event Cover Image -->
+        {% if event_profile.cover_image %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <label class="form-label text-muted">Cover Image</label>
+                <div class="position-relative" style="padding-bottom: 25%; overflow: hidden; border-radius: 0.375rem; border: 1px solid #dee2e6;">
+                    <img src="{{ event_profile.cover_image.url }}"
+                         alt="Event Cover"
+                         class="position-absolute w-100 h-100"
+                         style="object-fit: cover; top: 0; left: 0; border-radius: 0.375rem;">
+                </div>
             </div>
-            <div class="col-md-9">
-            {% else %}
+        </div>
+        {% endif %}
+
+        <div class="row">
             <div class="col-md-12">
-            {% endif %}
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Nama Event/Organisasi</label>
