@@ -44,8 +44,8 @@ class SupabaseStorage(Storage):
         # Normalize the file name
         cleaned_name = self._clean_name(name)
         
-        # Prepare the upload URL
-        upload_url = f"{self.storage_api_url}/{self.bucket_name}/{cleaned_name}"
+        # Prepare the upload URL - use public endpoint for uploads
+        upload_url = f"{self.storage_api_url}/public/{self.bucket_name}/{cleaned_name}"
         
         # Read file content
         if hasattr(content, 'read'):
@@ -61,14 +61,21 @@ class SupabaseStorage(Storage):
         upload_headers['Content-Type'] = content_type
         upload_headers['Cache-Control'] = 'max-age=86400'
         
-        # Upload file using PUT request
+        # Upload file using PUT request (Supabase Storage API uses PUT, not POST)
         try:
-            response = requests.post(
+            print(f"DEBUG: Uploading to {upload_url}")
+            print(f"DEBUG: File size: {len(file_content)} bytes")
+            print(f"DEBUG: Content type: {content_type}")
+            
+            response = requests.put(
                 upload_url,
                 data=file_content,
                 headers=upload_headers,
                 timeout=30
             )
+            
+            print(f"DEBUG: Upload response: {response.status_code}")
+            print(f"DEBUG: Upload response text: {response.text}")
             
             if response.status_code in [200, 201]:
                 return cleaned_name
