@@ -1,0 +1,302 @@
+/* 
+ * NarraPro Global Color Scheme
+ * Brand Blue: #0e1e7a with darker and lighter shades
+ * Event Orange: #ef6911 for event differentiation
+ */
+
+:root {
+  /* Brand Blue Color Palette */
+  --brand-blue: #0e1e7a;
+  --brand-blue-dark-1: #0b1862;
+  --brand-blue-dark-2: #081249;
+  --brand-blue-dark-3: #060c31;
+  --brand-blue-dark-4: #030618;
+  --brand-blue-light-1: #3e4b95;
+  --brand-blue-light-2: #6e78af;
+  --brand-blue-light-3: #9fa5ca;
+  --brand-blue-light-4: #cfd2e4;
+  
+  /* Event Orange */
+  --event-orange: #ef6911;
+  --event-orange-dark: #d55a0e;
+  --event-orange-light: #f2861a;
+  
+  /* Neutral Colors */
+  --white: #ffffff;
+  --gray-50: #f8f9fa;
+  --gray-100: #e9ecef;
+  --gray-200: #dee2e6;
+  --gray-300: #ced4da;
+  --gray-400: #adb5bd;
+  --gray-500: #6c757d;
+  --gray-600: #495057;
+  --gray-700: #343a40;
+  --gray-800: #212529;
+  --gray-900: #000000;
+}
+
+/* Global Overrides for Brand Colors */
+.bg-primary,
+.card-header.bg-primary,
+.btn.bg-primary {
+  background-color: var(--brand-blue) !important;
+}
+
+.text-primary,
+h1.text-primary,
+h2.text-primary,
+h3.text-primary,
+h4.text-primary,
+h5.text-primary,
+h6.text-primary {
+  color: var(--brand-blue) !important;
+}
+
+.border-primary {
+  border-color: var(--brand-blue) !important;
+}
+
+.btn-primary,
+button.btn-primary,
+input[type="submit"].btn-primary {
+  background-color: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+  color: var(--white) !important;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+input[type="submit"].btn-primary:hover {
+  background-color: var(--brand-blue-dark-1) !important;
+  border-color: var(--brand-blue-dark-1) !important;
+  color: var(--white) !important;
+}
+
+.btn-primary:active, 
+.btn-primary:focus,
+.btn-primary.active,
+.btn-primary:focus-visible {
+  background-color: var(--brand-blue-dark-2) !important;
+  border-color: var(--brand-blue-dark-2) !important;
+  color: var(--white) !important;
+  box-shadow: 0 0 0 0.2rem rgba(14, 30, 122, 0.25) !important;
+}
+
+.btn-outline-primary {
+  color: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+  color: var(--white) !important;
+}
+
+.btn-outline-primary:active, 
+.btn-outline-primary:focus,
+.btn-outline-primary.active {
+  background-color: var(--brand-blue-dark-1) !important;
+  border-color: var(--brand-blue-dark-1) !important;
+  color: var(--white) !important;
+  box-shadow: 0 0 0 0.2rem rgba(14, 30, 122, 0.25) !important;
+}
+
+/* Narasumber-specific colors (Brand Blue) */
+.narasumber-primary {
+  background-color: var(--brand-blue);
+  color: var(--white);
+}
+
+.narasumber-secondary {
+  background-color: var(--brand-blue-light-1);
+  color: var(--white);
+}
+
+.narasumber-light {
+  background-color: var(--brand-blue-light-4);
+  color: var(--brand-blue-dark-1);
+}
+
+.text-narasumber {
+  color: var(--brand-blue);
+}
+
+.border-narasumber {
+  border-color: var(--brand-blue);
+}
+
+.btn-narasumber {
+  background-color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: var(--white);
+}
+
+.btn-narasumber:hover {
+  background-color: var(--brand-blue-dark-1);
+  border-color: var(--brand-blue-dark-1);
+  color: var(--white);
+}
+
+.btn-outline-narasumber {
+  color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  background-color: transparent;
+}
+
+.btn-outline-narasumber:hover {
+  background-color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: var(--white);
+}
+
+.btn-outline-narasumber:hover .text-narasumber {
+  color: var(--white) !important;
+}
+
+/* Event-specific colors (Orange) */
+.event-primary {
+  background-color: var(--event-orange);
+  color: var(--white);
+}
+
+.event-secondary {
+  background-color: var(--event-orange-light);
+  color: var(--white);
+}
+
+.event-light {
+  background-color: rgba(239, 105, 17, 0.1);
+  color: var(--event-orange-dark);
+}
+
+.text-event {
+  color: var(--event-orange);
+}
+
+.border-event {
+  border-color: var(--event-orange);
+}
+
+.btn-event {
+  background-color: var(--event-orange);
+  border-color: var(--event-orange);
+  color: var(--white);
+}
+
+.btn-event:hover {
+  background-color: var(--event-orange-dark);
+  border-color: var(--event-orange-dark);
+  color: var(--white);
+}
+
+.btn-outline-event {
+  color: var(--event-orange);
+  border-color: var(--event-orange);
+  background-color: transparent;
+}
+
+.btn-outline-event:hover {
+  background-color: var(--event-orange);
+  border-color: var(--event-orange);
+  color: var(--white);
+}
+
+.btn-outline-event:hover .text-event {
+  color: var(--white) !important;
+}
+
+/* Form Controls with Brand Colors */
+.form-control:focus {
+  border-color: var(--brand-blue-light-2);
+  box-shadow: 0 0 0 0.2rem rgba(14, 30, 122, 0.25);
+}
+
+.form-select:focus {
+  border-color: var(--brand-blue-light-2);
+  box-shadow: 0 0 0 0.2rem rgba(14, 30, 122, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--brand-blue);
+  border-color: var(--brand-blue);
+}
+
+.form-check-input:focus {
+  border-color: var(--brand-blue-light-2);
+  box-shadow: 0 0 0 0.2rem rgba(14, 30, 122, 0.25);
+}
+
+/* Link Colors */
+.link-primary {
+  color: var(--brand-blue);
+}
+
+.link-primary:hover, .link-primary:focus {
+  color: var(--brand-blue-dark-1);
+}
+
+/* Alert Variants */
+.alert-primary {
+  background-color: var(--brand-blue-light-4);
+  border-color: var(--brand-blue-light-3);
+  color: var(--brand-blue-dark-2);
+}
+
+.alert-narasumber {
+  background-color: var(--brand-blue-light-4);
+  border-color: var(--brand-blue-light-3);
+  color: var(--brand-blue-dark-2);
+}
+
+.alert-event {
+  background-color: rgba(239, 105, 17, 0.1);
+  border-color: rgba(239, 105, 17, 0.3);
+  color: var(--event-orange-dark);
+}
+
+/* Badge Variants */
+.badge-narasumber {
+  background-color: var(--brand-blue);
+  color: var(--white);
+}
+
+.badge-event {
+  background-color: var(--event-orange);
+  color: var(--white);
+}
+
+/* Card Headers with Brand Colors */
+.card-header-narasumber {
+  background-color: var(--brand-blue-light-4);
+  border-bottom-color: var(--brand-blue-light-3);
+  color: var(--brand-blue-dark-1);
+}
+
+.card-header-event {
+  background-color: rgba(239, 105, 17, 0.1);
+  border-bottom-color: rgba(239, 105, 17, 0.3);
+  color: var(--event-orange-dark);
+}
+
+/* Progress Bars */
+.progress-bar-narasumber {
+  background-color: var(--brand-blue);
+}
+
+.progress-bar-event {
+  background-color: var(--event-orange);
+}
+
+/* Custom Utilities */
+.bg-brand-blue { background-color: var(--brand-blue); }
+.bg-brand-blue-light { background-color: var(--brand-blue-light-4); }
+.bg-event-orange { background-color: var(--event-orange); }
+.bg-event-light { background-color: rgba(239, 105, 17, 0.1); }
+
+.text-brand-blue { color: var(--brand-blue); }
+.text-event-orange { color: var(--event-orange); }
+
+.border-brand-blue { border-color: var(--brand-blue); }
+.border-event-orange { border-color: var(--event-orange); }
