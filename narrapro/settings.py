@@ -162,23 +162,20 @@ if not DEBUG:
 # Storage Configuration
 if os.getenv("PRODUCTION") == "true":
     # Supabase Storage Configuration for Production
-    DEFAULT_FILE_STORAGE = 'narrapro.simple_storage.SimpleSupabaseStorage'
-    
-    # Supabase Storage Settings
-    AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME', 'storage')
-    AWS_S3_ENDPOINT_URL = os.getenv('SUPABASE_URL')
-    AWS_S3_REGION_NAME = 'us-east-1'
-    
-    # S3 Configuration for Supabase compatibility
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+
+    # Modern Django storage configuration (Django 4.2+)
+    STORAGES = {
+        "default": {
+            "BACKEND": "narrapro.simple_storage.SimpleSupabaseStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
     }
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_QUERYSTRING_AUTH = False
-    
+
+    # Fallback for older Django versions
+    DEFAULT_FILE_STORAGE = 'narrapro.simple_storage.SimpleSupabaseStorage'
+
     # Media URL will be constructed by custom storage backend
     MEDIA_URL = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{os.getenv('SUPABASE_BUCKET_NAME', 'storage')}/"
 else:
