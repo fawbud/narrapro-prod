@@ -32,7 +32,6 @@ class UserAdmin(BaseUserAdmin):
         'first_name', 
         'last_name', 
         'user_type', 
-        'is_approved', 
         'approval_status_display',
         'is_staff', 
         'date_joined'

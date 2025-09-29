@@ -51,6 +51,70 @@ class ExpertiseCategory(models.Model):
         return self.name
 
 
+class Education(models.Model):
+    """
+    Model to represent education history for narasumber.
+    Each narasumber can have multiple education entries.
+    """
+    
+    DEGREE_CHOICES = [
+        ('SMA', 'SMA/SMK/Sederajat'),
+        ('D3', 'Diploma 3 (D3)'),
+        ('S1', 'Sarjana (S1)'),
+        ('S2', 'Magister (S2)'),
+        ('S3', 'Doktor (S3)'),
+        ('Certificate', 'Sertifikat Profesional'),
+        ('Other', 'Lainnya'),
+    ]
+    
+    narasumber_profile = models.ForeignKey(
+        'NarasumberProfile',
+        on_delete=models.CASCADE,
+        related_name='educations',
+        help_text="Associated narasumber profile"
+    )
+    
+    degree = models.CharField(
+        max_length=20,
+        choices=DEGREE_CHOICES,
+        help_text="Type of degree or education level"
+    )
+    
+    school_university = models.CharField(
+        max_length=200,
+        help_text="Name of school, university, or institution"
+    )
+    
+    field_of_study = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Field of study or major (optional)"
+    )
+    
+    graduation_year = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1950)],
+        help_text="Year of graduation (optional)"
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this education entry was created"
+    )
+    
+    class Meta:
+        verbose_name = "Education"
+        verbose_name_plural = "Educations"
+        ordering = ['-graduation_year', '-created_at']
+    
+    def __str__(self):
+        if self.graduation_year:
+            return f"{self.get_degree_display()} - {self.school_university} ({self.graduation_year})"
+        return f"{self.get_degree_display()} - {self.school_university}"
+
+
 class NarasumberProfile(models.Model):
     """
     Profile model for narasumber users containing detailed information

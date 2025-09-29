@@ -21,6 +21,6 @@ urlpatterns = [
     path('applications/<uuid:application_id>/', views.application_detail, name='application_detail'),
     path('applications/<uuid:application_id>/update-status/', views.application_update_status, name='application_update_status'),
 
-    # Narasumber user views
-    path('my-applications/', views.my_applications, name='my_applications'),
+    # Narasumber user views - moved to profiles app
+    # path('my-applications/', views.my_applications, name='my_applications'),
 ]

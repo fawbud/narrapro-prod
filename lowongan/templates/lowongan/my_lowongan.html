@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}My Lowongan - NarraPro{% endblock %}
+{% block title %}Lowongan Saya - NarraPro{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2">My Lowongan</h1>
+            <h1 class="h2">Lowongan Saya</h1>
             <a href="{% url 'lowongan:create' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Create New Lowongan
+                <i class="fas fa-plus"></i> Buat Lowongan Baru
             </a>
         </div>
 
@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="{% url 'lowongan:my_lowongan' %}" class="btn btn-outline-secondary">Clear</a>
+                        <a href="{% url 'lowongan:my_lowongan' %}" class="btn btn-outline-secondary">Hapus</a>
                     </div>
                 </form>
             </div>
@@ -32,7 +32,7 @@
 
         <!-- Results count -->
         <div class="mb-3">
-            <small class="text-muted">{{ total_count }} lowongan found</small>
+            <small class="text-muted">{{ total_count }} lowongan ditemukan</small>
         </div>
 
         <!-- Lowongan List -->
@@ -65,12 +65,12 @@
                                     <div class="col-sm-6">
                                         <i class="fas fa-map-marker-alt"></i> {{ lowongan.location_display }}<br>
                                         <i class="fas fa-calendar"></i> {{ lowongan.event_date }}<br>
-                                        <i class="fas fa-clock"></i> {{ lowongan.duration_hours }} hours
+                                        <i class="fas fa-clock"></i> {{ lowongan.duration_hours }} jam
                                     </div>
                                     <div class="col-sm-6">
-                                        <i class="fas fa-calendar-check"></i> Deadline: {{ lowongan.application_deadline }}<br>
-                                        <i class="fas fa-users"></i> {{ lowongan.get_applications_count }} applications<br>
-                                        <i class="fas fa-clock"></i> Created: {{ lowongan.created_at|date:"M d, Y" }}
+                                        <i class="fas fa-calendar-check"></i> Batas Waktu: {{ lowongan.application_deadline }}<br>
+                                        <i class="fas fa-users"></i> {{ lowongan.get_applications_count }} lamaran<br>
+                                        <i class="fas fa-clock"></i> Dibuat: {{ lowongan.created_at|date:"M d, Y" }}
                                     </div>
                                 </div>
                             </div>
@@ -79,16 +79,16 @@
                         <div class="col-md-4 text-end">
                             <div class="btn-group-vertical gap-1" role="group">
                                 <a href="{% url 'lowongan:detail' lowongan.id %}" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye"></i> Lihat
                                 </a>
                                 <a href="{% url 'lowongan:applications' lowongan.id %}" class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-users"></i> Applications ({{ lowongan.get_applications_count }})
+                                    <i class="fas fa-users"></i> Lamaran ({{ lowongan.get_applications_count }})
                                 </a>
                                 <a href="{% url 'lowongan:edit' lowongan.id %}" class="btn btn-outline-secondary btn-sm">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                                 <a href="{% url 'lowongan:delete' lowongan.id %}" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash"></i> Delete
+                                    <i class="fas fa-trash"></i> Hapus
                                 </a>
                             </div>
 
@@ -110,10 +110,10 @@
         {% empty %}
             <div class="text-center py-5">
                 <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
-                <h4>No lowongan created yet</h4>
-                <p class="text-muted">Create your first lowongan to start connecting with narasumber.</p>
+                <h4>Belum ada lowongan yang dibuat</h4>
+                <p class="text-muted">Buat lowongan pertama Anda untuk mulai terhubung dengan narasumber.</p>
                 <a href="{% url 'lowongan:create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Your First Lowongan
+                    <i class="fas fa-plus"></i> Buat Lowongan Pertama Anda
                 </a>
             </div>
         {% endfor %}

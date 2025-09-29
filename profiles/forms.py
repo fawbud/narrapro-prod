@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 from .models import User, Booking
+from narasumber.models import Education
 
 
 class UserProfileForm(forms.ModelForm):
@@ -135,7 +136,7 @@ class EventProfileForm(forms.ModelForm):
         from event.models import EventProfile
         model = EventProfile
         fields = [
-            'name', 'description', 'location', 
+            'name', 'description', 'event_type', 'location', 'target_audience',
             'email', 'phone_number', 'is_phone_public', 'website', 
             'linkedin_url', 'cover_image', 'start_date', 'end_date'
         ]
@@ -149,8 +150,18 @@ class EventProfileForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'Deskripsi event atau organisasi...'
             }),
+            'event_type': forms.Select(attrs={
+                'class': 'form-select',
+                'id': 'event_type_select'
+            }),
             'location': forms.Select(attrs={
-                'class': 'form-select'
+                'class': 'form-select',
+                'id': 'location_select'
+            }),
+            'target_audience': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Deskripsi target audiens event ini...'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
@@ -187,7 +198,9 @@ class EventProfileForm(forms.ModelForm):
         labels = {
             'name': 'Nama Event/Organisasi',
             'description': 'Deskripsi',
-            'location': 'Lokasi',
+            'event_type': 'Tipe Event',
+            'location': 'Lokasi/Platform',
+            'target_audience': 'Target Audiens',
             'email': 'Email Kontak',
             'phone_number': 'Nomor Telepon',
             'is_phone_public': 'Tampilkan nomor telepon di profil publik',
@@ -197,6 +210,21 @@ class EventProfileForm(forms.ModelForm):
             'start_date': 'Tanggal Mulai (Opsional)',
             'end_date': 'Tanggal Selesai (Opsional)',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Set initial location choices based on event_type
+        if self.instance and self.instance.pk:
+            event_type = self.instance.event_type
+        elif 'event_type' in self.data:
+            event_type = self.data['event_type']
+        else:
+            event_type = 'offline'  # Default
+        
+        # Update location choices based on event type
+        from event.models import EventProfile
+        self.fields['location'].choices = EventProfile.get_location_choices_for_event_type(event_type)
 
 
 class PasswordChangeForm(DjangoPasswordChangeForm):
@@ -221,6 +249,40 @@ class PasswordChangeForm(DjangoPasswordChangeForm):
         self.fields['old_password'].widget.attrs['placeholder'] = 'Masukkan password lama'
         self.fields['new_password1'].widget.attrs['placeholder'] = 'Masukkan password baru'
         self.fields['new_password2'].widget.attrs['placeholder'] = 'Konfirmasi password baru'
+
+class EducationForm(forms.ModelForm):
+    """
+    Form for managing education entries for narasumber profiles.
+    """
+    class Meta:
+        model = Education
+        fields = ['degree', 'school_university', 'field_of_study', 'graduation_year']
+        widgets = {
+            'degree': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'school_university': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Sekolah/Universitas'
+            }),
+            'field_of_study': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Jurusan/Bidang Studi (opsional)'
+            }),
+            'graduation_year': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Tahun Lulus (opsional)',
+                'min': '1950',
+                'max': '2030'
+            }),
+        }
+        labels = {
+            'degree': 'Jenjang Pendidikan',
+            'school_university': 'Sekolah/Universitas',
+            'field_of_study': 'Jurusan/Bidang Studi',
+            'graduation_year': 'Tahun Lulus',
+        }
+
 
 class BookingForm(forms.ModelForm):
     class Meta:
