@@ -59,11 +59,11 @@ def register_view(request):
                 user, profile = combined_form.save(user_type)
                 messages.success(
                     request, 
-                    f'Registration successful! Your account is pending admin approval. You will receive an email once approved.'
+                    f'Pendaftaran berhasil! Akun Anda menungggu persetujuan admin. Anda akan menerima email ketika di-approve.'
                 )
                 return redirect('main:login')
             except Exception as e:
-                messages.error(request, f'Registration failed: {str(e)}')
+                messages.error(request, f'Pendaftaran gagal: {str(e)}')
         else:
             # Get all form errors
             errors = combined_form.get_errors(user_type)
@@ -73,8 +73,8 @@ def register_view(request):
             
             # Add education validation errors
             if not education_valid:
-                messages.error(request, 'Please provide at least one complete education entry with degree and school/university.')
-    
+                messages.error(request, 'Silakan berikan setidaknya satu entri pendidikan lengkap dengan gelar dan sekolah/universitas.')
+
     # For GET requests or form errors, show the registration form
     base_form = BaseUserRegistrationForm()
     narasumber_form = NarasumberRegistrationForm()
@@ -105,16 +105,16 @@ def login_view(request):
             login(request, user)
             
             if user.is_approved:
-                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+                messages.success(request, f'Selamat datang kembali, {user.first_name or user.username}!')
             else:
                 messages.info(
                     request, 
-                    f'Welcome back, {user.first_name or user.username}! Note: Your account is still pending admin approval.'
+                    f'Selamat datang kembali, {user.first_name or user.username}! Catatan: Akun Anda masih menunggu persetujuan admin.'
                 )
             return redirect('main:home')
         else:
-            messages.error(request, 'Invalid username or password.')
-    
+            messages.error(request, 'Username atau password tidak valid.')
+
     return render(request, 'main/login.html')
 
 
@@ -125,7 +125,7 @@ def logout_view(request):
     """
     user_name = request.user.first_name or request.user.username
     logout(request)
-    messages.success(request, f'Goodbye, {user_name}! You have been logged out.')
+    messages.success(request, f'Sampai jumpa, {user_name}! Anda telah di-logout.')
     return redirect('main:home')
 
 

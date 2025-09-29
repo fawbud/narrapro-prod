@@ -91,23 +91,12 @@
         }
     }
 
-    /* Search field rapat ke logo */
+    /* Search field rapat ke logo - Desktop only */
     .navbar .navbar-brand {
         margin-right: 10px !important;
     }
     .navbar form {
         margin-left: 0 !important;
-    }
-
-    /* Mobile: search full width, sisakan tombol menu */
-    @media (max-width: 991.98px) {
-        .navbar .navbar-brand {
-            margin-right: 6px !important;
-        }
-        .navbar form {
-            flex: 1 1 auto;
-            max-width: none !important;
-        }
     }
 </style>
 {% endblock %}
@@ -115,7 +104,7 @@
 <nav class="navbar navbar-expand-lg navbar-light navbar-custom position-relative" style="z-index:1060; box-shadow: 0 2px 20px rgba(0,0,0,0.08); transition: all 0.3s ease;">
     <div class="container d-flex align-items-center">
 
-        <!-- Brand + Search -->
+        <!-- Brand + Search (Desktop Only) -->
         <div class="d-flex align-items-center flex-grow-1">
             <!-- Brand -->
             <a class="navbar-brand fw-bold d-flex align-items-center me-3" href="{% url 'main:home' %}">
@@ -123,8 +112,8 @@
                 <img src="{% static 'images/narrapro-logo.png' %}" alt="NarraPro Logo" style="height:32px; margin-right:10px;">
             </a>
 
-            <!-- Search Field -->
-            <form class="flex-grow-1 position-relative" style="max-width:500px;">
+            <!-- Search Field - Desktop Only -->
+            <form class="flex-grow-1 position-relative d-none d-lg-block" style="max-width:500px;">
                 <div class="input-group rounded-pill overflow-hidden bg-white border" style="border-color:#e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                     <span class="input-group-text bg-white border-0">
                         <i class="bi bi-search text-muted"></i>
@@ -140,7 +129,6 @@
                         style="font-size: 0.95rem; padding: 0.75rem 0.5rem;"
                     />
                 </div>
-
             </form>
         </div>
 
@@ -148,9 +136,9 @@
         <div class="navbar-nav d-none d-lg-flex ms-3">
             {% if user.is_authenticated %}
                 {% if user.user_type == 'event' %}
-                    <a class="nav-link" href="{% url 'lowongan:my_lowongan' %}">My Lowongan</a>
+                    <a class="nav-link" href="{% url 'lowongan:my_lowongan' %}">Lowongan Saya</a>
                 {% elif user.user_type == 'narasumber' %}
-                    <a class="nav-link" href="{% url 'lowongan:my_applications' %}">My Applications</a>
+                    <a class="nav-link" href="{% url 'profiles:profile_lamaran' user.username %}">Lamaran Saya</a>
                 {% endif %}
             {% endif %}
         </div>
@@ -174,19 +162,41 @@
                         <i class="bi bi-list fs-3"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userDropdown" style="border-radius: 12px; margin-top: 8px;">
+                        <!-- Mobile Search Bar -->
+                        <li class="d-lg-none px-3 py-2">
+                            <form class="position-relative">
+                                <div class="input-group rounded-pill overflow-hidden bg-light border" style="border-color:#e0e0e0;">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input
+                                        id="mobileGlobalSearch"
+                                        type="text"
+                                        class="form-control border-0 shadow-none bg-light"
+                                        placeholder="Cari lowongan, event, narasumber"
+                                        aria-label="Search"
+                                        value="{{ request.GET.q|default:'' }}"
+                                        autocomplete="off"
+                                        style="font-size: 0.9rem; padding: 0.5rem;"
+                                    />
+                                </div>
+                            </form>
+                        </li>
+                        <li class="d-lg-none"><hr class="dropdown-divider"></li>
+
                         <!-- Mobile Navigation Links -->
                         {% if user.is_authenticated %}
                             {% if user.user_type == 'event' %}
-                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_lowongan' %}"><i class="bi bi-folder me-2"></i>My Lowongan</a></li>
+                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_lowongan' %}"><i class="bi bi-folder me-2"></i>Lowongan Saya</a></li>
                             {% elif user.user_type == 'narasumber' %}
-                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_applications' %}"><i class="bi bi-file-text me-2"></i>My Applications</a></li>
+                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'profiles:profile_lamaran' user.username %}"><i class="bi bi-file-text me-2"></i>Lamaran Saya</a></li>
                             {% endif %}
                             {% if user.user_type == 'event' or user.user_type == 'narasumber' %}
                                 <li class="d-lg-none"><hr class="dropdown-divider"></li>
                             {% endif %}
                         {% endif %}
                         <!-- Profile & Logout -->
-                        <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.username %}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.username %}"><i class="bi bi-person me-2"></i> Profil Saya</a></li>
                         <li><a class="dropdown-item" href="{% url 'main:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>
@@ -195,6 +205,27 @@
                 <div class="dropdown">
                     <a class="nav-link d-lg-none" href="#" data-bs-toggle="dropdown"><i class="bi bi-list fs-3"></i></a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <!-- Mobile Search Bar for Guests -->
+                        <div class="d-lg-none px-3 py-2">
+                            <form class="position-relative">
+                                <div class="input-group rounded-pill overflow-hidden bg-light border" style="border-color:#e0e0e0;">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input
+                                        id="mobileGuestSearch"
+                                        type="text"
+                                        class="form-control border-0 shadow-none bg-light"
+                                        placeholder="Cari lowongan, event, narasumber"
+                                        aria-label="Search"
+                                        value="{{ request.GET.q|default:'' }}"
+                                        autocomplete="off"
+                                        style="font-size: 0.9rem; padding: 0.5rem;"
+                                    />
+                                </div>
+                            </form>
+                        </div>
+                        <div class="d-lg-none"><hr class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'main:login' %}">Login</a>
                         <a class="dropdown-item" href="{% url 'main:register' %}">Register</a>
                     </div>
@@ -212,18 +243,37 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("globalSearch");
+    const mobileSearchInput = document.getElementById("mobileGlobalSearch");
+    const mobileGuestSearchInput = document.getElementById("mobileGuestSearch");
 
-    searchInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const query = searchInput.value.trim();
-            if (query.length > 0) {
-                const params = new URLSearchParams(window.location.search);
-                params.set("q", query);
-                params.delete("page");
-                window.location.href = `/search/result/?${params.toString()}`;
+    function handleSearch(input) {
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const query = input.value.trim();
+                if (query.length > 0) {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set("q", query);
+                    params.delete("page");
+                    window.location.href = `/search/result/?${params.toString()}`;
+                }
             }
-        }
-    });
+        });
+    }
+
+    // Handle desktop search
+    if (searchInput) {
+        handleSearch(searchInput);
+    }
+
+    // Handle mobile search for authenticated users
+    if (mobileSearchInput) {
+        handleSearch(mobileSearchInput);
+    }
+
+    // Handle mobile search for guest users
+    if (mobileGuestSearchInput) {
+        handleSearch(mobileGuestSearchInput);
+    }
 });
 </script>
