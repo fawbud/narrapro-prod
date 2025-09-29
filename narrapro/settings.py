@@ -162,7 +162,7 @@ if not DEBUG:
 # Storage Configuration
 if os.getenv("PRODUCTION") == "true":
     # Supabase Storage Configuration for Production
-    DEFAULT_FILE_STORAGE = 'narrapro.storage_backends.SupabasePublicStorage'
+    DEFAULT_FILE_STORAGE = 'narrapro.simple_storage.SimpleSupabaseStorage'
     
     # Supabase Storage Settings
     AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_ACCESS_KEY_ID')
