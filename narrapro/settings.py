@@ -162,18 +162,6 @@ if not DEBUG:
 # Storage Configuration
 if os.getenv("PRODUCTION") == "true":
     # Supabase Storage Configuration for Production
-
-    # Modern Django storage configuration (Django 4.2+)
-    STORAGES = {
-        "default": {
-            "BACKEND": "narrapro.simple_storage.SimpleSupabaseStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-
-    # Fallback for older Django versions
     DEFAULT_FILE_STORAGE = 'narrapro.simple_storage.SimpleSupabaseStorage'
 
     # Media URL will be constructed by custom storage backend
