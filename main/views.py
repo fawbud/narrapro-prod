@@ -17,11 +17,17 @@ def home(request):
     # Ambil data expertise categories
     expertise_categories = ExpertiseCategory.objects.all()
 
-    # Ambil 6–8 narasumber terbaru
-    narasumbers = NarasumberProfile.objects.select_related("expertise_area").order_by("-created_at")[:8]
+    # Ambil 6–8 narasumber terbaru, kecuali profil user sendiri jika dia narasumber
+    narasumbers_query = NarasumberProfile.objects.select_related("expertise_area").order_by("-created_at")
+    if request.user.is_authenticated and request.user.user_type == 'narasumber':
+        narasumbers_query = narasumbers_query.exclude(user=request.user)
+    narasumbers = narasumbers_query[:8]
 
-    # Ambil 6–8 lowongan terbaru
-    lowongans = Lowongan.objects.order_by("-created_at")[:8]
+    # Ambil 6–8 lowongan terbaru, kecuali yang dibuat user sendiri jika dia event organizer
+    lowongans_query = Lowongan.objects.order_by("-created_at")
+    if request.user.is_authenticated and request.user.user_type == 'event':
+        lowongans_query = lowongans_query.exclude(created_by=request.user)
+    lowongans = lowongans_query[:8]
 
     context = {
         "expertise_categories": expertise_categories,
