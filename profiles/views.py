@@ -215,22 +215,52 @@ def profile_lamaran(request, username):
     """
     Profile lamaran view - shows user's applications (for narasumber users).
     """
+    from lowongan.models import LowonganApplication
+    from django.core.paginator import Paginator
+
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
-    
+
     # Only allow access to own profile or if user is narasumber
     if not is_own_profile:
         raise Http404("You can only view your own applications.")
-    
+
     if profile_user.user_type != 'narasumber':
         raise Http404("This page is only available for narasumber users.")
-    
+
+    applications_qs = LowonganApplication.objects.filter(
+        applicant=profile_user
+    ).select_related('lowongan', 'lowongan__created_by').order_by('-applied_at')
+
+    # Filter by status
+    status_filter = request.GET.get('status')
+    if status_filter:
+        applications_qs = applications_qs.filter(status=status_filter)
+
+    # Calculate statistics
+    total_applications = LowonganApplication.objects.filter(applicant=profile_user).count()
+    pending_applications = LowonganApplication.objects.filter(applicant=profile_user, status='PENDING').count()
+    accepted_applications = LowonganApplication.objects.filter(applicant=profile_user, status='ACCEPTED').count()
+    rejected_applications = LowonganApplication.objects.filter(applicant=profile_user, status='REJECTED').count()
+
+    # Pagination
+    paginator = Paginator(applications_qs, 10)
+    page_number = request.GET.get('page')
+    applications_page = paginator.get_page(page_number)
+
     context = {
         'profile_user': profile_user,
         'is_own_profile': is_own_profile,
         'active_section': 'lamaran',
+        'applications_page': applications_page,
+        'status_filter': status_filter,
+        'status_choices': LowonganApplication.STATUS_CHOICES,
+        'total_applications': total_applications,
+        'pending_applications': pending_applications,
+        'accepted_applications': accepted_applications,
+        'rejected_applications': rejected_applications,
     }
-    
+
     return render(request, 'profiles/profile_lamaran.html', context)
 
 
@@ -501,3 +531,36 @@ def booking_detail(request, username, booking_id):
     }
 
     return render(request, 'profiles/booking_detail.html', context)
+
+
+@login_required
+def application_detail(request, username, application_id):
+    """
+    View for narasumber users to see their own application details
+    """
+    from lowongan.models import LowonganApplication
+
+    profile_user = get_object_or_404(User, username=username)
+    is_own_profile = request.user.username == profile_user.username
+
+    # Only allow access to own profile
+    if not is_own_profile:
+        raise Http404("You can only view your own applications.")
+
+    if profile_user.user_type != 'narasumber':
+        raise Http404("This page is only available for narasumber users.")
+
+    application = get_object_or_404(
+        LowonganApplication.objects.select_related('applicant', 'lowongan'),
+        id=application_id,
+        applicant=profile_user
+    )
+
+    context = {
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'application': application,
+        'active_section': 'lamaran',
+    }
+
+    return render(request, 'profiles/application_detail.html', context)
