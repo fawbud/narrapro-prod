@@ -165,6 +165,12 @@ def edit_profile(request, username):
         
         if forms_valid:
             print("DEBUG: All forms valid, saving...")
+
+            # Debug storage backend info
+            from django.core.files.storage import default_storage
+            print(f"DEBUG: Storage backend in use: {default_storage.__class__.__name__}")
+            print(f"DEBUG: Storage module: {default_storage.__class__.__module__}")
+
             user_form.save()
             if narasumber_form:
                 saved_narasumber = narasumber_form.save()
