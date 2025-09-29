@@ -13,9 +13,6 @@ from django.core.paginator import Paginator
 import json
 
 def search_preview(request):
-    if not request.user.is_authenticated:
-        messages.error(request, "You must log in to access this page.")
-        return redirect('/login')
     """
     Return JSON search preview results for popup suggestions.
     """
@@ -116,9 +113,6 @@ def search_preview(request):
 
 
 def search_result_page(request):
-    if not request.user.is_authenticated:
-        messages.error(request, "You must log in to access this page.")
-        return redirect('/login')
     
     query = request.GET.get("q", "").strip()
     category = request.GET.get("category", "").lower()
@@ -178,6 +172,8 @@ def search_result_page(request):
         qs = Lowongan.objects.all()
         if query:
             qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        if expertise_ids:
+            qs = qs.filter(expertise_category__id__in=expertise_ids)
 
         qs = qs.order_by("-created_at")
         lowongans_count = qs.count()
