@@ -218,10 +218,3 @@ CSRF_TRUSTED_ORIGINS = [
     'https://narrapro.up.railway.app',
     # Add your actual production domain here
 ]
-
-if os.getenv("PRODUCTION") == "true":
-    SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
