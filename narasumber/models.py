@@ -5,6 +5,17 @@ import json
 import uuid
 import os
 
+def get_storage():
+    """Get the appropriate storage backend based on environment"""
+    if os.getenv("PRODUCTION") == "true":
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"NARASUMBER MODEL DEBUG: Using SimpleSupabaseStorage for production")
+        return SimpleSupabaseStorage()
+    else:
+        from django.core.files.storage import default_storage
+        print(f"NARASUMBER MODEL DEBUG: Using default storage for development")
+        return default_storage
+
 User = get_user_model()
 
 
@@ -189,7 +200,8 @@ class NarasumberProfile(models.Model):
         upload_to=narasumber_profile_picture_upload_path,
         blank=True,
         null=True,
-        help_text="Profile picture for the narasumber (optional)"
+        help_text="Profile picture for the narasumber (optional)",
+        storage=get_storage  # Dynamic storage based on environment
     )
     
     bio = models.TextField(

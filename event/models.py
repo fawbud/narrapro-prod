@@ -5,6 +5,17 @@ from django.utils import timezone
 import uuid
 import os
 
+def get_storage():
+    """Get the appropriate storage backend based on environment"""
+    if os.getenv("PRODUCTION") == "true":
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"EVENT MODEL DEBUG: Using SimpleSupabaseStorage for production")
+        return SimpleSupabaseStorage()
+    else:
+        from django.core.files.storage import default_storage
+        print(f"EVENT MODEL DEBUG: Using default storage for development")
+        return default_storage
+
 User = get_user_model()
 
 
@@ -170,7 +181,8 @@ class EventProfile(models.Model):
         upload_to=event_cover_upload_path,
         blank=True,
         null=True,
-        help_text="Cover image for the event or organization (recommended)"
+        help_text="Cover image for the event or organization (recommended)",
+        storage=get_storage  # Dynamic storage based on environment
     )
     
     # Event dates (nullable for one-time events)
