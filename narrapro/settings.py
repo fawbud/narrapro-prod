@@ -160,13 +160,27 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Storage Configuration
+print(f"SETTINGS DEBUG: PRODUCTION env var = '{os.getenv('PRODUCTION')}'")
+print(f"SETTINGS DEBUG: Checking storage configuration...")
+
 if os.getenv("PRODUCTION") == "true":
+    print(f"SETTINGS DEBUG: Production mode detected, setting up Supabase storage")
     # Supabase Storage Configuration for Production
     DEFAULT_FILE_STORAGE = 'narrapro.simple_storage.SimpleSupabaseStorage'
 
+    # Test import to make sure it works
+    try:
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"SETTINGS DEBUG: SimpleSupabaseStorage import successful")
+    except Exception as e:
+        print(f"SETTINGS DEBUG: ERROR importing SimpleSupabaseStorage: {e}")
+
     # Media URL will be constructed by custom storage backend
     MEDIA_URL = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{os.getenv('SUPABASE_BUCKET_NAME', 'storage')}/"
+    print(f"SETTINGS DEBUG: DEFAULT_FILE_STORAGE set to: {DEFAULT_FILE_STORAGE}")
+    print(f"SETTINGS DEBUG: MEDIA_URL set to: {MEDIA_URL}")
 else:
+    print(f"SETTINGS DEBUG: Development mode, using local storage")
     # Local development settings
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
