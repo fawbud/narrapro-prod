@@ -99,6 +99,10 @@ def edit_profile(request, username):
         event_profile, created = EventProfile.objects.get_or_create(user=user)
     
     if request.method == 'POST':
+        print(f"=== DEBUG: Form submission for {user.username} ===")
+        print(f"POST data: {dict(request.POST)}")
+        print(f"FILES data: {dict(request.FILES)}")
+        
         user_form = UserProfileForm(request.POST, instance=user)
         narasumber_form = None
         event_form = None
@@ -132,23 +136,59 @@ def edit_profile(request, username):
         
         # Validate all forms
         forms_valid = user_form.is_valid()
+        print(f"DEBUG: User form valid: {forms_valid}")
+        if not forms_valid:
+            print(f"DEBUG: User form errors: {user_form.errors}")
+            
         if narasumber_form:
-            forms_valid = forms_valid and narasumber_form.is_valid()
+            narasumber_valid = narasumber_form.is_valid()
+            forms_valid = forms_valid and narasumber_valid
+            print(f"DEBUG: Narasumber form valid: {narasumber_valid}")
+            if not narasumber_valid:
+                print(f"DEBUG: Narasumber form errors: {narasumber_form.errors}")
+                
         if event_form:
-            forms_valid = forms_valid and event_form.is_valid()
+            event_valid = event_form.is_valid()
+            forms_valid = forms_valid and event_valid
+            print(f"DEBUG: Event form valid: {event_valid}")
+            if not event_valid:
+                print(f"DEBUG: Event form errors: {event_form.errors}")
+                
         if education_formset:
-            forms_valid = forms_valid and education_formset.is_valid()
+            education_valid = education_formset.is_valid()
+            forms_valid = forms_valid and education_valid
+            print(f"DEBUG: Education formset valid: {education_valid}")
+            if not education_valid:
+                print(f"DEBUG: Education formset errors: {education_formset.errors}")
+        
+        print(f"DEBUG: Overall forms valid: {forms_valid}")
         
         if forms_valid:
+            print("DEBUG: All forms valid, saving...")
             user_form.save()
             if narasumber_form:
-                narasumber_form.save()
+                saved_narasumber = narasumber_form.save()
+                print(f"DEBUG: Narasumber profile saved, image: {saved_narasumber.profile_picture.name if saved_narasumber.profile_picture else 'None'}")
             if event_form:
-                event_form.save()
+                saved_event = event_form.save()
+                print(f"DEBUG: Event profile saved, image: {saved_event.cover_image.name if saved_event.cover_image else 'None'}")
             if education_formset:
                 education_formset.save()
             messages.success(request, 'Profil Anda berhasil diperbarui!')
             return redirect('profiles:profile_detail', username=user.username)
+        else:
+            print("DEBUG: Form validation failed!")
+            # Add form errors to messages for debugging
+            all_errors = []
+            if user_form.errors:
+                all_errors.extend([f"User: {error}" for field, errors in user_form.errors.items() for error in errors])
+            if narasumber_form and narasumber_form.errors:
+                all_errors.extend([f"Narasumber: {error}" for field, errors in narasumber_form.errors.items() for error in errors])
+            if event_form and event_form.errors:
+                all_errors.extend([f"Event: {error}" for field, errors in event_form.errors.items() for error in errors])
+            
+            for error in all_errors[:5]:  # Show first 5 errors
+                messages.error(request, error)
     else:
         user_form = UserProfileForm(instance=user)
         narasumber_form = None
