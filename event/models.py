@@ -215,7 +215,7 @@ class EventProfile(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.name} - {self.get_location_display()}"
+        return f"{self.name} - {self.location_display}"
     
     def get_public_phone(self):
         """
@@ -265,6 +265,17 @@ class EventProfile(models.Model):
         """
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to clean up the cover image from storage.
+        """
+        if self.cover_image:
+            try:
+                self.cover_image.delete(save=False)
+            except Exception as e:
+                print(f"Error deleting cover image: {e}")
+        super().delete(*args, **kwargs)
     
     @property
     def location_display(self):

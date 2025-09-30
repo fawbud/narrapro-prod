@@ -290,6 +290,17 @@ class NarasumberProfile(models.Model):
         Return phone number only if user wants it to be public.
         """
         return self.phone_number if self.is_phone_public else None
+
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to clean up the profile picture from storage.
+        """
+        if self.profile_picture:
+            try:
+                self.profile_picture.delete(save=False)
+            except Exception as e:
+                print(f"Error deleting profile picture: {e}")
+        super().delete(*args, **kwargs)
     
     @property
     def experience_display(self):
