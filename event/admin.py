@@ -78,7 +78,7 @@ class EventProfileAdmin(admin.ModelAdmin):
         """
         Display the location in a more readable format.
         """
-        return obj.get_location_display()
+        return obj.location_display
     location_display.short_description = "Location"
     location_display.admin_order_field = 'location'
     
