@@ -162,4 +162,8 @@ class Booking(models.Model):
         ordering = ['-booking_date']
 
     def __str__(self):
-        return f"Booking for {self.narasumber.get_full_name()} by {self.event.event_profile.name} on {self.booking_date}"
+        try:
+            event_name = self.event.event_profile.name if hasattr(self.event, 'event_profile') else self.event.username
+        except:
+            event_name = self.event.username
+        return f"Booking for {self.narasumber.get_full_name()} by {event_name} on {self.booking_date}"

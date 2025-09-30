@@ -201,7 +201,7 @@ class NarasumberProfile(models.Model):
         blank=True,
         null=True,
         help_text="Profile picture for the narasumber (optional)",
-        storage=get_storage  # Dynamic storage based on environment
+        storage=get_storage()  # Dynamic storage based on environment
     )
     
     bio = models.TextField(
@@ -211,7 +211,7 @@ class NarasumberProfile(models.Model):
     # Expertise information
     expertise_area = models.ForeignKey(
         ExpertiseCategory,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='narasumber_profiles',
         help_text="Area of expertise"
     )

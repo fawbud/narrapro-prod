@@ -182,7 +182,7 @@ class EventProfile(models.Model):
         blank=True,
         null=True,
         help_text="Cover image for the event or organization (recommended)",
-        storage=get_storage  # Dynamic storage based on environment
+        storage=get_storage()  # Dynamic storage based on environment
     )
     
     # Event dates (nullable for one-time events)
