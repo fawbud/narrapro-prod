@@ -29,7 +29,7 @@ django-storages
 boto3
 
 # Email backend
-django-anymail
+django-anymail[resend]
 
 # Form handling and validation (optional)
 django-widget-tweaks
