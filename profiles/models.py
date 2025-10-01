@@ -27,6 +27,7 @@ class User(AbstractUser):
         ('', 'Pilih Role'),
         ('narasumber', 'Narasumber'),
         ('event', 'Event'),
+        ('pengguna', 'Pengguna'),
     ]
     
     user_type = models.CharField(
@@ -169,7 +170,8 @@ class Booking(models.Model):
         on_delete=models.CASCADE,
         related_name='outgoing_bookings',
         limit_choices_to={'user_type': 'event'},
-        help_text="The event organizer making the booking"
+        help_text="The event organizer making the booking",
+        null=True, blank=True,
     )
     narasumber = models.ForeignKey(
         User,

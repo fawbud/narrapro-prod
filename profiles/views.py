@@ -4,8 +4,10 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
+
+from pengguna.models import PenggunaBooking
 from .models import User
-from .forms import UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
+from .forms import PenggunaBookingForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
 from narasumber.models import ExpertiseCategory, Education
 from django.forms import inlineformset_factory
 from profiles.models import Booking
@@ -365,20 +367,30 @@ def profile_lowongan(request, username):
 @login_required
 def profile_booking(request, username):
     """
-    Profile booking view - shows user's bookings (incoming for narasumber, outgoing for event).
+    Profile booking view - shows user's bookings:
+    - event → outgoing bookings
+    - pengguna → pengguna bookings (via PenggunaBooking)
+    - narasumber → incoming bookings
     """
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
 
-    # Only allow access to own profile
     if not is_own_profile:
         raise Http404("You can only view your own bookings.")
 
-    bookings_qs = []
+    # Tentukan queryset sesuai user_type
     if profile_user.user_type == 'event':
         bookings_qs = profile_user.outgoing_bookings.all()
+        is_pengguna = False
+    elif profile_user.user_type == 'pengguna':
+        bookings_qs = PenggunaBooking.objects.filter(pengguna=profile_user).select_related("booking", "booking__narasumber")
+        is_pengguna = True
     elif profile_user.user_type == 'narasumber':
         bookings_qs = profile_user.incoming_bookings.all()
+        is_pengguna = False
+    else:
+        bookings_qs = []
+        is_pengguna = False
 
     status_options = [
         ('PENDING', 'Menunggu'),
@@ -388,20 +400,30 @@ def profile_booking(request, username):
     ]
     all_statuses = [s[0] for s in status_options]
 
-    # Filtering
+    # Filtering status
     status_filters = request.GET.getlist('status')
     if not request.GET:
         status_filters = ['PENDING', 'APPROVED']
 
     if status_filters:
-        bookings = bookings_qs.filter(status__in=status_filters)
+        if is_pengguna:
+            bookings = bookings_qs.filter(booking__status__in=status_filters)
+        else:
+            bookings = bookings_qs.filter(status__in=status_filters)
     else:
         bookings = bookings_qs
 
-    total_bookings = bookings_qs.count()
-    pending_bookings = bookings_qs.filter(status='PENDING').count()
-    approved_bookings = bookings_qs.filter(status='APPROVED').count()
+    # Hitung total
+    if is_pengguna:
+        total_bookings = bookings_qs.count()
+        pending_bookings = bookings_qs.filter(booking__status='PENDING').count()
+        approved_bookings = bookings_qs.filter(booking__status='APPROVED').count()
+    else:
+        total_bookings = bookings_qs.count()
+        pending_bookings = bookings_qs.filter(status='PENDING').count()
+        approved_bookings = bookings_qs.filter(status='APPROVED').count()
 
+    # Buat filter link
     filters_data = []
     for status, label in status_options:
         next_filters = status_filters[:]
@@ -409,9 +431,9 @@ def profile_booking(request, username):
             next_filters.remove(status)
         else:
             next_filters.append(status)
-        
+
         query_string = '&'.join([f'status={s}' for s in sorted(next_filters)])
-        
+
         filters_data.append({
             'status': status,
             'label': label,
@@ -420,7 +442,7 @@ def profile_booking(request, username):
         })
 
     all_selected = sorted(status_filters) == sorted(all_statuses)
-    
+
     if all_selected:
         semua_reset_qs = ''
     else:
@@ -431,6 +453,7 @@ def profile_booking(request, username):
         'is_own_profile': is_own_profile,
         'active_section': 'booking',
         'bookings': bookings,
+        'is_pengguna': is_pengguna,  # supaya di template bisa bedakan
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings,
         'approved_bookings': approved_bookings,
@@ -480,46 +503,77 @@ def book_narasumber(request, username):
 @login_required
 def create_booking(request, username, narasumber_id):
     """
-    View for an event organizer to book a narasumber.
+    View untuk membuat booking.
+    - Event user booking narasumber langsung.
+    - Pengguna biasa booking narasumber via extension PenggunaBooking.
     """
-    if not request.user.is_approved:
-        messages.error(request, 'unapproved_user')
-        # Redirect back to the previous page, or home if referrer is not available
-        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
+    narasumber = get_object_or_404(User, id=narasumber_id, user_type="narasumber")
 
-    narasumber = get_object_or_404(User, id=narasumber_id, user_type='narasumber')
-    
-    if request.method == 'POST':
-        form = BookingForm(request.POST)
-        if form.is_valid():
-            booking = form.save(commit=False)
+    booking_form = BookingForm(request.POST or None)
+
+    if request.user.user_type == "event":
+        # Event booking narasumber
+        if request.method == "POST" and booking_form.is_valid():
+            booking = booking_form.save(commit=False)
             booking.event = request.user
             booking.narasumber = narasumber
             booking.save()
             messages.success(request, f"Booking request sent to {narasumber.get_full_name()}.")
-            return redirect('profiles:profile_booking', username=request.user.username)
+            return redirect("profiles:profile_booking", username=request.user.username)
+
+        return render(request, "profiles/create_booking.html", {
+            "booking_form": booking_form,
+            "pengguna_form": None,  # biar template konsisten
+            "narasumber": narasumber,
+        })
+
+    elif request.user.user_type == "pengguna":
+        pengguna_form = PenggunaBookingForm(request.POST or None, initial={"contact_email": request.user.email})
+
+        if request.method == "POST" and booking_form.is_valid() and pengguna_form.is_valid():
+            # 1. Buat booking utama (tanpa event)
+            booking = booking_form.save(commit=False)
+            booking.event = None
+            booking.narasumber = narasumber
+            booking.save()
+
+            # 2. Buat extension pengguna
+            pengguna_booking = pengguna_form.save(commit=False)
+            pengguna_booking.booking = booking
+            pengguna_booking.pengguna = request.user
+            pengguna_booking.save()
+
+            messages.success(request, f"Booking request sent to {narasumber.get_full_name()}.")
+            return redirect("profiles:profile_booking", username=request.user.username)
+
+        return render(request, "profiles/create_booking.html", {
+            "booking_form": booking_form,
+            "pengguna_form": pengguna_form,
+            "narasumber": narasumber,
+        })
+
     else:
-        form = BookingForm()
-        
-    context = {
-        'form': form,
-        'narasumber': narasumber,
-    }
-    return render(request, 'profiles/create_booking.html', context)
+        messages.error(request, "Tipe user tidak bisa melakukan booking.")
+        return redirect("profiles:profile_detail", username=narasumber.username)
 
-
+    
 @login_required
 def cancel_booking(request, username, booking_id):
     """
-    View for an event organizer to cancel a booking.
+    View for an event organizer OR pengguna to cancel a booking.
     """
     booking = get_object_or_404(Booking, id=booking_id)
-    
-    # Check if the user is the event organizer for this booking
-    if request.user != booking.event:
-        raise Http404("You are not authorized to cancel this booking.")
-        
-    # Check if the booking can be canceled
+
+    # --- check authorization ---
+    if booking.event:  # booking dari event
+        if request.user != booking.event:
+            raise Http404("You are not authorized to cancel this booking.")
+    else:  # booking dari pengguna
+        pengguna_booking = get_object_or_404(PenggunaBooking, booking=booking)
+        if request.user != pengguna_booking.pengguna:
+            raise Http404("You are not authorized to cancel this booking.")
+
+    # --- only allow cancel if masih pending/approved ---
     if booking.status not in ['PENDING', 'APPROVED']:
         messages.error(request, "This booking cannot be canceled.")
         return redirect('profiles:profile_booking', username=request.user.username)
@@ -529,8 +583,9 @@ def cancel_booking(request, username, booking_id):
         booking.save()
         messages.success(request, "The booking has been canceled.")
         return redirect('profiles:profile_booking', username=request.user.username)
-    
+
     return redirect('profiles:profile_booking', username=request.user.username)
+
 
 
 @login_required
@@ -564,7 +619,7 @@ def update_booking_status(request, username, booking_id, action):
 @login_required
 def booking_detail(request, username, booking_id):
     """
-    Booking detail view.
+    Booking detail view - support event, narasumber, dan pengguna.
     """
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
@@ -572,20 +627,37 @@ def booking_detail(request, username, booking_id):
     if not is_own_profile:
         raise Http404("You can only view your own bookings.")
 
-    booking = get_object_or_404(Booking, id=booking_id)
+    # kalau pengguna → ambil dari PenggunaBooking
+    if profile_user.user_type == "pengguna":
+        pengguna_booking = get_object_or_404(
+            PenggunaBooking.objects.select_related("booking", "booking__narasumber"),
+            booking__id=booking_id
+        )
+        booking = pengguna_booking.booking
+        context = {
+            "profile_user": profile_user,
+            "is_own_profile": is_own_profile,
+            "booking": booking,
+            "pengguna_booking": pengguna_booking,  # extra
+            "is_pengguna": True,
+            "active_section": "booking",
+        }
+    else:
+        booking = get_object_or_404(Booking, id=booking_id)
+        # Authorization check
+        if request.user != booking.event and request.user != booking.narasumber:
+            raise Http404("You are not authorized to view this booking.")
 
-    # Authorization check
-    if request.user != booking.event and request.user != booking.narasumber:
-        raise Http404("You are not authorized to view this booking.")
+        context = {
+            "profile_user": profile_user,
+            "is_own_profile": is_own_profile,
+            "booking": booking,
+            "is_pengguna": False,
+            "active_section": "booking",
+        }
 
-    context = {
-        'profile_user': profile_user,
-        'is_own_profile': is_own_profile,
-        'booking': booking,
-        'active_section': 'booking',
-    }
+    return render(request, "profiles/booking_detail.html", context)
 
-    return render(request, 'profiles/booking_detail.html', context)
 
 
 @login_required

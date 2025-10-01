@@ -280,7 +280,7 @@
                 {% if category == "event" %}
                     {% for e in events %}
                     <div class="col">
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a href="{% url 'profiles:profile_detail' e.user.username %}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm event-card">
                                 {% if e.cover_image %}
                                 <img src="{{ e.cover_image.url }}"
@@ -334,7 +334,7 @@
                 {% else %}
                     {% for e in events|slice:":8" %}
                     <div class="col">
-                        <a href="#" class="text-decoration-none text-dark">
+                        <a href="{% url 'profiles:profile_detail' e.user.username %}" class="text-decoration-none text-dark">
                             <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm event-card">
                                 {% if e.cover_image %}
                                 <img src="{{ e.cover_image.url }}"

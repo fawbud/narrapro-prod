@@ -241,6 +241,8 @@ class CombinedRegistrationForm:
             role_valid = self.narasumber_form.is_valid() if self.narasumber_form else False
         elif user_type == 'event':
             role_valid = self.event_form.is_valid() if self.event_form else False
+        elif user_type == 'pengguna':
+            role_valid = True
         else:
             role_valid = False
         
@@ -279,6 +281,8 @@ class CombinedRegistrationForm:
             profile.user = user
             profile.save()
             return user, profile
+        elif user_type == 'pengguna':
+            profile = None
         
         return user, None
     

@@ -16,6 +16,7 @@ from django.contrib.auth import get_user_model
 from narasumber.models import ExpertiseCategory, NarasumberProfile
 from event.models import EventProfile  # SESUAIKAN jika letak model berbeda
 from lowongan.models import Lowongan 
+from pengguna.models import PenggunaProfile
 
 User = get_user_model()
 
@@ -298,7 +299,41 @@ for i in range(10):
     created_lowongan += 1
     print(f"✓ Lowongan created: {title} | Status: {lowongan.status}")
 
-print(f"Total Lowongan created in this run: {created_lowongan}")
-print(f"Total Lowongan in DB: {Lowongan.objects.count()}\n")
+print("Creating 10 Pengguna profiles...")
+created_pengguna = 0
+
+for i in range(10):
+    user = ensure_user("pengguna", user_type="pengguna")
+
+    full_name = f"{random.choice(first_names)} {random.choice(last_names)}"
+    email = user.email
+    phone = random.choice([None, f"+62{random.randint(81300000000, 81999999999)}"])
+    is_phone_public = random.choice([True, False])
+
+    bio = f"Halo, saya {full_name}, pengguna biasa yang tertarik mengikuti acara dan narasumber."
+    website = random.choice([None, "https://personal.example.com", "https://portfolio.example.org"])
+    linkedin = random.choice([None, f"https://linkedin.com/in/{full_name.replace(' ', '').lower()}"])
+
+    profile = PenggunaProfile.objects.create(
+        user=user,
+        full_name=full_name,
+        bio=bio,
+        email=email,
+        phone_number=phone,
+        is_phone_public=is_phone_public,
+        website=website,
+        linkedin_url=linkedin,
+    )
+
+    # tambahin avatar dummy
+    if random.random() < 0.8:
+        profile.avatar = tiny_png_contentfile("user")
+        profile.save(update_fields=["avatar"])
+
+    created_pengguna += 1
+    print(f"✓ Pengguna created: {full_name}")
+
+print(f"Total Pengguna created in this run: {created_pengguna}")
+print(f"Total Pengguna in DB: {PenggunaProfile.objects.count()}\n")
 
 print("Done.")
