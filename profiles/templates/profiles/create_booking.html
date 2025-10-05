@@ -26,19 +26,36 @@
                 <div class="card-body">
                     <p class="text-muted">Fill out the form below to send a booking request to {{ narasumber.get_full_name }}.</p>
                     <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_booking_date" class="form-label">Booking Date and Time</label>
-                            <input type="datetime-local" name="booking_date" class="form-control" required id="id_booking_date">
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_message" class="form-label">Message</label>
-                            <textarea name="message" cols="40" rows="4" class="form-control" id="id_message"></textarea>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Send Booking Request</button>
-                        </div>
-                    </form>
+    {% csrf_token %}
+    <div class="mb-3">
+        {{ booking_form.booking_date.label_tag }}
+        {{ booking_form.booking_date }}
+        {{ booking_form.booking_date.errors }}
+    </div>
+    <div class="mb-3">
+        {{ booking_form.message.label_tag }}
+        {{ booking_form.message }}
+        {{ booking_form.message.errors }}
+    </div>
+
+    {% if user.user_type == "pengguna" %}
+        <hr>
+        <h5>Detail Interview</h5>
+
+        {% for field in pengguna_form %}
+            <div class="mb-3">
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Send Booking Request</button>
+    </div>
+</form>
+
                 </div>
             </div>
         </div>

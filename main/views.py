@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from lowongan.models import Lowongan
+from profiles.forms import PenggunaProfileForm
 from .forms import BaseUserRegistrationForm, NarasumberRegistrationForm, EventRegistrationForm, CombinedRegistrationForm
 from narasumber.models import ExpertiseCategory,NarasumberProfile
 # from lowongan.models import Lowongan
@@ -147,6 +148,11 @@ def get_role_form_fields(request):
         form = EventRegistrationForm()
         form_html = render(request, 'main/partials/event_fields.html', {
             'form': form
+        }).content.decode('utf-8')
+    elif user_type == 'pengguna':
+        form = PenggunaProfileForm()
+        form_html = render(request, 'main/partials/pengguna_form_fields.html', {
+            'pengguna_form': form
         }).content.decode('utf-8')
     else:
         # No role selected or invalid role
