@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'lowongan',
     'event',
     'search',
+    'pengguna',
 ]
 
 MIDDLEWARE = [

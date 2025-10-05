@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
+
+from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User, Booking
 from narasumber.models import Education
 
@@ -325,8 +327,117 @@ class EducationForm(forms.ModelForm):
             'graduation_year': 'Tahun Lulus',
         }
 
+class PenggunaBookingForm(forms.ModelForm):
+    """
+    Form untuk membuat booking khusus pengguna biasa (ekstensi Booking).
+    """
+    class Meta:
+        model = PenggunaBooking
+        fields = [
+            "interview_topic",
+            "description",
+            "platform",
+            "location_detail",
+            "contact_email",
+            "contact_phone",
+            "is_phone_public",
+            "website",
+            "linkedin_url",
+        ]
+        widgets = {
+            "interview_topic": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Topik wawancara atau tujuan booking"
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Deskripsi singkat tentang wawancara"
+            }),
+            "platform": forms.Select(attrs={
+                "class": "form-select"
+            }),
+            "location_detail": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Detail lokasi (jika offline)"
+            }),
+            "contact_email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Email kontak Anda"
+            }),
+            "contact_phone": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Nomor telepon (opsional)"
+            }),
+            "is_phone_public": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+            "website": forms.URLInput(attrs={
+                "class": "form-control",
+                "placeholder": "https://website-anda.com (opsional)"
+            }),
+            "linkedin_url": forms.URLInput(attrs={
+                "class": "form-control",
+                "placeholder": "https://linkedin.com/in/username (opsional)"
+            }),
+        }
+        labels = {
+            "interview_topic": "Topik Wawancara",
+            "description": "Deskripsi",
+            "platform": "Platform",
+            "location_detail": "Detail Lokasi (Offline)",
+            "contact_email": "Email Kontak",
+            "contact_phone": "Nomor Telepon",
+            "is_phone_public": "Tampilkan Nomor Telepon",
+            "website": "Website",
+            "linkedin_url": "LinkedIn",
+        }
+
 
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = ['booking_date', 'message']
+        widgets = {
+            'booking_date': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local',
+                'required': 'required',
+            }),
+            'message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Pesan tambahan (opsional)'
+            }),
+        }
+        labels = {
+            'booking_date': 'Tanggal & Waktu Booking',
+            'message': 'Pesan',
+        }
+        
+class PenggunaProfileForm(forms.ModelForm):
+    class Meta:
+        model = PenggunaProfile
+        fields = ['profile_picture', 'bio', 'email', 'phone_number', 'is_phone_public', 'website', 'linkedin_url']
+        widgets = {
+            'profile_picture': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Ceritakan tentang dirimu (opsional)'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'is_phone_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'website': forms.URLInput(attrs={'class': 'form-control'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'form-control'}),
+        }

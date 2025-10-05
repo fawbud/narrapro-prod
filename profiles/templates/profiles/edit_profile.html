@@ -591,6 +591,26 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    {% elif pengguna_form %}
+                    <hr class="my-4">
+                    <h6 class="text-primary mb-3"><i class="fas fa-user me-2"></i>Informasi Pengguna</h6>
+
+                    <div class="row">
+                        {% for field in pengguna_form %}
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in field.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
                     
                     <div class="d-flex justify-content-between">

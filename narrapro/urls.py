@@ -25,6 +25,7 @@ urlpatterns = [
     path('search/', include('search.urls')),
     path('lowongan/', include('lowongan.urls')),
     path('', include('profiles.urls')),
+    path('', include('pengguna.urls'))
 ]
 
 if settings.DEBUG:

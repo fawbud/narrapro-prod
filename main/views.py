@@ -7,10 +7,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from lowongan.models import Lowongan
+from profiles.forms import PenggunaProfileForm
 from .forms import BaseUserRegistrationForm, NarasumberRegistrationForm, EventRegistrationForm, CombinedRegistrationForm
 from narasumber.models import ExpertiseCategory,NarasumberProfile
 # from lowongan.models import Lowongan
 import json
+
+
+from narrapro.email_service import send_new_user_confirmation
 
 
 def home(request):
@@ -57,6 +61,7 @@ def register_view(request):
         if combined_form.is_valid(user_type) and education_valid:
             try:
                 user, profile = combined_form.save(user_type)
+                send_new_user_confirmation([user.email], user.username)
                 messages.success(
                     request, 
                     f'Pendaftaran berhasil! Akun Anda menungggu persetujuan admin. Anda akan menerima email ketika di-approve.'
@@ -147,6 +152,11 @@ def get_role_form_fields(request):
         form = EventRegistrationForm()
         form_html = render(request, 'main/partials/event_fields.html', {
             'form': form
+        }).content.decode('utf-8')
+    elif user_type == 'pengguna':
+        form = PenggunaProfileForm()
+        form_html = render(request, 'main/partials/pengguna_form_fields.html', {
+            'pengguna_form': form
         }).content.decode('utf-8')
     else:
         # No role selected or invalid role

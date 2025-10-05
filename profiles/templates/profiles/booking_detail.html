@@ -12,99 +12,384 @@ Detail Booking - NarraPro
             <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Booking
         </a>
     </div>
+
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="text-muted">Event Organizer</h6>
-                <div class="d-flex align-items-center mb-3">
-                    {% if booking.event.event_profile.profile_picture %}
-                        <img src="{{ booking.event.event_profile.profile_picture.url }}" alt="{{ booking.event.get_full_name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                    {% else %}
-                        <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                    {% endif %}
-                    <div>
-                        <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
-                        <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+        {% if is_pengguna %}
+            <!-- ==================== DETAIL BOOKING UNTUK PENGGUNA ==================== -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Narasumber</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        {% if booking.narasumber.narasumber_profile.profile_picture %}
+                            <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
+                                 alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                        {% else %}
+                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                            <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <h6 class="text-muted">Narasumber</h6>
-                <div class="d-flex align-items-center mb-3">
-                    {% if booking.narasumber.narasumber_profile.profile_picture %}
-                        <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" alt="{{ booking.narasumber.get_full_name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                    {% else %}
-                        <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                    {% endif %}
-                    <div>
-                        <h5 class="mb-0">{{ booking.narasumber.get_full_name }}</h5>
-                        <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
-                    </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Informasi Tambahan</h6>
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td style="width: 150px;"><strong>Topik Wawancara</strong></td>
+                            <td>{{ pengguna_booking.interview_topic }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Platform</strong></td>
+                            <td>{{ pengguna_booking.get_platform_display }}</td>
+                        </tr>
+                        {% if pengguna_booking.location_detail %}
+                        <tr>
+                            <td><strong>Lokasi</strong></td>
+                            <td>{{ pengguna_booking.location_detail }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td><strong>Kontak</strong></td>
+                            <td>{{ pengguna_booking.contact_email }}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-        </div>
 
-        <hr>
+            <hr>
 
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="text-muted">Informasi Booking</h6>
-                <table class="table table-borderless table-sm">
-                    <tr>
-                        <td style="width: 150px;"><strong>Status</strong></td>
-                        <td>
-                            <span class="badge 
-                                {% if booking.status == 'PENDING' %}bg-warning
-                                {% elif booking.status == 'APPROVED' %}bg-success
-                                {% elif booking.status == 'REJECTED' %}bg-danger
-                                {% elif booking.status == 'CANCELED' %}bg-secondary
-                                {% endif %}">
-                                {{ booking.get_status_display }}
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 150px;"><strong>Tanggal Booking</strong></td>
-                        <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <td style="width: 150px;"><strong>Dibuat pada</strong></td>
-                        <td>{{ booking.created_at|date:"d M Y, H:i" }}</td>
-                    </tr>
-                </table>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Informasi Booking</h6>
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td style="width: 150px;"><strong>Status</strong></td>
+                            <td>
+                                <span class="badge 
+                                    {% if booking.status == 'PENDING' %}bg-warning
+                                    {% elif booking.status == 'APPROVED' %}bg-success
+                                    {% elif booking.status == 'REJECTED' %}bg-danger
+                                    {% elif booking.status == 'CANCELED' %}bg-secondary
+                                    {% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tanggal Booking</strong></td>
+                            <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dibuat pada</strong></td>
+                            <td>{{ booking.created_at|date:"d M Y, H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Pesan</h6>
+                    {% if booking.message %}
+                        <p>{{ booking.message|linebreaksbr }}</p>
+                    {% else %}
+                        <p class="text-muted"><i>Tidak ada pesan.</i></p>
+                    {% endif %}
+                </div>
             </div>
-            <div class="col-md-6">
-                <h6 class="text-muted">Pesan</h6>
-                {% if booking.message %}
-                    <p>{{ booking.message|linebreaksbr }}</p>
-                {% else %}
-                    <p class="text-muted"><i>Tidak ada pesan.</i></p>
-                {% endif %}
-            </div>
-        </div>
 
-        {% if request.user == booking.event or request.user == booking.narasumber %}
-        <hr>
-        <div class="d-flex justify-content-end">
-            {% if request.user.user_type == 'event' %}
+            <hr>
+            <div class="d-flex justify-content-end">
                 {% if booking.status == 'PENDING' or booking.status == 'APPROVED' %}
-                <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post" class="me-2">
+                <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Batalkan Booking</button>
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('Yakin ingin membatalkan booking ini?');">
+                        Batalkan Booking
+                    </button>
                 </form>
                 {% endif %}
+            </div>
+        {% elif is_event %} 
+            <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Event Organizer</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        {% if booking.event and booking.event.event_profile.profile_picture %}
+                            <img src="{{ booking.event.event_profile.profile_picture.url }}" 
+                                 alt="{{ booking.event.get_full_name }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                        {% else %}
+                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
+                            <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Narasumber</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        {% if booking.narasumber.narasumber_profile.profile_picture %}
+                            <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
+                                 alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                        {% else %}
+                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                            <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Informasi Booking</h6>
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td style="width: 150px;"><strong>Status</strong></td>
+                            <td>
+                                <span class="badge 
+                                    {% if booking.status == 'PENDING' %}bg-warning
+                                    {% elif booking.status == 'APPROVED' %}bg-success
+                                    {% elif booking.status == 'REJECTED' %}bg-danger
+                                    {% elif booking.status == 'CANCELED' %}bg-secondary
+                                    {% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tanggal Booking</strong></td>
+                            <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dibuat pada</strong></td>
+                            <td>{{ booking.created_at|date:"d M Y, H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Pesan</h6>
+                    {% if booking.message %}
+                        <p>{{ booking.message|linebreaksbr }}</p>
+                    {% else %}
+                        <p class="text-muted"><i>Tidak ada pesan.</i></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if request.user == booking.event or request.user == booking.narasumber %}
+            <hr>
+            <div class="d-flex justify-content-end">
+                {% if request.user.user_type == 'event' %}
+                    {% if booking.status == 'PENDING' or booking.status == 'APPROVED' %}
+                    <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Batalkan Booking</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            </div>
             {% endif %}
-            {% if request.user.user_type == 'narasumber' and booking.status == 'PENDING' %}
-            <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Tolak</button>
-            </form>
-            <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='accept' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Terima</button>
-            </form>
+        {% elif is_narasumber %}
+            {% if is_pengguna_booking %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Pengguna</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                 <!-- nanti ganti profile picture url nya -->
+                                <img src="{{ pengguna_booking.pengguna.get_profile_picture.url }}"  
+                                    alt="{{ pengguna_booking.pengguna.get_full_name }}" 
+                                    class="rounded-circle me-3" 
+                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ pengguna_booking.pengguna.get_full_name }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Informasi Tambahan</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td style="width: 150px;"><strong>Topik Wawancara</strong></td>
+                                <td>{{ pengguna_booking.interview_topic }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Platform</strong></td>
+                                <td>{{ pengguna_booking.get_platform_display }}</td>
+                            </tr>
+                            {% if pengguna_booking.location_detail %}
+                            <tr>
+                                <td><strong>Lokasi</strong></td>
+                                <td>{{ pengguna_booking.location_detail }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td><strong>Kontak</strong></td>
+                                <td>{{ pengguna_booking.contact_email }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Informasi Booking</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td style="width: 150px;"><strong>Status</strong></td>
+                                <td>
+                                    <span class="badge 
+                                        {% if booking.status == 'PENDING' %}bg-warning
+                                        {% elif booking.status == 'APPROVED' %}bg-success
+                                        {% elif booking.status == 'REJECTED' %}bg-danger
+                                        {% elif booking.status == 'CANCELED' %}bg-secondary
+                                        {% endif %}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal Booking</strong></td>
+                                <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dibuat pada</strong></td>
+                                <td>{{ booking.created_at|date:"d M Y, H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Pesan</h6>
+                        {% if booking.message %}
+                            <p>{{ booking.message|linebreaksbr }}</p>
+                        {% else %}
+                            <p class="text-muted"><i>Tidak ada pesan.</i></p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr>
+                {% if booking.status != 'Disetujui' %}
+                <div class="d-flex justify-content-end">
+                    <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Tolak</button>
+                    </form>
+                    <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='accept' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Terima</button>
+                    </form>
+                </div>
+                {% endif %}
+            {% else %}
+                <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Event Organizer</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.event and booking.event.event_profile.profile_picture %}
+                                <img src="{{ booking.event.event_profile.profile_picture.url }}" 
+                                    alt="{{ booking.event.get_full_name }}" 
+                                    class="rounded-circle me-3" 
+                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
+                                <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Narasumber</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
+                                    alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
+                                    class="rounded-circle me-3" 
+                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                                <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Informasi Booking</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td style="width: 150px;"><strong>Status</strong></td>
+                                <td>
+                                    <span class="badge 
+                                        {% if booking.status == 'PENDING' %}bg-warning
+                                        {% elif booking.status == 'APPROVED' %}bg-success
+                                        {% elif booking.status == 'REJECTED' %}bg-danger
+                                        {% elif booking.status == 'CANCELED' %}bg-secondary
+                                        {% endif %}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal Booking</strong></td>
+                                <td>{{ booking.booking_date|date:"d M Y, H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dibuat pada</strong></td>
+                                <td>{{ booking.created_at|date:"d M Y, H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Pesan</h6>
+                        {% if booking.message %}
+                            <p>{{ booking.message|linebreaksbr }}</p>
+                        {% else %}
+                            <p class="text-muted"><i>Tidak ada pesan.</i></p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr>
+                {% if booking.status != 'APPROVED' %}
+                <div class="d-flex justify-content-end">
+                    <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Tolak</button>
+                    </form>
+                    <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='accept' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Terima</button>
+                    </form>
+                </div>
+                {% endif %}
             {% endif %}
-        </div>
         {% endif %}
     </div>
 </div>

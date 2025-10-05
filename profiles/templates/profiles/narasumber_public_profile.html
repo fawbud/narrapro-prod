@@ -49,12 +49,14 @@
                                 </div>
 
                                 <!-- Book Narasumber Button -->
-                                {% if user.is_authenticated and user.user_type == 'event' and profile_user.user_type == 'narasumber' %}
-                                <div class="col-12 mb-3">
-                                    <a href="{% url 'profiles:create_booking' username=user.username narasumber_id=profile_user.id %}" class="btn btn-primary">
-                                        <i class="fas fa-calendar-check me-2"></i>Book Narasumber
-                                    </a>
-                                </div>
+                                {% if user.is_authenticated and profile_user.user_type == 'narasumber' %}
+                                    {% if user.user_type == 'event' or user.user_type == 'pengguna' %}
+                                    <div class="col-12 mb-3">
+                                        <a href="{% url 'profiles:create_booking' username=user.username narasumber_id=profile_user.id %}" class="btn btn-primary">
+                                            <i class="fas fa-calendar-check me-2"></i>Book Narasumber
+                                        </a>
+                                    </div>
+                                    {% endif %}
                                 {% endif %}
                                 
                                 <!-- Contact Details -->

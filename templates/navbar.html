@@ -6,7 +6,9 @@
         border-bottom: 1px solid #e0e0e0;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
     }
+
     .navbar-custom .nav-link {
         color: #2c3e50;
         font-weight: 500;
@@ -32,88 +34,46 @@
         transform: scale(1.02);
     }
 
-    /* Hover show dropdown (desktop) */
-    @media (min-width: 992px) {
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown:hover .dropdown-menu {
-            display: block !important;
-            margin-top: -2px !important;
-            right: 0;
-        }
-        .user-dropdown .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            padding-top: 4px;
-        }
-        .user-dropdown .dropdown-menu::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: transparent;
-        }
-    }
-    .user-dropdown .dropdown-menu {
-        margin-top: 0;
-        border-radius: 0.5rem;
-    }
-
-    .btn-create {
-        background: linear-gradient(135deg, #0e1e7a, #1a2b8a);
-        color: #fff !important;
-        border-radius: 25px;
-        padding: 8px 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        border: none;
-        box-shadow: 0 2px 10px rgba(14, 30, 122, 0.2);
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-    .btn-create:hover {
-        background: linear-gradient(135deg, #fff, #f8f9fa);
-        color: #0e1e7a !important;
-        border: 2px solid #0e1e7a;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(14, 30, 122, 0.3);
-    }
-
-    /* Hide brand text on mobile */
-    @media (max-width: 991.98px) {
-        .navbar-brand span {
-            display: none;
-        }
-    }
-
-    /* Search field rapat ke logo - Desktop only */
-    .navbar .navbar-brand {
-        margin-right: 10px !important;
-    }
+    /* Search field */
     .navbar form {
+        flex-grow: 1;
+        max-width: 500px;
         margin-left: 0 !important;
+    }
+
+    /* Mobile: make search full width (besides menu) */
+    @media (max-width: 991.98px) {
+        .navbar .navbar-brand {
+            margin-right: 6px !important;
+        }
+        .navbar form {
+            flex: 1 1 auto;
+            max-width: none !important;
+        }
+    }
+
+    /* Popup preview */
+    #searchPopup {
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1060;
     }
 </style>
 {% endblock %}
 
-<nav class="navbar navbar-expand-lg navbar-light navbar-custom position-relative" style="z-index:1060; box-shadow: 0 2px 20px rgba(0,0,0,0.08); transition: all 0.3s ease;">
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom position-relative" style="z-index:1060;">
     <div class="container d-flex align-items-center">
 
-        <!-- Brand + Search (Desktop Only) -->
+        <!-- Brand + Search -->
         <div class="d-flex align-items-center flex-grow-1">
             <!-- Brand -->
             <a class="navbar-brand fw-bold d-flex align-items-center me-3" href="{% url 'main:home' %}">
                 {% load static %}
-                <img src="{% static 'images/narrapro-logo.png' %}" alt="NarraPro Logo" style="height:32px; margin-right:10px;">
+                <img src="{% static 'images/narrapro-logo.png' %}" alt="Logo" style="height:32px; margin-right:8px;">
             </a>
 
-            <!-- Search Field - Desktop Only -->
-            <form class="flex-grow-1 position-relative d-none d-lg-block" style="max-width:500px;">
+            <!-- Search Field (Desktop + Mobile) -->
+            <form class="flex-grow-1 position-relative">
                 <div class="input-group rounded-pill overflow-hidden bg-white border" style="border-color:#e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                     <span class="input-group-text bg-white border-0">
                         <i class="bi bi-search text-muted"></i>
@@ -129,103 +89,48 @@
                         style="font-size: 0.95rem; padding: 0.75rem 0.5rem;"
                     />
                 </div>
-            </form>
-        </div>
 
-        <!-- Navigation Links -->
-        <div class="navbar-nav d-none d-lg-flex ms-3">
-            {% if user.is_authenticated %}
-                {% if user.user_type == 'event' %}
-                    <a class="nav-link" href="{% url 'lowongan:my_lowongan' %}">Lowongan Saya</a>
-                {% elif user.user_type == 'narasumber' %}
-                    <a class="nav-link" href="{% url 'profiles:profile_lamaran' user.username %}">Lamaran Saya</a>
-                {% endif %}
-            {% endif %}
+                <!-- Popup Preview -->
+                <div id="searchPopup"
+                    class="position-absolute start-0 mt-2 w-100 bg-white rounded-3 shadow-lg d-none"
+                    style="">
+                    
+                </div>
+            </form>
         </div>
 
         <!-- Right Side -->
         <div class="d-flex align-items-center ms-3">
             {% if user.is_authenticated %}
+                <!-- Event: Buat Lowongan -->
                 {% if user.user_type == "event" %}
                 <a href="{% url 'lowongan:create' %}" class="btn btn-create d-none d-lg-inline me-3">+ Buat Lowongan</a>
                 {% endif %}
 
                 <!-- Dropdown User -->
                 <div class="nav-item dropdown user-dropdown">
-                    <!-- Desktop: tampil nama -->
-                    <a class="nav-link fw-semibold d-none d-lg-block d-flex align-items-center" href="#" id="userDropdown" data-bs-toggle="dropdown">
+                    <a class="nav-link fw-semibold d-none d-lg-block d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                         Hai, {{ user.first_name|default:user.username }}!
                         <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
                     </a>
-                    <!-- Mobile: tampil menu icon -->
-                    <a class="nav-link d-lg-none" href="#" id="mobileMenu" data-bs-toggle="dropdown">
+                    <a class="nav-link d-lg-none" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-list fs-3"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userDropdown" style="border-radius: 12px; margin-top: 8px;">
-                        <!-- Mobile Search Bar -->
-                        <li class="d-lg-none px-3 py-2">
-                            <form class="position-relative">
-                                <div class="input-group rounded-pill overflow-hidden bg-light border" style="border-color:#e0e0e0;">
-                                    <span class="input-group-text bg-light border-0">
-                                        <i class="bi bi-search text-muted"></i>
-                                    </span>
-                                    <input
-                                        id="mobileGlobalSearch"
-                                        type="text"
-                                        class="form-control border-0 shadow-none bg-light"
-                                        placeholder="Cari lowongan, event, narasumber"
-                                        aria-label="Search"
-                                        value="{{ request.GET.q|default:'' }}"
-                                        autocomplete="off"
-                                        style="font-size: 0.9rem; padding: 0.5rem;"
-                                    />
-                                </div>
-                            </form>
-                        </li>
-                        <li class="d-lg-none"><hr class="dropdown-divider"></li>
-
-                        <!-- Mobile Navigation Links -->
-                        {% if user.is_authenticated %}
-                            {% if user.user_type == 'event' %}
-                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_lowongan' %}"><i class="bi bi-folder me-2"></i>Lowongan Saya</a></li>
-                            {% elif user.user_type == 'narasumber' %}
-                                <li class="d-lg-none"><a class="dropdown-item" href="{% url 'profiles:profile_lamaran' user.username %}"><i class="bi bi-file-text me-2"></i>Lamaran Saya</a></li>
-                            {% endif %}
-                            {% if user.user_type == 'event' or user.user_type == 'narasumber' %}
-                                <li class="d-lg-none"><hr class="dropdown-divider"></li>
-                            {% endif %}
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        {% if user.user_type == 'event' %}
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'lowongan:my_lowongan' %}"><i class="bi bi-folder me-2"></i>Lowongan Saya</a></li>
+                        {% elif user.user_type == 'narasumber' %}
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'profiles:profile_lamaran' user.username %}"><i class="bi bi-file-text me-2"></i>Lamaran Saya</a></li>
                         {% endif %}
-                        <!-- Profile & Logout -->
-                        <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.username %}"><i class="bi bi-person me-2"></i> Profil Saya</a></li>
+                        <li class="d-lg-none"><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.username %}"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
                         <li><a class="dropdown-item" href="{% url 'main:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </div>
             {% else %}
-                <!-- Guest -->
                 <div class="dropdown">
                     <a class="nav-link d-lg-none" href="#" data-bs-toggle="dropdown"><i class="bi bi-list fs-3"></i></a>
                     <div class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <!-- Mobile Search Bar for Guests -->
-                        <div class="d-lg-none px-3 py-2">
-                            <form class="position-relative">
-                                <div class="input-group rounded-pill overflow-hidden bg-light border" style="border-color:#e0e0e0;">
-                                    <span class="input-group-text bg-light border-0">
-                                        <i class="bi bi-search text-muted"></i>
-                                    </span>
-                                    <input
-                                        id="mobileGuestSearch"
-                                        type="text"
-                                        class="form-control border-0 shadow-none bg-light"
-                                        placeholder="Cari lowongan, event, narasumber"
-                                        aria-label="Search"
-                                        value="{{ request.GET.q|default:'' }}"
-                                        autocomplete="off"
-                                        style="font-size: 0.9rem; padding: 0.5rem;"
-                                    />
-                                </div>
-                            </form>
-                        </div>
-                        <div class="d-lg-none"><hr class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{% url 'main:login' %}">Login</a>
                         <a class="dropdown-item" href="{% url 'main:register' %}">Register</a>
                     </div>
@@ -239,41 +144,95 @@
     </div>
 </nav>
 
+<!-- Dark Overlay -->
+<div id="overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index:1050;"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("globalSearch");
-    const mobileSearchInput = document.getElementById("mobileGlobalSearch");
-    const mobileGuestSearchInput = document.getElementById("mobileGuestSearch");
+    const popup = document.getElementById("searchPopup");
+    const overlay = document.getElementById("overlay");
+    let typingTimer;
 
-    function handleSearch(input) {
-        input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                const query = input.value.trim();
-                if (query.length > 0) {
-                    const params = new URLSearchParams(window.location.search);
-                    params.set("q", query);
-                    params.delete("page");
-                    window.location.href = `/search/result/?${params.toString()}`;
-                }
+    const loadingTemplate = `
+        <div class="d-flex justify-content-center align-items-center p-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+
+    // Show popup on focus
+    searchInput.addEventListener("focus", () => {
+        popup.classList.remove("d-none");
+        overlay.classList.remove("d-none");
+        popup.innerHTML = emptyTemplate;
+    });
+
+    // Debounced search
+    searchInput.addEventListener("input", () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            const query = searchInput.value.trim();
+            if (!query) {
+                popup.innerHTML = emptyTemplate;
+                return;
             }
-        });
-    }
 
-    // Handle desktop search
-    if (searchInput) {
-        handleSearch(searchInput);
-    }
+            popup.innerHTML = loadingTemplate;
 
-    // Handle mobile search for authenticated users
-    if (mobileSearchInput) {
-        handleSearch(mobileSearchInput);
-    }
+            fetch(`/search/preview/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        let html = `<ul class="list-group list-group-flush">`;
+                        data.results.forEach(item => {
+                            html += `
+                                <li class="list-group-item">
+                                    <strong>[${item.type}]</strong> ${item.title}<br/>
+                                    <small class="text-muted">${item.subtitle || ""}</small>
+                                </li>
+                            `;
+                        });
+                        html += `</ul>`;
+                        popup.innerHTML = html;
+                    } else {
+                        popup.innerHTML = `<div class="p-3 text-muted">Tidak ada hasil ditemukan</div>`;
+                    }
+                })
+                .catch(() => {
+                    popup.innerHTML = `<div class="p-3 text-danger">Terjadi kesalahan</div>`;
+                });
+        }, 600);
+    });
 
-    // Handle mobile search for guest users
-    if (mobileGuestSearchInput) {
-        handleSearch(mobileGuestSearchInput);
-    }
+    // Search on Enter
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            const params = new URLSearchParams(window.location.search);
+            if (query) {
+                params.set("q", query);
+            } else {
+                params.delete("q");  // or keep it empty if your view handles it
+            }
+            params.delete("page");
+            window.location.href = `/search/result/?${params.toString()}`;
+        }
+    });
+
+    // Close popup when clicking overlay or ESC
+    overlay.addEventListener("click", () => {
+        popup.classList.add("d-none");
+        overlay.classList.add("d-none");
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            popup.classList.add("d-none");
+            overlay.classList.add("d-none");
+            searchInput.blur();
+        }
+    });
 });
 </script>
