@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
 
+from narrapro.email_service import send_speaker_booking_notification, send_booking_status_update
 from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User
 from .forms import PenggunaBookingForm, PenggunaProfileForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
@@ -544,6 +545,14 @@ def create_booking(request, username, narasumber_id):
             booking.event = request.user
             booking.narasumber = narasumber
             booking.save()
+            send_speaker_booking_notification(
+                recipient_list=[narasumber.email],
+                event_name=booking.event.event_profile.name,
+                event_date=booking.booking_date.strftime("%d %B %Y"),
+                event_time=booking.booking_date.strftime("%H:%M"),
+                booker_name=booking.event.get_full_name(),
+                username=narasumber.get_full_name()
+            )
             messages.success(request, f"Booking request sent to {narasumber.get_full_name()}.")
             return redirect("profiles:profile_booking", username=request.user.username)
 
@@ -568,6 +577,14 @@ def create_booking(request, username, narasumber_id):
             pengguna_booking.booking = booking
             pengguna_booking.pengguna = request.user
             pengguna_booking.save()
+            send_speaker_booking_notification(
+                recipient_list=[narasumber.email],
+                event_name=pengguna_booking.interview_topic,
+                event_date=booking.booking_date.strftime("%d %B %Y"),
+                event_time=booking.booking_date.strftime("%H:%M"),
+                booker_name=pengguna_booking.pengguna.get_full_name(),
+                username=narasumber.get_full_name()
+            )
 
             messages.success(request, f"Booking request sent to {narasumber.get_full_name()}.")
             return redirect("profiles:profile_booking", username=request.user.username)
@@ -637,9 +654,14 @@ def update_booking_status(request, username, booking_id, action):
         elif action == 'decline':
             booking.status = 'REJECTED'
             messages.success(request, "The booking has been declined.")
-        booking.save()
-        return redirect('profiles:profile_booking', username=request.user.username)
-
+            booking.save()
+        
+            # Send email notification to the booker
+            booker_email = booking.event.email if booking.event else booking.pengguna_extension.pengguna.email
+            event_name = booking.event.event_profile.name if booking.event else booking.pengguna_extension.interview_topic
+            send_booking_status_update([booker_email], booking.get_status_display(), event_name)
+        
+            return redirect('profiles:profile_booking', username=request.user.username)
     return redirect('profiles:profile_booking', username=request.user.username)
 
 @login_required

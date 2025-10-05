@@ -14,6 +14,9 @@ from narasumber.models import ExpertiseCategory,NarasumberProfile
 import json
 
 
+from narrapro.email_service import send_new_user_confirmation
+
+
 def home(request):
     # Ambil data expertise categories
     expertise_categories = ExpertiseCategory.objects.all()
@@ -58,6 +61,7 @@ def register_view(request):
         if combined_form.is_valid(user_type) and education_valid:
             try:
                 user, profile = combined_form.save(user_type)
+                send_new_user_confirmation([user.email], user.username)
                 messages.success(
                     request, 
                     f'Pendaftaran berhasil! Akun Anda menungggu persetujuan admin. Anda akan menerima email ketika di-approve.'

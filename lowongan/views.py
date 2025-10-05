@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from narrapro.email_service import send_new_application_notification, send_application_status_update
 from .models import Lowongan, LowonganApplication
 from .forms import (
     LowonganForm, LowonganStatusForm, LowonganApplicationForm,
@@ -126,7 +127,12 @@ def lowongan_apply(request, lowongan_id):
             lowongan=lowongan
         )
         if form.is_valid():
-            form.save()
+            application = form.save()
+            send_new_application_notification(
+                [lowongan.created_by.email],
+                applicant_name=application.applicant.get_full_name(),
+                event_name=lowongan.title
+            )
             messages.success(request, 'Lamaran Anda telah di-submit!')
             return redirect('lowongan:detail', lowongan_id=lowongan_id)
     else:
@@ -342,7 +348,13 @@ def application_update_status(request, application_id):
 
     form = LowonganApplicationStatusForm(request.POST, instance=application)
     if form.is_valid():
-        form.save()
+        application = form.save()
+        send_application_status_update(
+            recipient_list=[application.applicant.email],
+            status=application.get_status_display(),
+            event_name=application.lowongan.title,
+            username=application.applicant.get_full_name()
+        )
         return JsonResponse({
             'success': True,
             'message': f'Application status updated to {application.get_status_display()}',
