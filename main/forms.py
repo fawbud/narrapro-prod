@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.forms import inlineformset_factory
 from narasumber.models import ExpertiseCategory, NarasumberProfile, Education
 from event.models import EventProfile
+from profiles.forms import PenggunaProfileForm
 
 User = get_user_model()
 
@@ -230,6 +231,7 @@ class CombinedRegistrationForm:
         self.base_form = BaseUserRegistrationForm(data=data)
         self.narasumber_form = NarasumberRegistrationForm(data=data, files=files) if data else None
         self.event_form = EventRegistrationForm(data=data, files=files) if data else None
+        self.pengguna_form = PenggunaProfileForm(data=data, files=files) if data else None
     
     def is_valid(self, user_type):
         """
@@ -242,7 +244,7 @@ class CombinedRegistrationForm:
         elif user_type == 'event':
             role_valid = self.event_form.is_valid() if self.event_form else False
         elif user_type == 'pengguna':
-            role_valid = True
+            role_valid = self.pengguna_form.is_valid() if self.pengguna_form else False
         else:
             role_valid = False
         
@@ -281,8 +283,13 @@ class CombinedRegistrationForm:
             profile.user = user
             profile.save()
             return user, profile
-        elif user_type == 'pengguna':
-            profile = None
+        elif user_type == 'pengguna' and self.pengguna_form:
+            profile = self.pengguna_form.save(commit=False)
+            profile.user = user
+            # optionally set default full_name from user fields
+            profile.full_name = f"{user.first_name} {user.last_name}".strip()
+            profile.save()
+            return user, profile
         
         return user, None
     
@@ -341,6 +348,8 @@ class CombinedRegistrationForm:
             errors.update(self.narasumber_form.errors)
         elif user_type == 'event' and self.event_form:
             errors.update(self.event_form.errors)
+        elif user_type == 'pengguna' and self.pengguna_form:
+            errors.update(self.pengguna_form.errors)
         
         return errors
 

@@ -140,13 +140,6 @@
 			const selectedType = this.value;
 
 			if (selectedType) {
-
-				if (selectedType === 'pengguna') {
-					// Hilangkan placeholder, langsung enable submit
-					roleSpecificFields.innerHTML = "";
-					submitBtn.disabled = false;
-					return;
-				}
 				
 				// Show loading
 				roleSpecificFields.innerHTML = `

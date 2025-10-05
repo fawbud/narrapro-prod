@@ -5,7 +5,28 @@ import uuid
 import os
 from django.core.validators import URLValidator
 
+
+def get_storage():
+    """Get the appropriate storage backend based on environment"""
+    if os.getenv("PRODUCTION") == "true":
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"NARASUMBER MODEL DEBUG: Using SimpleSupabaseStorage for production")
+        return SimpleSupabaseStorage()
+    else:
+        from django.core.files.storage import default_storage
+        print(f"NARASUMBER MODEL DEBUG: Using default storage for development")
+        return default_storage
+    
 User = get_user_model()
+
+def pengguna_profile_picture_upload_path(instance, filename):
+    """
+    Generate a unique upload path for pengguna profile pictures.
+    Format: pengguna_profiles/user_id/uuid_filename
+    """
+    ext = filename.split('.')[-1].lower()
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    return f"pengguna_profiles/{instance.user.id}/{unique_filename}"
 
 def pengguna_avatar_upload_path(instance, filename):
     """
@@ -34,6 +55,15 @@ class PenggunaProfile(models.Model):
     full_name = models.CharField(max_length=200, help_text="Nama lengkap pengguna")
     bio = models.TextField(blank=True, null=True, help_text="Tentang pengguna (opsional)")
     email = models.EmailField(help_text="Alamat email pengguna")
+
+    # 🆕 Add profile picture here
+    profile_picture = models.ImageField(
+        upload_to=pengguna_profile_picture_upload_path,
+        blank=True,
+        null=True,
+        help_text="Foto profil pengguna (opsional)",
+        storage=get_storage()
+    )
 
     phone_number = models.CharField(
         max_length=20,

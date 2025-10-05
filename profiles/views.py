@@ -5,9 +5,9 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
 
-from pengguna.models import PenggunaBooking
+from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User
-from .forms import PenggunaBookingForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
+from .forms import PenggunaBookingForm, PenggunaProfileForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
 from narasumber.models import ExpertiseCategory, Education
 from django.forms import inlineformset_factory
 from profiles.models import Booking
@@ -92,6 +92,7 @@ def edit_profile(request, username):
     # Get or create user-specific profile
     narasumber_profile = None
     event_profile = None
+    pengguna_profile = None
     
     if user.user_type == 'narasumber':
         from narasumber.models import NarasumberProfile
@@ -99,6 +100,8 @@ def edit_profile(request, username):
     elif user.user_type == 'event':
         from event.models import EventProfile
         event_profile, created = EventProfile.objects.get_or_create(user=user)
+    elif user.user_type == 'pengguna':
+        pengguna_profile, _ = PenggunaProfile.objects.get_or_create(user=user)
     
     if request.method == 'POST':
         print(f"=== DEBUG: Form submission for {user.username} ===")
@@ -109,9 +112,16 @@ def edit_profile(request, username):
         narasumber_form = None
         event_form = None
         education_formset = None
+        pengguna_form = None
         
         # Create user-type specific forms
-        if user.user_type == 'narasumber' and narasumber_profile:
+        if user.user_type == 'pengguna' and pengguna_profile:
+            pengguna_form = PenggunaProfileForm(
+                request.POST,
+                request.FILES,
+                instance=pengguna_profile
+            )
+        elif user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(
                 request.POST, 
                 request.FILES, 
@@ -141,6 +151,13 @@ def edit_profile(request, username):
         print(f"DEBUG: User form valid: {forms_valid}")
         if not forms_valid:
             print(f"DEBUG: User form errors: {user_form.errors}")
+        
+        if pengguna_form:
+            pengguna_valid = pengguna_form.is_valid()
+            forms_valid = forms_valid and pengguna_valid
+            print(f"DEBUG: Pengguna form valid: {pengguna_valid}")
+            if not pengguna_valid:
+                print(f"DEBUG: Pengguna form errors: {pengguna_form.errors}")
             
         if narasumber_form:
             narasumber_valid = narasumber_form.is_valid()
@@ -182,6 +199,8 @@ def edit_profile(request, username):
                 print(f"DEBUG: Event profile saved, image: {saved_event.cover_image.name if saved_event.cover_image else 'None'}")
             if education_formset:
                 education_formset.save()
+            if pengguna_form:
+                pengguna_form.save()
             messages.success(request, 'Profil Anda berhasil diperbarui!')
             return redirect('profiles:profile_detail', username=user.username)
         else:
@@ -194,6 +213,9 @@ def edit_profile(request, username):
                 all_errors.extend([f"Narasumber: {error}" for field, errors in narasumber_form.errors.items() for error in errors])
             if event_form and event_form.errors:
                 all_errors.extend([f"Event: {error}" for field, errors in event_form.errors.items() for error in errors])
+            if pengguna_form and pengguna_form.errors:
+                all_errors.extend([f"Pengguna: {error}" for field, errors in pengguna_form.errors.items() for error in errors])
+
             
             for error in all_errors[:5]:  # Show first 5 errors
                 messages.error(request, error)
@@ -202,6 +224,7 @@ def edit_profile(request, username):
         narasumber_form = None
         event_form = None
         education_formset = None
+        pengguna_form = None
         
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(instance=narasumber_profile)
@@ -216,6 +239,8 @@ def edit_profile(request, username):
             education_formset = EducationFormSet(instance=narasumber_profile)
         elif user.user_type == 'event' and event_profile:
             event_form = EventProfileForm(instance=event_profile)
+        elif user.user_type == 'pengguna' and pengguna_profile:
+            pengguna_form = PenggunaProfileForm(instance=pengguna_profile)
     
     context = {
         'user_form': user_form,
@@ -225,6 +250,7 @@ def edit_profile(request, username):
         'profile_user': user,
         'narasumber_profile': narasumber_profile,
         'event_profile': event_profile,
+        'pengguna_form': pengguna_form,  
     }
     
     return render(request, 'profiles/edit_profile.html', context)
@@ -618,16 +644,13 @@ def update_booking_status(request, username, booking_id, action):
 
 @login_required
 def booking_detail(request, username, booking_id):
-    """
-    Booking detail view - support event, narasumber, dan pengguna.
-    """
     profile_user = get_object_or_404(User, username=username)
     is_own_profile = request.user.username == profile_user.username
 
     if not is_own_profile:
         raise Http404("You can only view your own bookings.")
 
-    # kalau pengguna → ambil dari PenggunaBooking
+    # =============== PENGGUNA ===============
     if profile_user.user_type == "pengguna":
         pengguna_booking = get_object_or_404(
             PenggunaBooking.objects.select_related("booking", "booking__narasumber"),
@@ -638,25 +661,67 @@ def booking_detail(request, username, booking_id):
             "profile_user": profile_user,
             "is_own_profile": is_own_profile,
             "booking": booking,
-            "pengguna_booking": pengguna_booking,  # extra
+            "pengguna_booking": pengguna_booking,
             "is_pengguna": True,
+            "is_event": False,
+            "is_narasumber": False,
+            "is_pengguna_booking": False,
             "active_section": "booking",
         }
-    else:
-        booking = get_object_or_404(Booking, id=booking_id)
-        # Authorization check
-        if request.user != booking.event and request.user != booking.narasumber:
-            raise Http404("You are not authorized to view this booking.")
 
+    # =============== EVENT ===============
+    elif profile_user.user_type == "event":
+        booking = get_object_or_404(Booking, id=booking_id)
+        if request.user != booking.event:
+            raise Http404("You are not authorized to view this booking.")
         context = {
             "profile_user": profile_user,
             "is_own_profile": is_own_profile,
             "booking": booking,
             "is_pengguna": False,
+            "is_event": True,
+            "is_narasumber": False,
+            "is_pengguna_booking": False,
             "active_section": "booking",
         }
 
+    # =============== NARASUMBER ===============
+    elif profile_user.user_type == "narasumber":
+        pengguna_booking = PenggunaBooking.objects.filter(
+            booking__id=booking_id, booking__narasumber=profile_user
+        ).select_related("booking", "booking__narasumber").first()
+
+        if pengguna_booking:
+            booking = pengguna_booking.booking
+            context = {
+                "profile_user": profile_user,
+                "is_own_profile": is_own_profile,
+                "booking": booking,
+                "pengguna_booking": pengguna_booking,
+                "is_pengguna": False,
+                "is_event": False,
+                "is_narasumber": True,
+                "is_pengguna_booking": True,
+                "active_section": "booking",
+            }
+        else:
+            booking = get_object_or_404(Booking, id=booking_id, narasumber=profile_user)
+            context = {
+                "profile_user": profile_user,
+                "is_own_profile": is_own_profile,
+                "booking": booking,
+                "is_pengguna": False,
+                "is_event": False,
+                "is_narasumber": True,
+                "is_pengguna_booking": False,
+                "active_section": "booking",
+            }
+
+    else:
+        raise Http404("Invalid user type.")
+
     return render(request, "profiles/booking_detail.html", context)
+
 
 
 

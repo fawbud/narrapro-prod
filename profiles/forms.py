@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 
-from pengguna.models import PenggunaBooking
+from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User, Booking
 from narasumber.models import Education
 
@@ -415,3 +415,29 @@ class BookingForm(forms.ModelForm):
             'message': 'Pesan',
         }
         
+class PenggunaProfileForm(forms.ModelForm):
+    class Meta:
+        model = PenggunaProfile
+        fields = ['profile_picture', 'bio', 'email', 'phone_number', 'is_phone_public', 'website', 'linkedin_url']
+        widgets = {
+            'profile_picture': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Ceritakan tentang dirimu (opsional)'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'is_phone_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'website': forms.URLInput(attrs={'class': 'form-control'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'form-control'}),
+        }
