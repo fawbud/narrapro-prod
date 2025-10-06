@@ -43,7 +43,8 @@ def profile_detail(request, username):
     # Get user-specific profile data
     narasumber_profile = None
     event_profile = None
-    
+    pengguna_profile = None
+
     if profile_user.user_type == 'narasumber':
         try:
             narasumber_profile = profile_user.narasumber_profile
@@ -54,27 +55,37 @@ def profile_detail(request, username):
             event_profile = profile_user.event_profile
         except:
             event_profile = None
-    
+    elif profile_user.user_type == 'pengguna':
+        try:
+            pengguna_profile = profile_user.pengguna_profile
+        except:
+            pengguna_profile = None
+
     context = {
         'profile_user': profile_user,
         'is_own_profile': is_own_profile,
         'active_section': 'profile',
         'narasumber_profile': narasumber_profile,
         'event_profile': event_profile,
+        'pengguna_profile': pengguna_profile,
     }
     
     # Use custom template for public narasumber profiles
     if not is_own_profile and profile_user.user_type == 'narasumber' and narasumber_profile:
         return render(request, 'profiles/narasumber_public_profile.html', context)
-    
+
     # Use custom template for public event profiles
     if not is_own_profile and profile_user.user_type == 'event' and event_profile:
         return render(request, 'profiles/event_public_profile.html', context)
-    
+
+    # Use custom template for public pengguna profiles
+    if not is_own_profile and profile_user.user_type == 'pengguna' and pengguna_profile:
+        return render(request, 'profiles/pengguna_public_profile.html', context)
+
     # For own profile or other user types, require login
     if not request.user.is_authenticated:
         return redirect('login')
-    
+
     return render(request, 'profiles/profile_detail.html', context)
 
 
@@ -190,7 +201,7 @@ def edit_profile(request, username):
             print(f"DEBUG: Storage backend in use: {default_storage.__class__.__name__}")
             print(f"DEBUG: Storage module: {default_storage.__class__.__module__}")
 
-            user_form.save()
+            saved_user = user_form.save()
             if narasumber_form:
                 saved_narasumber = narasumber_form.save()
                 print(f"DEBUG: Narasumber profile saved, image: {saved_narasumber.profile_picture.name if saved_narasumber.profile_picture else 'None'}")
@@ -200,7 +211,11 @@ def edit_profile(request, username):
             if education_formset:
                 education_formset.save()
             if pengguna_form:
-                pengguna_form.save()
+                saved_pengguna = pengguna_form.save(commit=False)
+                # Auto-generate full_name from user's first_name and last_name
+                saved_pengguna.full_name = f"{saved_user.first_name} {saved_user.last_name}".strip()
+                saved_pengguna.save()
+                print(f"DEBUG: Pengguna profile saved, full_name: {saved_pengguna.full_name}")
             messages.success(request, 'Profil Anda berhasil diperbarui!')
             return redirect('profiles:profile_detail', username=user.username)
         else:

@@ -596,20 +596,109 @@
                     <hr class="my-4">
                     <h6 class="text-primary mb-3"><i class="fas fa-user me-2"></i>Informasi Pengguna</h6>
 
+                    <div class="mb-3">
+                        <label for="{{ pengguna_form.profile_picture.id_for_label }}" class="form-label">
+                            {{ pengguna_form.profile_picture.label }}
+                        </label>
+                        <div class="enhanced-image-widget" data-type="profile">
+                            {{ pengguna_form.profile_picture }}
+                        </div>
+                        {% if pengguna_form.profile_picture.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in pengguna_form.profile_picture.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload a clear profile picture. Image will be automatically cropped to 1:1 ratio and compressed to max 1MB.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ pengguna_form.bio.id_for_label }}" class="form-label">
+                            {{ pengguna_form.bio.label }}
+                        </label>
+                        {{ pengguna_form.bio }}
+                        {% if pengguna_form.bio.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in pengguna_form.bio.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
                     <div class="row">
-                        {% for field in pengguna_form %}
                         <div class="col-md-6 mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
+                            <label for="{{ pengguna_form.email.id_for_label }}" class="form-label">
+                                {{ pengguna_form.email.label }}
+                            </label>
+                            {{ pengguna_form.email }}
+                            {% if pengguna_form.email.errors %}
                                 <div class="text-danger small mt-1">
-                                    {% for error in field.errors %}
+                                    {% for error in pengguna_form.email.errors %}
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
-                        {% endfor %}
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ pengguna_form.phone_number.id_for_label }}" class="form-label">
+                                {{ pengguna_form.phone_number.label }}
+                            </label>
+                            {{ pengguna_form.phone_number }}
+                            {% if pengguna_form.phone_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in pengguna_form.phone_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ pengguna_form.is_phone_public }}
+                            <label class="form-check-label" for="{{ pengguna_form.is_phone_public.id_for_label }}">
+                                {{ pengguna_form.is_phone_public.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ pengguna_form.website.id_for_label }}" class="form-label">
+                            {{ pengguna_form.website.label }}
+                        </label>
+                        {{ pengguna_form.website }}
+                        {% if pengguna_form.website.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in pengguna_form.website.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ pengguna_form.linkedin_url.id_for_label }}" class="form-label">
+                            {{ pengguna_form.linkedin_url.label }}
+                        </label>
+                        {{ pengguna_form.linkedin_url }}
+                        {% if pengguna_form.linkedin_url.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in pengguna_form.linkedin_url.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Add your LinkedIn profile URL (optional). Example: https://linkedin.com/in/your-username
+                        </div>
                     </div>
                     {% endif %}
                     
@@ -635,6 +724,27 @@
 <script src="{% static 'js/education-form-handler.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize auto-crop widgets for profile pictures
+    const profileWidgets = document.querySelectorAll('.enhanced-image-widget[data-type="profile"]');
+    profileWidgets.forEach((widget) => {
+        new AutoCropWidget(widget, {
+            aspectRatio: 1,
+            maxSizeKB: 1024,
+            outputWidth: 800
+        });
+    });
+
+    // Initialize auto-crop widgets for cover images
+    const coverWidgets = document.querySelectorAll('.enhanced-image-widget[data-type="cover"]');
+    coverWidgets.forEach((widget) => {
+        new AutoCropWidget(widget, {
+            aspectRatio: 4,
+            maxSizeKB: 4096,
+            outputWidth: 1200
+        });
+    });
+
+    // Education form handlers
     const addEducationBtn = document.getElementById('add-education-form');
     const educationFormset = document.getElementById('education-formset');
     const maxForms = 5;
