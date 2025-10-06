@@ -15,12 +15,19 @@
             </nav>
             <div class="card">
                 <div class="card-header d-flex align-items-center">
-                    <img src="{{ narasumber.narasumber_profile.profile_picture.url|default:'/static/images/default-avatar.png' }}" 
-                         alt="{{ narasumber.get_full_name }}" 
-                         class="rounded-circle me-3" 
-                         width="40" 
-                         height="40"
-                         style="object-fit: cover;">
+                    {% if narasumber.narasumber_profile.profile_picture %}
+                        <img src="{{ narasumber.narasumber_profile.profile_picture.url }}" 
+                             alt="{{ narasumber.get_full_name }}" 
+                             class="rounded-circle me-3" 
+                             width="40" 
+                             height="40"
+                             style="object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width: 40px; height: 40px; border: 1px solid #dee2e6;">
+                            <i class="fas fa-user text-muted"></i>
+                        </div>
+                    {% endif %}
                     <h4 class="mb-0">Book {{ narasumber.get_full_name }}</h4>
                 </div>
                 <div class="card-body">

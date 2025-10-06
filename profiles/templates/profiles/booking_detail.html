@@ -286,6 +286,7 @@ Detail Booking - NarraPro
                 </div>
 
                 <hr>
+                {% if booking.status != 'Disetujui' %}
                 <div class="d-flex justify-content-end">
                     <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
                         {% csrf_token %}
@@ -296,6 +297,7 @@ Detail Booking - NarraPro
                         <button type="submit" class="btn btn-success">Terima</button>
                     </form>
                 </div>
+                {% endif %}
             {% else %}
                 <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
                 <div class="row">
@@ -375,6 +377,7 @@ Detail Booking - NarraPro
                 </div>
 
                 <hr>
+                {% if booking.status != 'APPROVED' %}
                 <div class="d-flex justify-content-end">
                     <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
                         {% csrf_token %}
@@ -385,6 +388,7 @@ Detail Booking - NarraPro
                         <button type="submit" class="btn btn-success">Terima</button>
                     </form>
                 </div>
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>
