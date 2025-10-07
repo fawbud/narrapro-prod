@@ -15,9 +15,8 @@ logger = logging.getLogger(__name__)
 
 def _send_email_with_error_handling(subject, plain_message, from_email, recipient_list, html_message=None):
     """
-    Send email with error handling for non-production environments.
-    In development, log errors but don't raise them to prevent blocking the process.
-    In production, raise errors to ensure email failures are noticed.
+    Send email with error handling that never blocks the business flow.
+    Logs errors but continues execution in both development and production.
     """
     is_production = os.getenv("PRODUCTION") == "true"
 
@@ -26,12 +25,11 @@ def _send_email_with_error_handling(subject, plain_message, from_email, recipien
         logger.info(f"Email sent successfully: {subject} to {recipient_list}")
     except Exception as e:
         if is_production:
-            # In production, raise the error so we know about failures
-            logger.error(f"Failed to send email in production: {subject} to {recipient_list}. Error: {str(e)}")
-            raise
+            # In production, log the error but don't block the process
+            logger.error(f"Failed to send email in production (continuing): {subject} to {recipient_list}. Error: {str(e)}")
         else:
             # In development, log the error but continue execution
-            logger.warning(f"Failed to send email (development mode - continuing): {subject} to {recipient_list}. Error: {str(e)}")
+            logger.warning(f"Failed to send email in development (continuing): {subject} to {recipient_list}. Error: {str(e)}")
 
 def send_speaker_booking_notification(recipient_list, event_name, event_date, event_time, booker_name, username):
     subject, html_message = get_speaker_booking_notification_template(event_name, event_date, event_time, booker_name, username)
