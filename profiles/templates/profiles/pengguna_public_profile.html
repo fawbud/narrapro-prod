@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ pengguna_profile.full_name }} - Pengguna - NarraPro
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Card 1: Main Profile Information -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Profile Picture -->
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            {% if pengguna_profile.profile_picture %}
+                            <img src="{{ pengguna_profile.profile_picture.url }}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle border"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border"
+                                 style="width: 150px; height: 150px; margin: 0 auto;">
+                                <i class="fas fa-user fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Profile Details -->
+                        <div class="col-md-9">
+                            <div class="row">
+                                <!-- Full Name and Username -->
+                                <div class="col-12 mb-2">
+                                    <h3 class="mb-1">{{ pengguna_profile.full_name }}</h3>
+                                    <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+                                </div>
+
+                                <!-- Labels Row -->
+                                <div class="col-12 mb-3">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span class="badge bg-primary py-1 px-2" style="font-size: 0.7rem;">
+                                            <i class="fas fa-user me-1"></i>Pengguna
+                                        </span>
+                                        {% if profile_user.is_approved %}
+                                            <span class="badge bg-success py-1 px-2" style="font-size: 0.7rem;">
+                                                <i class="fas fa-check-circle me-1"></i>Verified
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Contact Details -->
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-envelope text-primary me-2"></i>
+                                        <span>{{ pengguna_profile.email }}</span>
+                                    </div>
+                                </div>
+
+                                {% if pengguna_profile.get_public_phone %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-phone text-success me-2"></i>
+                                        <span>{{ pengguna_profile.get_public_phone }}</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Join Date -->
+                                <div class="col-md-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-calendar text-info me-2"></i>
+                                        <span>Bergabung {{ profile_user.date_joined|date:"F Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Bio (if available) -->
+            {% if pengguna_profile.bio %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-circle text-muted me-2"></i>Tentang Saya</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 lead">{{ pengguna_profile.bio }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 3: Contact Links -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Hubungi Saya</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Email Link -->
+                        <div class="col-md-4">
+                            <a href="mailto:{{ pengguna_profile.email }}"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-envelope me-2"></i>
+                                <span>Kirim Email</span>
+                            </a>
+                        </div>
+
+                        <!-- Call Link (if phone is public) -->
+                        {% if pengguna_profile.get_public_phone %}
+                        <div class="col-md-4">
+                            <a href="tel:{{ pengguna_profile.get_public_phone }}"
+                               class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-phone me-2"></i>
+                                <span>Telepon</span>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <!-- Website Link (if provided) -->
+                        {% if pengguna_profile.website %}
+                        <div class="col-md-4">
+                            <a href="{{ pengguna_profile.website }}"
+                               target="_blank"
+                               class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-globe me-2"></i>
+                                <span>Website</span>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <!-- LinkedIn Link (if provided) -->
+                        {% if pengguna_profile.linkedin_url %}
+                        <div class="col-md-4">
+                            <a href="{{ pengguna_profile.linkedin_url }}"
+                               target="_blank"
+                               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                                <i class="fab fa-linkedin me-2"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-success:hover,
+    .btn-outline-info:hover {
+        color: white;
+    }
+
+    .badge {
+        font-weight: normal;
+    }
+</style>
+{% endblock %}

@@ -220,11 +220,70 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                 </div>
             </div>
         </div>
+        {% elif profile_user.user_type == 'pengguna' and pengguna_profile %}
+        <hr>
+        <h6 class="text-muted mb-3">Informasi Pengguna</h6>
+        <div class="row">
+            {% if pengguna_profile.profile_picture %}
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ pengguna_profile.profile_picture.url }}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+            {% else %}
+            <div class="col-md-12">
+            {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nama Lengkap</label>
+                        <p class="mb-0">{{ pengguna_profile.full_name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <p class="mb-0">{{ pengguna_profile.email }}</p>
+                    </div>
+                    {% if pengguna_profile.bio %}
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Bio</label>
+                        <p class="mb-0">{{ pengguna_profile.bio }}</p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.phone_number %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nomor Telepon</label>
+                        <p class="mb-0">{{ pengguna_profile.phone_number }}</p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.website %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Website</label>
+                        <p class="mb-0">
+                            <a href="{{ pengguna_profile.website }}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>Kunjungi Website
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.linkedin_url %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">LinkedIn</label>
+                        <p class="mb-0">
+                            <a href="{{ pengguna_profile.linkedin_url }}" target="_blank" class="text-decoration-none">
+                                <i class="fab fa-linkedin me-1"></i>Lihat LinkedIn
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         {% elif profile_user.user_type != '' %}
         <hr>
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
-            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi. 
+            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi.
             <a href="{% url 'profiles:edit_profile' profile_user.username %}" class="alert-link">Lengkapi profil Anda</a>
         </div>
         {% endif %}

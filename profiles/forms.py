@@ -430,14 +430,38 @@ class PenggunaProfileForm(forms.ModelForm):
                 'placeholder': 'Ceritakan tentang dirimu (opsional)'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Email kontak'
             }),
             'phone_number': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Nomor telepon (opsional)'
             }),
             'is_phone_public': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
-            'website': forms.URLInput(attrs={'class': 'form-control'}),
-            'linkedin_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'website': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://website-anda.com (opsional)'
+            }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://linkedin.com/in/username (opsional)'
+            }),
         }
+        labels = {
+            'profile_picture': 'Foto Profil',
+            'bio': 'Bio / Tentang Diri',
+            'email': 'Email Kontak',
+            'phone_number': 'Nomor Telepon',
+            'is_phone_public': 'Tampilkan nomor telepon di profil publik',
+            'website': 'Website',
+            'linkedin_url': 'Link LinkedIn',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add help text for existing profile pictures
+        if self.instance and self.instance.pk and self.instance.profile_picture:
+            self.fields['profile_picture'].help_text = 'Leave empty to keep current profile picture'
