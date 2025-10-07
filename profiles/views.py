@@ -9,8 +9,8 @@ from anymail.exceptions import AnymailRequestsAPIError
 from narrapro.email_service import send_speaker_booking_notification, send_booking_status_update
 from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User
-from .forms import PenggunaBookingForm, PenggunaProfileForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm
-from narasumber.models import ExpertiseCategory, Education
+from .forms import PenggunaBookingForm, PenggunaProfileForm, UserProfileForm, PasswordChangeForm, NarasumberProfileForm, EventProfileForm, EducationForm, ProfessionalCertificationForm
+from narasumber.models import ExpertiseCategory, Education, ProfessionalCertification
 from django.forms import inlineformset_factory
 from profiles.models import Booking
 from .forms import BookingForm
@@ -125,6 +125,7 @@ def edit_profile(request, username):
         narasumber_form = None
         event_form = None
         education_formset = None
+        certification_formset = None
         pengguna_form = None
         
         # Create user-type specific forms
@@ -142,13 +143,26 @@ def edit_profile(request, username):
             )
             # Create education formset
             EducationFormSet = inlineformset_factory(
-                NarasumberProfile, 
-                Education, 
+                NarasumberProfile,
+                Education,
                 form=EducationForm,
-                extra=1, 
+                extra=1,
                 can_delete=True
             )
             education_formset = EducationFormSet(
+                request.POST,
+                instance=narasumber_profile
+            )
+            # Create certification formset
+            CertificationFormSet = inlineformset_factory(
+                NarasumberProfile,
+                ProfessionalCertification,
+                form=ProfessionalCertificationForm,
+                extra=1,
+                max_num=10,
+                can_delete=True
+            )
+            certification_formset = CertificationFormSet(
                 request.POST,
                 instance=narasumber_profile
             )
@@ -192,7 +206,14 @@ def edit_profile(request, username):
             print(f"DEBUG: Education formset valid: {education_valid}")
             if not education_valid:
                 print(f"DEBUG: Education formset errors: {education_formset.errors}")
-        
+
+        if certification_formset:
+            certification_valid = certification_formset.is_valid()
+            forms_valid = forms_valid and certification_valid
+            print(f"DEBUG: Certification formset valid: {certification_valid}")
+            if not certification_valid:
+                print(f"DEBUG: Certification formset errors: {certification_formset.errors}")
+
         print(f"DEBUG: Overall forms valid: {forms_valid}")
         
         if forms_valid:
@@ -212,6 +233,8 @@ def edit_profile(request, username):
                 print(f"DEBUG: Event profile saved, image: {saved_event.cover_image.name if saved_event.cover_image else 'None'}")
             if education_formset:
                 education_formset.save()
+            if certification_formset:
+                certification_formset.save()
             if pengguna_form:
                 saved_pengguna = pengguna_form.save(commit=False)
                 # Auto-generate full_name from user's first_name and last_name
@@ -241,19 +264,30 @@ def edit_profile(request, username):
         narasumber_form = None
         event_form = None
         education_formset = None
+        certification_formset = None
         pengguna_form = None
         
         if user.user_type == 'narasumber' and narasumber_profile:
             narasumber_form = NarasumberProfileForm(instance=narasumber_profile)
             # Create education formset for GET requests
             EducationFormSet = inlineformset_factory(
-                NarasumberProfile, 
-                Education, 
+                NarasumberProfile,
+                Education,
                 form=EducationForm,
-                extra=1, 
+                extra=1,
                 can_delete=True
             )
             education_formset = EducationFormSet(instance=narasumber_profile)
+            # Create certification formset for GET requests
+            CertificationFormSet = inlineformset_factory(
+                NarasumberProfile,
+                ProfessionalCertification,
+                form=ProfessionalCertificationForm,
+                extra=1,
+                max_num=10,
+                can_delete=True
+            )
+            certification_formset = CertificationFormSet(instance=narasumber_profile)
         elif user.user_type == 'event' and event_profile:
             event_form = EventProfileForm(instance=event_profile)
         elif user.user_type == 'pengguna' and pengguna_profile:
@@ -264,10 +298,11 @@ def edit_profile(request, username):
         'narasumber_form': narasumber_form,
         'event_form': event_form,
         'education_formset': education_formset,
+        'certification_formset': certification_formset,
         'profile_user': user,
         'narasumber_profile': narasumber_profile,
         'event_profile': event_profile,
-        'pengguna_form': pengguna_form,  
+        'pengguna_form': pengguna_form,
     }
     
     return render(request, 'profiles/edit_profile.html', context)

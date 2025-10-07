@@ -3,7 +3,7 @@ from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChange
 
 from pengguna.models import PenggunaBooking, PenggunaProfile
 from .models import User, Booking
-from narasumber.models import Education
+from narasumber.models import Education, ProfessionalCertification
 
 
 class UserProfileForm(forms.ModelForm):
@@ -338,6 +338,31 @@ class EducationForm(forms.ModelForm):
             'field_of_study': 'Jurusan/Bidang Studi',
             'graduation_year': 'Tahun Lulus',
         }
+
+
+class ProfessionalCertificationForm(forms.ModelForm):
+    """
+    Form for managing professional certification entries for narasumber profiles.
+    """
+    class Meta:
+        model = ProfessionalCertification
+        fields = ['title', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nama Sertifikasi'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Deskripsi sertifikasi, organisasi penerbit, atau detail lainnya'
+            }),
+        }
+        labels = {
+            'title': 'Nama Sertifikasi',
+            'description': 'Deskripsi',
+        }
+
 
 class PenggunaBookingForm(forms.ModelForm):
     """
