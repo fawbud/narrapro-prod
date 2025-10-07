@@ -67,16 +67,7 @@
                                         <span>{{ narasumber_profile.email }}</span>
                                     </div>
                                 </div>
-                                
-                                {% if narasumber_profile.get_public_phone %}
-                                <div class="col-md-6 mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-phone text-narasumber me-2"></i>
-                                        <span>{{ narasumber_profile.get_public_phone }}</span>
-                                    </div>
-                                </div>
-                                {% endif %}
-                                
+
                                 <!-- Location -->
                                 <div class="col-md-6 mb-2">
                                     <div class="d-flex align-items-center">
@@ -172,19 +163,6 @@
                             </a>
                         </div>
 
-                        
-                        <!-- Call Link (if phone is public) -->
-                        {% if narasumber_profile.get_public_phone %}
-                        <div class="col-md-4">
-                            <a href="tel:{{ narasumber_profile.get_public_phone }}" 
-                               class="btn btn-outline-narasumber w-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-phone text-narasumber me-2"></i>
-                                <span>Telepon</span>
-                            </a>
-                        </div>
-                        {% endif %}
-                        
-                        
                         <!-- LinkedIn Link (if provided) -->
                         {% if narasumber_profile.linkedin_url %}
                         <div class="col-md-4">
