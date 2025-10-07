@@ -19,20 +19,27 @@ Detail Booking - NarraPro
             <div class="row">
                 <div class="col-md-6">
                     <h6 class="text-muted">Narasumber</h6>
-                    <div class="d-flex align-items-center mb-3">
-                        {% if booking.narasumber.narasumber_profile.profile_picture %}
-                            <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
-                                 alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
-                                 class="rounded-circle me-3" 
-                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                        {% else %}
-                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                        {% endif %}
-                        <div>
-                            <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
-                            <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                    <a href="{% url 'profiles:profile_detail' username=booking.narasumber.username %}" class="text-decoration-none text-dark">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}"
+                                     alt="{{ booking.narasumber.narasumber_profile.full_name }}"
+                                     class="rounded-circle me-3"
+                                     style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                                <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                                {% if booking.narasumber.narasumber_profile.get_public_phone %}
+                                    {% if booking.status == 'APPROVED' %}
+                                        <p class="mb-0 text-muted"><i class="fas fa-phone me-1"></i>{{ booking.narasumber.narasumber_profile.get_public_phone }}</p>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-md-6">
                     <h6 class="text-muted">Informasi Tambahan</h6>
@@ -110,42 +117,51 @@ Detail Booking - NarraPro
                 </form>
                 {% endif %}
             </div>
-        {% elif is_event %} 
+        {% elif is_event %}
             <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
             <div class="row">
                 <div class="col-md-6">
                     <h6 class="text-muted">Event Organizer</h6>
-                    <div class="d-flex align-items-center mb-3">
-                        {% if booking.event and booking.event.event_profile.profile_picture %}
-                            <img src="{{ booking.event.event_profile.profile_picture.url }}" 
-                                 alt="{{ booking.event.get_full_name }}" 
-                                 class="rounded-circle me-3" 
-                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                        {% else %}
-                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                        {% endif %}
-                        <div>
-                            <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
-                            <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                    <a href="{% url 'profiles:profile_detail' username=booking.event.username %}" class="text-decoration-none text-dark">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.event and booking.event.event_profile.profile_picture %}
+                                <img src="{{ booking.event.event_profile.profile_picture.url }}"
+                                     alt="{{ booking.event.get_full_name }}"
+                                     class="rounded-circle me-3"
+                                     style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
+                                <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-md-6">
                     <h6 class="text-muted">Narasumber</h6>
-                    <div class="d-flex align-items-center mb-3">
-                        {% if booking.narasumber.narasumber_profile.profile_picture %}
-                            <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
-                                 alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
-                                 class="rounded-circle me-3" 
-                                 style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                        {% else %}
-                            <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                        {% endif %}
-                        <div>
-                            <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
-                            <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                    <a href="{% url 'profiles:profile_detail' username=booking.narasumber.username %}" class="text-decoration-none text-dark">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}"
+                                     alt="{{ booking.narasumber.narasumber_profile.full_name }}"
+                                     class="rounded-circle me-3"
+                                     style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                            {% else %}
+                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                                <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                                {% if booking.narasumber.narasumber_profile.get_public_phone %}
+                                    {% if booking.status == 'APPROVED' %}
+                                        <p class="mb-0 text-muted"><i class="fas fa-phone me-1"></i>{{ booking.narasumber.narasumber_profile.get_public_phone }}</p>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -206,20 +222,22 @@ Detail Booking - NarraPro
                 <div class="row">
                     <div class="col-md-6">
                         <h6 class="text-muted">Pengguna</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            {% if booking.narasumber.narasumber_profile.profile_picture %}
-                                 <!-- nanti ganti profile picture url nya -->
-                                <img src="{{ pengguna_booking.pengguna.get_profile_picture.url }}"  
-                                    alt="{{ pengguna_booking.pengguna.get_full_name }}" 
-                                    class="rounded-circle me-3" 
-                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                            {% else %}
-                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                            {% endif %}
-                            <div>
-                                <h5 class="mb-0">{{ pengguna_booking.pengguna.get_full_name }}</h5>
+                        <a href="{% url 'profiles:profile_detail' username=pengguna_booking.pengguna.username %}" class="text-decoration-none text-dark">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                     <!-- nanti ganti profile picture url nya -->
+                                    <img src="{{ pengguna_booking.pengguna.get_profile_picture.url }}"
+                                        alt="{{ pengguna_booking.pengguna.get_full_name }}"
+                                        class="rounded-circle me-3"
+                                        style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                                {% else %}
+                                    <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                                {% endif %}
+                                <div>
+                                    <h5 class="mb-0">{{ pengguna_booking.pengguna.get_full_name }}</h5>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-6">
                         <h6 class="text-muted">Informasi Tambahan</h6>
@@ -299,41 +317,45 @@ Detail Booking - NarraPro
                 </div>
                 {% endif %}
             {% else %}
-                <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
+                <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER (from narasumber view) ==================== -->
                 <div class="row">
                     <div class="col-md-6">
                         <h6 class="text-muted">Event Organizer</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            {% if booking.event and booking.event.event_profile.profile_picture %}
-                                <img src="{{ booking.event.event_profile.profile_picture.url }}" 
-                                    alt="{{ booking.event.get_full_name }}" 
-                                    class="rounded-circle me-3" 
-                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                            {% else %}
-                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                            {% endif %}
-                            <div>
-                                <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
-                                <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                        <a href="{% url 'profiles:profile_detail' username=booking.event.username %}" class="text-decoration-none text-dark">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if booking.event and booking.event.event_profile.profile_picture %}
+                                    <img src="{{ booking.event.event_profile.profile_picture.url }}"
+                                        alt="{{ booking.event.get_full_name }}"
+                                        class="rounded-circle me-3"
+                                        style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                                {% else %}
+                                    <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                                {% endif %}
+                                <div>
+                                    <h5 class="mb-0">{{ booking.event.get_full_name }}</h5>
+                                    <p class="mb-0 text-muted">{{ booking.event.event_profile.name }}</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-6">
                         <h6 class="text-muted">Narasumber</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            {% if booking.narasumber.narasumber_profile.profile_picture %}
-                                <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}" 
-                                    alt="{{ booking.narasumber.narasumber_profile.full_name }}" 
-                                    class="rounded-circle me-3" 
-                                    style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
-                            {% else %}
-                                <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
-                            {% endif %}
-                            <div>
-                                <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
-                                <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                        <a href="{% url 'profiles:profile_detail' username=booking.narasumber.username %}" class="text-decoration-none text-dark">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if booking.narasumber.narasumber_profile.profile_picture %}
+                                    <img src="{{ booking.narasumber.narasumber_profile.profile_picture.url }}"
+                                        alt="{{ booking.narasumber.narasumber_profile.full_name }}"
+                                        class="rounded-circle me-3"
+                                        style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;">
+                                {% else %}
+                                    <div class="rounded-circle me-3 bg-secondary" style="width: 60px; height: 60px;"></div>
+                                {% endif %}
+                                <div>
+                                    <h5 class="mb-0">{{ booking.narasumber.narasumber_profile.full_name }}</h5>
+                                    <p class="mb-0 text-muted">{{ booking.narasumber.narasumber_profile.expertise_area.name }}</p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
 

@@ -444,13 +444,19 @@ class BookingForm(forms.ModelForm):
             'message': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'Pesan tambahan (opsional)'
+                'placeholder': 'Tuliskan pesan untuk narasumber...',
+                'required': 'required',
             }),
         }
         labels = {
             'booking_date': 'Tanggal & Waktu Booking',
-            'message': 'Pesan',
+            'message': 'Pesan untuk Narasumber',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make message field required
+        self.fields['message'].required = True
         
 class PenggunaProfileForm(forms.ModelForm):
     class Meta:

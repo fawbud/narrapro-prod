@@ -331,11 +331,22 @@ class NarasumberProfile(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.expertise_area.name}"
     
-    def get_public_phone(self):
+    def get_public_phone(self, booking=None):
         """
-        Return phone number only if user wants it to be public.
+        Return phone number based on is_phone_public setting and booking status.
+        - If booking is provided and is_phone_public is True: only return phone if booking is APPROVED
+        - If booking is None and is_phone_public is True: return phone (for public profile)
+        - Otherwise: return None
         """
-        return self.phone_number if self.is_phone_public else None
+        if not self.is_phone_public:
+            return None
+
+        # If booking context is provided, only show phone when booking is approved
+        if booking is not None:
+            return self.phone_number if booking.status == 'APPROVED' else None
+
+        # For public profile (no booking context), show phone if is_phone_public is True
+        return self.phone_number
 
     def delete(self, *args, **kwargs):
         """
