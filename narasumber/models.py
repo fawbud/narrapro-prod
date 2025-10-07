@@ -5,6 +5,17 @@ import json
 import uuid
 import os
 
+def get_storage():
+    """Get the appropriate storage backend based on environment"""
+    if os.getenv("PRODUCTION") == "true":
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"NARASUMBER MODEL DEBUG: Using SimpleSupabaseStorage for production")
+        return SimpleSupabaseStorage()
+    else:
+        from django.core.files.storage import default_storage
+        print(f"NARASUMBER MODEL DEBUG: Using default storage for development")
+        return default_storage
+
 User = get_user_model()
 
 
@@ -51,12 +62,112 @@ class ExpertiseCategory(models.Model):
         return self.name
 
 
+class Education(models.Model):
+    """
+    Model to represent education history for narasumber.
+    Each narasumber can have multiple education entries.
+    """
+    
+    DEGREE_CHOICES = [
+        ('SMA', 'SMA/SMK/Sederajat'),
+        ('D3', 'Diploma 3 (D3)'),
+        ('S1', 'Sarjana (S1)'),
+        ('S2', 'Magister (S2)'),
+        ('S3', 'Doktor (S3)'),
+        ('Certificate', 'Sertifikat Profesional'),
+        ('Other', 'Lainnya'),
+    ]
+    
+    narasumber_profile = models.ForeignKey(
+        'NarasumberProfile',
+        on_delete=models.CASCADE,
+        related_name='educations',
+        help_text="Associated narasumber profile"
+    )
+    
+    degree = models.CharField(
+        max_length=20,
+        choices=DEGREE_CHOICES,
+        help_text="Type of degree or education level"
+    )
+    
+    school_university = models.CharField(
+        max_length=200,
+        help_text="Name of school, university, or institution"
+    )
+    
+    field_of_study = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Field of study or major (optional)"
+    )
+    
+    graduation_year = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1950)],
+        help_text="Year of graduation (optional)"
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this education entry was created"
+    )
+    
+    class Meta:
+        verbose_name = "Education"
+        verbose_name_plural = "Educations"
+        ordering = ['-graduation_year', '-created_at']
+    
+    def __str__(self):
+        if self.graduation_year:
+            return f"{self.get_degree_display()} - {self.school_university} ({self.graduation_year})"
+        return f"{self.get_degree_display()} - {self.school_university}"
+
+
+class ProfessionalCertification(models.Model):
+    """
+    Model to represent professional certifications for narasumber.
+    Each narasumber can have multiple certification entries (up to 10).
+    """
+
+    narasumber_profile = models.ForeignKey(
+        'NarasumberProfile',
+        on_delete=models.CASCADE,
+        related_name='certifications',
+        help_text="Associated narasumber profile"
+    )
+
+    title = models.CharField(
+        max_length=200,
+        help_text="Title or name of the certification"
+    )
+
+    description = models.TextField(
+        help_text="Description of the certification, issuing organization, or other details"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this certification entry was created"
+    )
+
+    class Meta:
+        verbose_name = "Professional Certification"
+        verbose_name_plural = "Professional Certifications"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.narasumber_profile.full_name}"
+
+
 class NarasumberProfile(models.Model):
     """
     Profile model for narasumber users containing detailed information
     about their expertise, experience, and contact details.
     """
-    
+
     # Experience level choices
     EXPERIENCE_LEVEL_CHOICES = [
         ('BEGINNER', 'Beginner'),
@@ -119,13 +230,24 @@ class NarasumberProfile(models.Model):
         max_length=200,
         help_text="Full name of the narasumber"
     )
+
+    pekerjaan = models.CharField(
+        max_length=40,
+        help_text="Occupation/job of the narasumber"
+    )
+
+    jabatan = models.CharField(
+        max_length=40,
+        help_text="Position/title of the narasumber"
+    )
     
     # Profile picture
     profile_picture = models.ImageField(
         upload_to=narasumber_profile_picture_upload_path,
         blank=True,
         null=True,
-        help_text="Profile picture for the narasumber (optional)"
+        help_text="Profile picture for the narasumber (optional)",
+        storage=get_storage()  # Dynamic storage based on environment
     )
     
     bio = models.TextField(
@@ -135,7 +257,7 @@ class NarasumberProfile(models.Model):
     # Expertise information
     expertise_area = models.ForeignKey(
         ExpertiseCategory,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='narasumber_profiles',
         help_text="Area of expertise"
     )
@@ -214,6 +336,17 @@ class NarasumberProfile(models.Model):
         Return phone number only if user wants it to be public.
         """
         return self.phone_number if self.is_phone_public else None
+
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to clean up the profile picture from storage.
+        """
+        if self.profile_picture:
+            try:
+                self.profile_picture.delete(save=False)
+            except Exception as e:
+                print(f"Error deleting profile picture: {e}")
+        super().delete(*args, **kwargs)
     
     @property
     def experience_display(self):

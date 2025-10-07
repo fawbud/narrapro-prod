@@ -15,6 +15,8 @@ from django.contrib.auth import get_user_model
 
 from narasumber.models import ExpertiseCategory, NarasumberProfile
 from event.models import EventProfile  # SESUAIKAN jika letak model berbeda
+from lowongan.models import Lowongan 
+from pengguna.models import PenggunaProfile
 
 User = get_user_model()
 
@@ -121,11 +123,11 @@ for i in range(10):
         "", "https://portfolio.example.com", "https://mywork.example.org", None
     ]) or None
 
-    social_media = {
-        "linkedin": f"https://www.linkedin.com/in/{full_name.replace(' ', '').lower()}",
-        "twitter": f"https://x.com/{full_name.split()[0].lower()}{random.randint(1,999)}",
-        "github": f"https://github.com/{full_name.split()[0].lower()}"
-    }
+    # social_media = {
+    #     "linkedin": f"https://www.linkedin.com/in/{full_name.replace(' ', '').lower()}",
+    #     "twitter": f"https://x.com/{full_name.split()[0].lower()}{random.randint(1,999)}",
+    #     "github": f"https://github.com/{full_name.split()[0].lower()}"
+    # }
 
     # Buat profile (boleh langsung create karena tidak ada field wajib file)
     profile = NarasumberProfile.objects.create(
@@ -140,7 +142,7 @@ for i in range(10):
         is_phone_public=is_phone_public,
         location=location,
         portfolio_link=portfolio_link,
-        social_media_links=social_media,
+        # social_media_links=social_media,
     )
 
     # Tambahkan foto profil dummy (opsional)
@@ -237,5 +239,101 @@ for i in range(10):
 
 print(f"Total Events created in this run: {created_events}")
 print(f"Total Events in DB: {EventProfile.objects.count()}\n")
+
+print("Creating 10 Lowongan (Job Opportunities)...")
+created_lowongan = 0
+
+# ambil semua Event users (karena hanya mereka boleh buat lowongan)
+event_users = User.objects.filter(user_type="event")
+if not event_users.exists():
+    raise RuntimeError("Tidak ada user dengan user_type=event. Jalankan seed Event dulu.")
+
+# ambil expertise categories
+categories = list(ExpertiseCategory.objects.all())
+if not categories:
+    raise RuntimeError("Tidak ada ExpertiseCategory. Jalankan seed kategori dulu.")
+
+today = timezone.now().date()
+
+for i in range(10):
+    creator = random.choice(event_users)
+    category = random.choice(categories)
+
+    title = f"Lowongan {random.choice(['Speaker', 'Moderator', 'Trainer', 'Consultant'])} #{random.randint(100,999)}"
+    description = (
+        f"{title} untuk acara {random.choice(event_names)}. "
+        "Kami mencari narasumber berpengalaman yang siap tampil profesional."
+    )
+
+    # event date in the future
+    event_date = today + timedelta(days=random.randint(10, 90))
+    application_deadline = event_date - timedelta(days=random.randint(3, 7))
+
+    lowongan = Lowongan(
+        title=title,
+        description=description,
+        created_by=creator,
+        job_type=random.choice([c[0] for c in Lowongan.JOB_TYPE_CHOICES]),
+        expertise_category=category,
+        experience_level_required=random.choice([c[0] for c in Lowongan.EXPERIENCE_LEVEL_CHOICES]),
+        location=random.choice([c[0] for c in Lowongan.PROVINCE_CHOICES]),
+        is_remote=random.choice([True, False]),
+        event_date=event_date,
+        duration_hours=random.randint(1, 8),
+        budget_amount=random.choice([None, random.randint(500000, 5000000)]),
+        budget_negotiable=random.choice([True, False]),
+        application_deadline=application_deadline,
+        max_applicants=random.choice([None, random.randint(3, 20)]),
+        requirements=random.choice([
+            "",
+            "Minimal pengalaman 2 tahun di bidang terkait.",
+            "Mampu presentasi di depan publik.",
+            "Punya portofolio relevan."
+        ]),
+        contact_email=creator.email,
+        contact_phone=random.choice([None, f"+62{random.randint(81100000000, 81999999999)}"]),
+        status=random.choice(["OPEN", "DRAFT", "CLOSED"]),
+    )
+    lowongan.save()
+
+    created_lowongan += 1
+    print(f"✓ Lowongan created: {title} | Status: {lowongan.status}")
+
+print("Creating 10 Pengguna profiles...")
+created_pengguna = 0
+
+for i in range(10):
+    user = ensure_user("pengguna", user_type="pengguna")
+
+    full_name = f"{random.choice(first_names)} {random.choice(last_names)}"
+    email = user.email
+    phone = random.choice([None, f"+62{random.randint(81300000000, 81999999999)}"])
+    is_phone_public = random.choice([True, False])
+
+    bio = f"Halo, saya {full_name}, pengguna biasa yang tertarik mengikuti acara dan narasumber."
+    website = random.choice([None, "https://personal.example.com", "https://portfolio.example.org"])
+    linkedin = random.choice([None, f"https://linkedin.com/in/{full_name.replace(' ', '').lower()}"])
+
+    profile = PenggunaProfile.objects.create(
+        user=user,
+        full_name=full_name,
+        bio=bio,
+        email=email,
+        phone_number=phone,
+        is_phone_public=is_phone_public,
+        website=website,
+        linkedin_url=linkedin,
+    )
+
+    # tambahin avatar dummy
+    if random.random() < 0.8:
+        profile.avatar = tiny_png_contentfile("user")
+        profile.save(update_fields=["avatar"])
+
+    created_pengguna += 1
+    print(f"✓ Pengguna created: {full_name}")
+
+print(f"Total Pengguna created in this run: {created_pengguna}")
+print(f"Total Pengguna in DB: {PenggunaProfile.objects.count()}\n")
 
 print("Done.")

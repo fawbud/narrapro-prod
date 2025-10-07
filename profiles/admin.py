@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from django.utils import timezone
-from .models import User
+from .models import User, Booking
 
 
 @admin.register(User)
@@ -32,7 +32,6 @@ class UserAdmin(BaseUserAdmin):
         'first_name', 
         'last_name', 
         'user_type', 
-        'is_approved', 
         'approval_status_display',
         'is_staff', 
         'date_joined'
@@ -101,3 +100,12 @@ class UserAdmin(BaseUserAdmin):
             self.message_user(request, 'No users were updated.')
     
     disapprove_selected_users.short_description = "Disapprove selected users"
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ('event', 'narasumber', 'status', 'booking_date', 'created_at')
+    list_filter = ('status', 'booking_date', 'created_at')
+    search_fields = ('event__username', 'narasumber__username', 'message')
+    date_hierarchy = 'booking_date'
+    ordering = ('-created_at',)

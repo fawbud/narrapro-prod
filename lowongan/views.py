@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from narrapro.email_service import send_new_application_notification, send_application_status_update
 from .models import Lowongan, LowonganApplication
 from .forms import (
     LowonganForm, LowonganStatusForm, LowonganApplicationForm,
@@ -105,14 +107,17 @@ def lowongan_apply(request, lowongan_id):
     """
     View for narasumber users to apply for lowongan
     """
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
     lowongan = get_object_or_404(Lowongan, id=lowongan_id)
 
     if request.user.user_type != 'narasumber':
-        messages.error(request, 'Only Narasumber users can apply for lowongan.')
+        messages.error(request, 'Hanya narasumber yang bisa melamar lowongan.')
         return redirect('lowongan:detail', lowongan_id=lowongan_id)
 
     if not lowongan.can_user_apply(request.user):
-        messages.error(request, 'You cannot apply for this lowongan.')
+        messages.error(request, 'Anda tidak bisa melamar lowongan ini.')
         return redirect('lowongan:detail', lowongan_id=lowongan_id)
 
     if request.method == 'POST':
@@ -122,8 +127,13 @@ def lowongan_apply(request, lowongan_id):
             lowongan=lowongan
         )
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Your application has been submitted successfully!')
+            application = form.save()
+            send_new_application_notification(
+                [lowongan.created_by.email],
+                applicant_name=application.applicant.get_full_name(),
+                event_name=lowongan.title
+            )
+            messages.success(request, 'Lamaran Anda telah di-submit!')
             return redirect('lowongan:detail', lowongan_id=lowongan_id)
     else:
         form = LowonganApplicationForm(user=request.user, lowongan=lowongan)
@@ -184,12 +194,16 @@ def lowongan_create(request):
     if request.user.user_type != 'event':
         messages.error(request, 'Only Event users can create lowongan.')
         return redirect('main:home')
+    
+    if not request.user.is_approved:
+        messages.error(request, 'unapproved_user')
+        return redirect(request.META.get('HTTP_REFERER', reverse('main:home')))
 
     if request.method == 'POST':
         form = LowonganForm(request.POST, user=request.user)
         if form.is_valid():
             lowongan = form.save()
-            messages.success(request, f'Lowongan "{lowongan.title}" has been created successfully!')
+            messages.success(request, f'Lowongan "{lowongan.title}" berhasil dibuat!')
             return redirect('lowongan:my_lowongan')
     else:
         form = LowonganForm(user=request.user)
@@ -213,7 +227,7 @@ def lowongan_edit(request, lowongan_id):
         form = LowonganForm(request.POST, instance=lowongan, user=request.user)
         if form.is_valid():
             lowongan = form.save()
-            messages.success(request, f'Lowongan "{lowongan.title}" has been updated successfully!')
+            messages.success(request, f'Lowongan "{lowongan.title}" berhasil di-update!')
             return redirect('lowongan:my_lowongan')
     else:
         form = LowonganForm(instance=lowongan, user=request.user)
@@ -237,7 +251,7 @@ def lowongan_delete(request, lowongan_id):
     if request.method == 'POST':
         title = lowongan.title
         lowongan.delete()
-        messages.success(request, f'Lowongan "{title}" has been deleted successfully!')
+        messages.success(request, f'Lowongan "{title}" berhasil dihapus!')
         return redirect('lowongan:my_lowongan')
 
     context = {
@@ -334,7 +348,13 @@ def application_update_status(request, application_id):
 
     form = LowonganApplicationStatusForm(request.POST, instance=application)
     if form.is_valid():
-        form.save()
+        application = form.save()
+        send_application_status_update(
+            recipient_list=[application.applicant.email],
+            status=application.get_status_display(),
+            event_name=application.lowongan.title,
+            username=application.applicant.get_full_name()
+        )
         return JsonResponse({
             'success': True,
             'message': f'Application status updated to {application.get_status_display()}',
@@ -348,33 +368,4 @@ def application_update_status(request, application_id):
         })
 
 
-@login_required
-def my_applications(request):
-    """
-    View for Narasumber users to see their applications
-    """
-    if request.user.user_type != 'narasumber':
-        messages.error(request, 'Only Narasumber users can access this page.')
-        return redirect('main:home')
-
-    applications_qs = LowonganApplication.objects.filter(
-        applicant=request.user
-    ).select_related('lowongan', 'lowongan__created_by').order_by('-applied_at')
-
-    # Filter by status
-    status_filter = request.GET.get('status')
-    if status_filter:
-        applications_qs = applications_qs.filter(status=status_filter)
-
-    # Pagination
-    paginator = Paginator(applications_qs, 10)
-    page_number = request.GET.get('page')
-    applications_page = paginator.get_page(page_number)
-
-    context = {
-        'applications_page': applications_page,
-        'status_filter': status_filter,
-        'status_choices': LowonganApplication.STATUS_CHOICES,
-    }
-
-    return render(request, 'lowongan/my_applications.html', context)
+# my_applications view moved to profiles app at profiles.views.profile_lamaran

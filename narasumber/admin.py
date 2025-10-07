@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import ExpertiseCategory, NarasumberProfile
+from .models import ExpertiseCategory, NarasumberProfile, Education, ProfessionalCertification
 
 
 @admin.register(ExpertiseCategory)
@@ -32,21 +32,44 @@ class ExpertiseCategoryAdmin(admin.ModelAdmin):
     narasumber_count.short_description = "Narasumber Count"
 
 
+class EducationInline(admin.TabularInline):
+    """
+    Inline education entries for NarasumberProfile admin.
+    """
+    model = Education
+    extra = 1
+    fields = ['degree', 'school_university', 'field_of_study', 'graduation_year']
+
+
+class ProfessionalCertificationInline(admin.TabularInline):
+    """
+    Inline professional certification entries for NarasumberProfile admin.
+    """
+    model = ProfessionalCertification
+    extra = 1
+    max_num = 10
+    fields = ['title', 'description']
+
+
 @admin.register(NarasumberProfile)
 class NarasumberProfileAdmin(admin.ModelAdmin):
     """
     Admin configuration for NarasumberProfile model.
     """
     list_display = [
-        'full_name', 
+        'full_name',
         'user_username',
-        'expertise_area', 
-        'experience_level', 
+        'expertise_area',
+        'experience_level',
         'years_of_experience',
         'location_display',
+        'education_count',
+        'certification_count',
         'phone_status',
         'created_at'
     ]
+
+    inlines = [EducationInline, ProfessionalCertificationInline]
     
     list_filter = [
         'expertise_area', 
@@ -119,6 +142,22 @@ class NarasumberProfileAdmin(admin.ModelAdmin):
     location_display.short_description = "Location"
     location_display.admin_order_field = 'location'
     
+    def education_count(self, obj):
+        """
+        Display the number of education entries for this narasumber.
+        """
+        count = obj.educations.count()
+        return format_html('<strong>{}</strong>', count)
+    education_count.short_description = "Education Entries"
+
+    def certification_count(self, obj):
+        """
+        Display the number of certification entries for this narasumber.
+        """
+        count = obj.certifications.count()
+        return format_html('<strong>{}</strong>', count)
+    certification_count.short_description = "Certifications"
+
     def save_model(self, request, obj, form, change):
         """
         Custom save method to handle any additional processing.
@@ -148,3 +187,106 @@ class NarasumberProfileAdmin(admin.ModelAdmin):
             f'{updated} profile(s) phone numbers are now private.'
         )
     make_phone_private.short_description = "Make phone numbers private"
+
+
+@admin.register(Education)
+class EducationAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for Education model.
+    """
+    list_display = [
+        'narasumber_name',
+        'degree',
+        'school_university',
+        'field_of_study',
+        'graduation_year',
+        'created_at'
+    ]
+    
+    list_filter = [
+        'degree',
+        'graduation_year',
+        'created_at'
+    ]
+    
+    search_fields = [
+        'narasumber_profile__full_name',
+        'school_university',
+        'field_of_study'
+    ]
+    
+    readonly_fields = ['created_at']
+    
+    fieldsets = (
+        ('Education Information', {
+            'fields': ('narasumber_profile', 'degree', 'school_university', 'field_of_study', 'graduation_year')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        })
+    )
+    
+    ordering = ['-graduation_year', '-created_at']
+    
+    def narasumber_name(self, obj):
+        """
+        Display the associated narasumber's name.
+        """
+        return obj.narasumber_profile.full_name
+    narasumber_name.short_description = "Narasumber"
+    narasumber_name.admin_order_field = 'narasumber_profile__full_name'
+
+
+@admin.register(ProfessionalCertification)
+class ProfessionalCertificationAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for ProfessionalCertification model.
+    """
+    list_display = [
+        'narasumber_name',
+        'title',
+        'description_preview',
+        'created_at'
+    ]
+
+    list_filter = [
+        'created_at'
+    ]
+
+    search_fields = [
+        'narasumber_profile__full_name',
+        'title',
+        'description'
+    ]
+
+    readonly_fields = ['created_at']
+
+    fieldsets = (
+        ('Certification Information', {
+            'fields': ('narasumber_profile', 'title', 'description')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        })
+    )
+
+    ordering = ['-created_at']
+
+    def narasumber_name(self, obj):
+        """
+        Display the associated narasumber's name.
+        """
+        return obj.narasumber_profile.full_name
+    narasumber_name.short_description = "Narasumber"
+    narasumber_name.admin_order_field = 'narasumber_profile__full_name'
+
+    def description_preview(self, obj):
+        """
+        Show a preview of the description.
+        """
+        if obj.description:
+            return obj.description[:100] + "..." if len(obj.description) > 100 else obj.description
+        return "-"
+    description_preview.short_description = "Description Preview"

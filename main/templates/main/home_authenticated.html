@@ -4,6 +4,10 @@
 
 {% block extra_head %}
 <style>
+    /* Allow normal overflow behavior */
+    body {
+        overflow-x: hidden;
+    }
     /* Expertise Card Style */
     .expertise-card {
         background: #fff;
@@ -14,14 +18,59 @@
         background-color: #0e1e7a;
         color: #fff !important;
         transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(14, 30, 122, 0.3);
     }
     .expertise-card h4, .expertise-card p {
+        color: #0a1559 !important;
         transition: color 0.3s ease;
     }
     .expertise-card:hover h4,
     .expertise-card:hover p {
         color: #fff !important;
     }
+
+    /* Hero Section - Break out of container properly */
+    .hero-section {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        margin-top: -1.5rem; /* Offset the mt-4 from base template */
+        margin-bottom: 2rem;
+        overflow: hidden;
+        z-index: 1;
+    }
+    .hero-image {
+        width: 100%;
+        height: 0;
+        padding-bottom: 25%; /* 4:1 aspect ratio */
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    .hero-overlay {
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(1px);
+    }
+    .hero-title {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        letter-spacing: -1px;
+    }
+    .hero-subtitle {
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        opacity: 0.95;
+    }
+
     /* Brand blue */
     .btn-brand {
         border: 1px solid #0e1e7a;
@@ -37,31 +86,43 @@
         background-color: #0e1e7a;
         color: #fff;
     }
+
+    .lowongan-card,
+    .narsum-card {
+        border: 1px solid #d9d9d9 !important; 
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+    }
+
+    .lowongan-card:hover,
+    .narsum-card:hover {
+        transform: translateY(-6px);
+        border-color: #999; /* makin gelap saat hover */
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22); /* shadow lebih bold */
+    }
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-
-    <!-- EXPERTISE SECTION -->
-    <h2 class="mb-4">Jelajahi Berdasarkan Expertise</h2>
-    <div class="row g-4">
-        {% for ex in expertise_categories %}
-        <div class="col-md-6 col-lg-4">
-            <a href="{% url 'search:search_result' %}?category=narasumber&expertise={{ ex.id }}" 
-               class="text-decoration-none text-dark">
-                <div class="card expertise-card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column justify-content-center text-center">
-                        <h4 class="card-title">{{ ex.name }}</h4>
-                        {% if ex.description %}
-                        <p class="card-text small text-muted">{{ ex.description|truncatewords:15 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </a>
-        </div>
-        {% endfor %}
+<!-- HERO SECTION -->
+<div class="hero-section position-relative">
+    <div class="hero-image">
+        {% load static %}
+        <img src="{% static 'images/hero-banner.png' %}"
+             alt="NarraPro Hero"
+             class="w-100 h-100">
     </div>
+    <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+        <div class="text-center text-white">
+            <h1 class="hero-title display-2 fw-bold mb-3">NarraPro</h1>
+            <p class="hero-subtitle lead fs-4 d-none d-md-block">Temukan pembicara ahli untuk segala bidang!</p>
+        </div>
+    </div>
+</div>
+
+<div class="my-5">
 
     <!-- NARASUMBER SECTION -->
     <div class="mt-5">
@@ -71,26 +132,67 @@
             class="btn btn-sm btn-brand">Lihat Semua</a>
         </div>
 
-        <!-- ubah row jadi row-cols-2 untuk mobile -->
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             {% for n in narasumbers %}
             <div class="col">
-                <div class="card h-100 shadow-sm">
-                    {% if n.profile_picture %}
-                    <img src="{{ n.profile_picture.url }}" class="card-img-top" alt="{{ n.full_name }}">
-                    {% endif %}
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ n.full_name }}</h5>
-                        <p class="card-text text-muted small flex-grow-1">{{ n.bio|truncatewords:20 }}</p>
-                        {% if n.expertise_area %}
-                        <span class="badge badge-brand">{{ n.expertise_area.name }}</span>
-                        {% endif %}
+                        <a href="{% url 'profiles:profile_detail' n.user.username %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm narsum-card">
+                                {% if n.profile_picture %}
+                                <img src="{{ n.profile_picture.url }}" 
+                                    class="card-img-top" 
+                                    alt="{{ n.full_name }}" 
+                                    style="object-fit: cover; height: 180px;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <i class="bi bi-person-circle text-secondary" style="font-size:3rem;"></i>
+                                </div>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Nama -->
+                                    <h5 class="card-title mb-1">{{ n.full_name }}</h5>
+                                    <p class="text-muted small mb-2">{{ n.experience_display }}</p>
+
+                                    <!-- Expertise Badge -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary small">
+                                            {{ n.expertise_area.name }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Bio -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ n.bio|truncatewords:18 }}
+                                    </p>
+
+                                    <!-- Lokasi -->
+                                    <p class="small mb-1">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i> {{ n.location_display }}
+                                    </p>
+
+                                    <!-- Kontak (opsional) -->
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ n.email }}</li>
+                                        {% if n.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ n.get_public_phone }}</li>
+                                        {% endif %}
+                                        {% if n.linkedin_url %}
+                                        <li><i class="bi bi-linkedin me-1 text-muted"></i> LinkedIn tersedia</li>
+                                        {% endif %}
+                                        {% if n.portfolio_link %}
+                                        <li><i class="bi bi-globe me-1 text-muted"></i> Portfolio tersedia</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </div>
-            </div>
             {% endfor %}
         </div>
     </div>
+
+
+
 
 
 
@@ -103,27 +205,85 @@
             class="btn btn-sm btn-brand">Lihat Semua</a>
         </div>
 
-        <!-- ubah row jadi row-cols-2 untuk mobile -->
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
             {% for l in lowongans %}
             <div class="col">
-                <div class="card h-100 shadow-sm">
-                    {% if l.cover_image %}
-                    <img src="{{ l.cover_image.url }}" class="card-img-top" alt="{{ l.title }}">
-                    {% endif %}
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ l.title }}</h5>
-                        <p class="card-text text-muted small flex-grow-1">{{ l.description|truncatewords:20 }}</p>
-                        <span class="badge badge-brand">Lowongan</span>
+                <a href="{% url 'lowongan:detail' l.id %}" class="text-decoration-none text-dark">
+                    <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm lowongan-card">
+                        {% if l.created_by.event_profile.cover_image %}
+                        <img src="{{ l.created_by.event_profile.cover_image.url }}"
+                            class="card-img-top"
+                            alt="{{ l.title }}"
+                            style="width: 100%; height: auto; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 4/1;">
+                            <i class="bi bi-calendar-event text-secondary" style="font-size:2rem;"></i>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Title -->
+                            <h5 class="card-title mb-1">{{ l.title }}</h5>
+                            <p class="text-muted small mb-2">{{ l.get_job_type_display }}</p>
+
+                            <!-- Badges -->
+                            <div class="mb-2">
+                                <span class="badge rounded-pill bg-primary me-1 small">{{ l.expertise_category.name }}</span>
+                                {% if l.is_remote %}
+                                    <span class="badge rounded-pill bg-success small">Remote</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <p class="card-text small flex-grow-1">
+                                {{ l.description|truncatewords:20 }}
+                            </p>
+
+                            <!-- Info list -->
+                            <ul class="list-unstyled small mt-2 mb-0">
+                                <li><i class="bi bi-geo-alt me-1 text-muted"></i> {{ l.location_display }}</li>
+                                <li><i class="bi bi-calendar-event me-1 text-muted"></i> {{ l.event_date|date:"M j, Y" }}</li>
+                                <li><i class="bi bi-hourglass-split me-1 text-muted"></i> {{ l.duration_hours }} jam</li>
+                                {% if l.budget_amount %}
+                                <li>
+                                    <i class="bi bi-cash-coin me-1 text-muted"></i> 
+                                    IDR {{ l.budget_amount|floatformat:0 }}{% if l.budget_negotiable %} (nego){% endif %}
+                                </li>
+                                {% endif %}
+                                <li>
+                                    <i class="bi bi-alarm me-1 text-danger"></i> 
+                                    Deadline: {{ l.application_deadline|date:"M j, Y" }}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             {% endfor %}
         </div>
     </div>
 
-
-
+    <!-- EXPERTISE SECTION -->
+    <div class="mt-5">
+        <h2 class="mb-4">Jelajahi Keahlian</h2>
+        <div class="row g-4">
+            {% for ex in expertise_categories %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'search:search_result' %}?category=narasumber&expertise={{ ex.id }}"
+                   class="text-decoration-none">
+                    <div class="card expertise-card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-center text-center">
+                            <h4 class="card-title">{{ ex.name }}</h4>
+                            {% if ex.description %}
+                            <p class="card-text small">{{ ex.description|truncatewords:15 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
 </div>
 {% endblock %}

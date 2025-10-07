@@ -2,77 +2,180 @@
 Custom storage backend for Supabase Storage.
 """
 import os
-from storages.backends.s3boto3 import S3Boto3Storage
+import requests
+from django.core.files.storage import Storage
+from django.core.files.base import ContentFile
+from django.utils.deconstruct import deconstructible
 from urllib.parse import urljoin
 
 
-class SupabaseStorage(S3Boto3Storage):
+@deconstructible
+class SupabaseStorage(Storage):
     """
-    Custom storage backend for Supabase Storage that properly handles URLs.
+    Custom storage backend for Supabase Storage using REST API.
     """
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        # Set Supabase-specific configurations
-        self.access_key = os.getenv('SUPABASE_ACCESS_KEY_ID')
-        self.secret_key = os.getenv('SUPABASE_SECRET_ACCESS_KEY')
+        # Get Supabase configuration from environment
+        self.supabase_url = os.getenv('SUPABASE_URL')
+        self.supabase_key = os.getenv('SUPABASE_SECRET_ACCESS_KEY')  # Use service role key
         self.bucket_name = os.getenv('SUPABASE_BUCKET_NAME', 'storage')
-        self.endpoint_url = os.getenv('SUPABASE_URL')
-        self.region_name = 'us-east-1'  # Supabase default
         
-        # Configure for public access
-        self.default_acl = 'public-read'
-        self.querystring_auth = False
-        self.file_overwrite = False
+        if not all([self.supabase_url, self.supabase_key, self.bucket_name]):
+            raise ValueError("Missing Supabase configuration. Please check SUPABASE_URL, SUPABASE_SECRET_ACCESS_KEY, and SUPABASE_BUCKET_NAME environment variables.")
         
-        # Set custom domain for direct Supabase access
-        if self.endpoint_url and self.bucket_name:
-            self.custom_domain = f"{self.endpoint_url}/storage/v1/object/public/{self.bucket_name}"
-    
-    def url(self, name):
-        """
-        Return the URL for accessing the file.
-        Uses Supabase's public URL format.
-        """
-        if self.custom_domain:
-            return urljoin(self.custom_domain + '/', name)
-        return super().url(name)
-    
-    def _normalize_name(self, name):
-        """
-        Normalize the file name to be compatible with Supabase.
-        """
-        # Remove any leading slashes and normalize path
-        normalized = name.lstrip('/')
-        return super()._normalize_name(normalized)
+        # Ensure URL doesn't end with slash
+        self.supabase_url = self.supabase_url.rstrip('/')
+        
+        # Build API URLs
+        self.storage_api_url = f"{self.supabase_url}/storage/v1/object"
+        self.public_url_base = f"{self.supabase_url}/storage/v1/object/public/{self.bucket_name}"
+        
+        # Headers for API requests
+        self.headers = {
+            'Authorization': f'Bearer {self.supabase_key}',
+            'apikey': self.supabase_key
+        }
     
     def _save(self, name, content):
         """
-        Save the file with proper Supabase configuration.
+        Save file to Supabase Storage.
         """
-        # Ensure the file has proper metadata
-        if hasattr(content, 'content_type') and content.content_type:
-            self.object_parameters = {
-                'ContentType': content.content_type,
-                'CacheControl': 'max-age=86400',
-            }
+        # Normalize the file name
+        cleaned_name = self._clean_name(name)
         
-        return super()._save(name, content)
+        # Prepare the upload URL - use public endpoint for uploads
+        upload_url = f"{self.storage_api_url}/public/{self.bucket_name}/{cleaned_name}"
+        
+        # Read file content
+        if hasattr(content, 'read'):
+            file_content = content.read()
+        else:
+            file_content = content
+        
+        # Determine content type
+        content_type = getattr(content, 'content_type', 'application/octet-stream')
+        
+        # Prepare headers for upload
+        upload_headers = self.headers.copy()
+        upload_headers['Content-Type'] = content_type
+        upload_headers['Cache-Control'] = 'max-age=86400'
+        
+        # Upload file using PUT request (Supabase Storage API uses PUT, not POST)
+        try:
+            print(f"DEBUG: Uploading to {upload_url}")
+            print(f"DEBUG: File size: {len(file_content)} bytes")
+            print(f"DEBUG: Content type: {content_type}")
+            
+            response = requests.put(
+                upload_url,
+                data=file_content,
+                headers=upload_headers,
+                timeout=30
+            )
+            
+            print(f"DEBUG: Upload response: {response.status_code}")
+            print(f"DEBUG: Upload response text: {response.text}")
+            
+            if response.status_code in [200, 201]:
+                return cleaned_name
+            else:
+                raise Exception(f"Upload failed: {response.status_code} - {response.text}")
+                
+        except requests.RequestException as e:
+            raise Exception(f"Network error during upload: {str(e)}")
+    
+    def _open(self, name, mode='rb'):
+        """
+        Open and read file from Supabase Storage.
+        """
+        try:
+            file_url = self.url(name)
+            response = requests.get(file_url, timeout=30)
+            
+            if response.status_code == 200:
+                return ContentFile(response.content)
+            else:
+                raise Exception(f"File not found: {response.status_code}")
+                
+        except requests.RequestException as e:
+            raise Exception(f"Network error during file read: {str(e)}")
+    
+    def delete(self, name):
+        """
+        Delete file from Supabase Storage.
+        """
+        cleaned_name = self._clean_name(name)
+        delete_url = f"{self.storage_api_url}/{self.bucket_name}/{cleaned_name}"
+        
+        try:
+            response = requests.delete(delete_url, headers=self.headers, timeout=30)
+            return response.status_code in [200, 204]
+        except requests.RequestException:
+            return False
+    
+    def exists(self, name):
+        """
+        Check if file exists in Supabase Storage.
+        """
+        try:
+            file_url = self.url(name)
+            response = requests.head(file_url, timeout=10)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+    
+    def size(self, name):
+        """
+        Get file size from Supabase Storage.
+        """
+        try:
+            file_url = self.url(name)
+            response = requests.head(file_url, timeout=10)
+            if response.status_code == 200:
+                return int(response.headers.get('Content-Length', 0))
+        except (requests.RequestException, ValueError):
+            pass
+        return 0
+    
+    def url(self, name):
+        """
+        Return the public URL for the file.
+        """
+        cleaned_name = self._clean_name(name)
+        return f"{self.public_url_base}/{cleaned_name}"
+    
+    def _clean_name(self, name):
+        """
+        Clean and normalize file name for Supabase.
+        """
+        # Remove leading slashes and normalize
+        return name.lstrip('/').replace('\\', '/')
+    
+    def get_available_name(self, name, max_length=None):
+        """
+        Return a filename that's free on the target storage system.
+        For Supabase, we'll use the original name since our models use UUID.
+        """
+        return name
 
 
+@deconstructible
 class SupabasePublicStorage(SupabaseStorage):
     """
     Supabase storage for public files (images, documents).
     """
-    location = 'public'
-    default_acl = 'public-read'
+    pass
 
 
+@deconstructible 
 class SupabasePrivateStorage(SupabaseStorage):
     """
     Supabase storage for private files.
     """
-    location = 'private'
-    default_acl = 'private'
-    querystring_auth = True
+    def url(self, name):
+        """
+        For private files, return a signed URL (if needed in future).
+        For now, returns the same public URL.
+        """
+        return super().url(name)

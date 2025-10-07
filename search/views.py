@@ -5,13 +5,13 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from lowongan.models import Lowongan
 from narasumber.models import *
 from event.models import *
 from django.db.models import Q
 from django.core.paginator import Paginator
 import json
 
-@login_required
 def search_preview(request):
     """
     Return JSON search preview results for popup suggestions.
@@ -62,17 +62,17 @@ def search_preview(request):
                 "subtitle": narsum.expertise_area.name,
             })
 
-    # elif category == "lowongan":
-    #     lowongan_matches = Lowongan.objects.filter(
-    #         Q(title__icontains=query) | Q(description__icontains=query)
-    #     )[:5]
-    #     for low in lowongan_matches:
-    #         results.append({
-    #             "type": "lowongan",
-    #             "id": low.id,
-    #             "title": low.title,
-    #             "subtitle": low.company_name if hasattr(low, "company_name") else "",
-    #         })
+    elif category == "lowongan":
+        lowongan_matches = Lowongan.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:5]
+        for low in lowongan_matches:
+            results.append({
+                "type": "lowongan",
+                "id": low.id,
+                "title": low.title,
+                "subtitle": low.company_name if hasattr(low, "company_name") else "",
+            })
 
     else:
         # --- Default: search all categories (preview) ---
@@ -98,22 +98,22 @@ def search_preview(request):
                 "subtitle": narsum.expertise_area.name,
             })
 
-        # lowongan_matches = Lowongan.objects.filter(
-        #     Q(title__icontains=query) | Q(description__icontains=query)
-        # )[:3]
-        # for low in lowongan_matches:
-        #     results.append({
-        #         "type": "lowongan",
-        #         "id": low.id,
-        #         "title": low.title,
-        #         "subtitle": low.company_name if hasattr(low, "company_name") else "",
-        #     })
+        lowongan_matches = Lowongan.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:3]
+        for low in lowongan_matches:
+            results.append({
+                "type": "lowongan",
+                "id": low.id,
+                "title": low.title,
+                "subtitle": low.company_name if hasattr(low, "company_name") else "",
+            })
 
     return JsonResponse({"results": results})
 
 
-@login_required
 def search_result_page(request):
+    
     query = request.GET.get("q", "").strip()
     category = request.GET.get("category", "").lower()
     page_number = request.GET.get("page", 1)
@@ -131,15 +131,19 @@ def search_result_page(request):
     elif lowered.startswith("narasumber:"):
         category = "narasumber"
         query = query[len("narasumber:"):].strip()
+    elif lowered.startswith("pengguna:"):
+        category = "pengguna"
+        query = query[len("pengguna:"):].strip()
 
-    events, narasumbers, lowongans = [], [], []
-    has_more = {"event": False, "narasumber": False, "lowongan": False}
+    events, narasumbers, lowongans, penggunas = [], [], [], []
+    has_more = {"event": False, "narasumber": False, "lowongan": False, "pengguna": False}
     pagination_obj = None  
 
     # counts default
     events_count = 0
     narasumbers_count = 0
     lowongans_count = 0
+    penggunas_count = 0
 
     # =============== NARASUMBER ===============
     if category == "narasumber":
@@ -168,16 +172,34 @@ def search_result_page(request):
         pagination_obj = events
 
     # =============== LOWONGAN ===============
-    # elif category == "lowongan":
-    #     qs = Lowongan.objects.all()
-    #     if query:
-    #         qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+    elif category == "lowongan":
+        qs = Lowongan.objects.all()
+        if query:
+            qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        if expertise_ids:
+            qs = qs.filter(expertise_category__id__in=expertise_ids)
 
-    #     qs = qs.order_by("-created_at")
-    #     lowongans_count = qs.count()
-    #     paginator = Paginator(qs, 25)
-    #     lowongans = paginator.get_page(page_number)
-    #     pagination_obj = lowongans
+        qs = qs.order_by("-created_at")
+        lowongans_count = qs.count()
+        paginator = Paginator(qs, 25)
+        lowongans = paginator.get_page(page_number)
+        pagination_obj = lowongans
+    
+    # =============== PENGGUNA ===============
+    elif category == "pengguna":
+        qs = User.objects.all()
+        if query:
+            qs = qs.filter(
+                Q(username__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(email__icontains=query)
+            )
+        qs = qs.order_by("-date_joined")
+        penggunas_count = qs.count()
+        paginator = Paginator(qs, 25)
+        penggunas = paginator.get_page(page_number)
+        pagination_obj = penggunas
 
     # =============== ALL CATEGORIES (preview) ===============
     else:
@@ -193,14 +215,26 @@ def search_result_page(request):
         narasumbers_count = narsum_qs.count()
         narasumbers = narsum_qs.order_by("-created_at")[:9]
 
-        # lowongan_qs = Lowongan.objects.all()
-        # if query:
-        #     lowongan_qs = lowongan_qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        # lowongans_count = lowongan_qs.count()
-        # lowongans = lowongan_qs.order_by("-created_at")[:9]
+        lowongan_qs = Lowongan.objects.all()
+        if query:
+            lowongan_qs = lowongan_qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        lowongans_count = lowongan_qs.count()
+        lowongans = lowongan_qs.order_by("-created_at")[:9]
+
+        pengguna_qs = User.objects.all()
+        if query:
+            pengguna_qs = pengguna_qs.filter(
+                Q(username__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(email__icontains=query)
+            )
+        penggunas_count = pengguna_qs.count()
+        penggunas = pengguna_qs.order_by("-date_joined")[:9]
 
         has_more["event"] = event_qs.count() > 8
         has_more["narasumber"] = narsum_qs.count() > 8
+        has_more["pengguna"] = pengguna_qs.count() > 8
         # has_more["lowongan"] = lowongan_qs.count() > 8
 
     context = {
@@ -209,6 +243,7 @@ def search_result_page(request):
         "events": events,
         "narasumbers": narasumbers,
         "lowongans": lowongans,
+        "penggunas": penggunas,
         "has_more": has_more,
         "pagination_obj": pagination_obj,
         "expertise_categories": ExpertiseCategory.objects.all(),
@@ -216,5 +251,6 @@ def search_result_page(request):
         "events_count": events_count,
         "narasumbers_count": narasumbers_count,
         "lowongans_count": lowongans_count,
+        "penggunas_count": penggunas_count,
     }
     return render(request, "search-result.html", context)

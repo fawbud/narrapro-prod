@@ -118,7 +118,19 @@
 	rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
 />
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/auto-crop-widget.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/auto-crop-widget.js' %}"></script>
+<script src="{% static 'js/education-form-handler.js' %}"></script>
+<script src="{% static 'js/certification-form-handler.js' %}"></script>
+<script src="{% static 'js/event-form-handler.js' %}"></script>
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
 		const userTypeSelect = document.getElementById('user_type_select');
@@ -129,6 +141,7 @@
 			const selectedType = this.value;
 
 			if (selectedType) {
+				
 				// Show loading
 				roleSpecificFields.innerHTML = `
                 <div class="text-center text-muted py-4">
@@ -152,6 +165,56 @@
 								window.initializeSocialMediaWidget(roleSpecificFields);
 							} else {
 								console.error('🔴 initializeSocialMediaWidget function not found!');
+							}
+
+							// Initialize auto-crop widgets for newly loaded content
+							setTimeout(() => {
+								// Profile picture widgets (1:1 ratio, 1MB)
+								const profileWidgets = roleSpecificFields.querySelectorAll('.enhanced-image-widget[data-type="profile"]');
+								profileWidgets.forEach((widget) => {
+									new AutoCropWidget(widget, {
+										aspectRatio: 1,
+										maxSizeKB: 1024,
+										outputWidth: 800
+									});
+								});
+
+								// Cover image widgets (4:1 ratio, 4MB)
+								const coverWidgets = roleSpecificFields.querySelectorAll('.enhanced-image-widget[data-type="cover"]');
+								coverWidgets.forEach((widget) => {
+									new AutoCropWidget(widget, {
+										aspectRatio: 4,
+										maxSizeKB: 4096,
+										outputWidth: 1200
+									});
+								});
+							}, 150);
+
+							// Initialize education forms for narasumber
+							if (selectedType === 'narasumber' && window.initializeEducationForms) {
+								console.log('🔵 Calling initializeEducationForms for AJAX content');
+								// Add a small delay to ensure the DOM is fully ready
+								setTimeout(() => {
+									window.initializeEducationForms(roleSpecificFields);
+								}, 100);
+							}
+
+							// Initialize certification forms for narasumber
+							if (selectedType === 'narasumber' && window.initializeCertificationForms) {
+								console.log('🔵 Calling initializeCertificationForms for AJAX content');
+								// Add a small delay to ensure the DOM is fully ready
+								setTimeout(() => {
+									window.initializeCertificationForms(roleSpecificFields);
+								}, 100);
+							}
+
+							// Initialize event form handler for event organizers
+							if (selectedType === 'event' && window.initializeEventFormHandler) {
+								console.log('🔵 Calling initializeEventFormHandler for AJAX content');
+								// Add a small delay to ensure the DOM is fully ready
+								setTimeout(() => {
+									window.initializeEventFormHandler(roleSpecificFields);
+								}, 100);
 							}
 						} else {
 							roleSpecificFields.innerHTML = `

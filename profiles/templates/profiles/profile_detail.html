@@ -76,6 +76,14 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                         <p class="mb-0">{{ narasumber_profile.full_name }}</p>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Pekerjaan</label>
+                        <p class="mb-0">{{ narasumber_profile.pekerjaan }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Jabatan</label>
+                        <p class="mb-0">{{ narasumber_profile.jabatan }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Area Keahlian</label>
                         <p class="mb-0">{{ narasumber_profile.expertise_area.name }}</p>
                     </div>
@@ -101,24 +109,76 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                         </p>
                     </div>
                     {% endif %}
+                    {% if narasumber_profile.linkedin_url %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">LinkedIn</label>
+                        <p class="mb-0">
+                            <a href="{{ narasumber_profile.linkedin_url }}" target="_blank" class="text-decoration-none">
+                                <i class="fab fa-linkedin me-1"></i>Lihat LinkedIn
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Education Section -->
+        {% if narasumber_profile.educations.all %}
+        <hr>
+        <h6 class="text-muted mb-3">Riwayat Edukasi</h6>
+        <div class="row">
+            <div class="col-12">
+                {% for education in narasumber_profile.educations.all %}
+                <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <h6 class="mb-1 fw-bold">{{ education.school_university }} - {{ education.get_degree_display }}</h6>
+                    {% if education.field_of_study or education.graduation_year %}
+                    <p class="mb-0 text-muted">
+                        {% if education.field_of_study %}{{ education.field_of_study }}{% endif %}{% if education.field_of_study and education.graduation_year %} - {% endif %}{% if education.graduation_year %}Lulus {{ education.graduation_year }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Certification Section -->
+        {% if narasumber_profile.certifications.all %}
+        <hr>
+        <h6 class="text-muted mb-3">Sertifikasi Profesional</h6>
+        <div class="row">
+            <div class="col-12">
+                {% for cert in narasumber_profile.certifications.all %}
+                <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <h6 class="mb-1 fw-bold">{{ cert.title }}</h6>
+                    <p class="mb-0 text-muted">{{ cert.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% elif profile_user.user_type == 'event' and event_profile %}
         <hr>
         <h6 class="text-muted mb-3">Informasi Event Organizer</h6>
-        <div class="row">
-            {% if event_profile.profile_picture %}
-            <div class="col-md-3 mb-3 text-center">
-                <img src="{{ event_profile.profile_picture.url }}"
-                     alt="Profile Picture"
-                     class="img-fluid rounded-circle"
-                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+
+        <!-- Event Cover Image -->
+        {% if event_profile.cover_image %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <label class="form-label text-muted">Cover Image</label>
+                <div class="position-relative" style="padding-bottom: 25%; overflow: hidden; border-radius: 0.375rem; border: 1px solid #dee2e6;">
+                    <img src="{{ event_profile.cover_image.url }}"
+                         alt="Event Cover"
+                         class="position-absolute w-100 h-100"
+                         style="object-fit: cover; top: 0; left: 0; border-radius: 0.375rem;">
+                </div>
             </div>
-            <div class="col-md-9">
-            {% else %}
+        </div>
+        {% endif %}
+
+        <div class="row">
             <div class="col-md-12">
-            {% endif %}
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Nama Event/Organisasi</label>
@@ -184,11 +244,70 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                 </div>
             </div>
         </div>
+        {% elif profile_user.user_type == 'pengguna' and pengguna_profile %}
+        <hr>
+        <h6 class="text-muted mb-3">Informasi Pengguna</h6>
+        <div class="row">
+            {% if pengguna_profile.profile_picture %}
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ pengguna_profile.profile_picture.url }}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="max-width: 150px; max-height: 150px; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+            {% else %}
+            <div class="col-md-12">
+            {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nama Lengkap</label>
+                        <p class="mb-0">{{ pengguna_profile.full_name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <p class="mb-0">{{ pengguna_profile.email }}</p>
+                    </div>
+                    {% if pengguna_profile.bio %}
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Bio</label>
+                        <p class="mb-0">{{ pengguna_profile.bio }}</p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.phone_number %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nomor Telepon</label>
+                        <p class="mb-0">{{ pengguna_profile.phone_number }}</p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.website %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Website</label>
+                        <p class="mb-0">
+                            <a href="{{ pengguna_profile.website }}" target="_blank" class="text-decoration-none">
+                                <i class="fas fa-external-link-alt me-1"></i>Kunjungi Website
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if pengguna_profile.linkedin_url %}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">LinkedIn</label>
+                        <p class="mb-0">
+                            <a href="{{ pengguna_profile.linkedin_url }}" target="_blank" class="text-decoration-none">
+                                <i class="fab fa-linkedin me-1"></i>Lihat LinkedIn
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         {% elif profile_user.user_type != '' %}
         <hr>
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
-            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi. 
+            Profil {{ profile_user.get_user_type_display|lower }} belum dilengkapi.
             <a href="{% url 'profiles:edit_profile' profile_user.username %}" class="alert-link">Lengkapi profil Anda</a>
         </div>
         {% endif %}
@@ -236,8 +355,9 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                     <div class="col-12 mb-2">
                         <h3 class="mb-1">{{ narasumber_profile.full_name }}</h3>
                         <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+                        <p class="text-muted mb-1"><strong>{{ narasumber_profile.pekerjaan }}</strong> - {{ narasumber_profile.jabatan }}</p>
                     </div>
-                    
+
                     <!-- Labels Row -->
                     <div class="col-12 mb-3">
                         <div class="d-flex flex-wrap gap-2">
@@ -313,6 +433,18 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
                     <span>Kirim Email</span>
                 </a>
             </div>
+
+            {% if user.is_authenticated and profile_user.user_type == 'narasumber' %}
+                {% if user.user_type == 'event' or user.user_type == 'pengguna' %}
+                <div class="col-md-4">
+                    <a href="{% url 'profiles:create_booking' username=user.username narasumber_id=profile_user.id %}" 
+                    class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-calendar-check me-2"></i>Book Narasumber
+                    </a>
+                </div>
+                {% endif %}
+            {% endif %}
+
             
             <!-- Call Link (if phone is public) -->
             {% if narasumber_profile.get_public_phone %}

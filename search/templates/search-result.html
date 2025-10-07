@@ -14,6 +14,33 @@
         background-color: #0e1e7a;
         color: #fff;
     }
+    .btn-brand {
+        background-color: #0e1e7a;
+        border: 1px solid #0e1e7a;
+        color: #fff;
+        transition: all 0.2s ease;
+    }
+    .btn-brand:hover {
+        background-color: #0b1560;
+        border-color: #0b1560;
+    }
+
+    .lowongan-card,
+    .event-card,
+    .narsum-card {
+        border: 1px solid #d9d9d9 !important;
+        box-shadow: 0 2px 8px rgba(95, 95, 95, 0.25) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .lowongan-card:hover,
+    .event-card:hover,
+    .narsum-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+        cursor: pointer;
+    }
+
 </style>
 {% endblock %}
 
@@ -46,49 +73,172 @@
         Narasumber
         </a>
 
+        <!-- Pengguna -->
+        <a href="{% if category == 'pengguna' %}?q={{ query }}{% else %}?q={{ query }}&category=pengguna{% endif %}"
+        class="btn border w-100 {% if category == 'pengguna' %}text-white{% endif %}"
+        style="border-color:#0e1e7a; {% if category == 'pengguna' %}background-color:#0e1e7a;{% else %}color:black;{% endif %}">
+        Pengguna
+        </a>
+
     </div>
 
 
     {% if not category or category == "lowongan" %}
     <!-- Lowongan -->
     <div id="sectionLowongan" class="mb-5">
+
+        {% if category == "lowongan" %}
+        <!-- Filter Expertise -->
+        <div class="border rounded p-3 mb-4 bg-white shadow-sm">
+            <form method="get" class="row g-3 align-items-center">
+                <input type="hidden" name="q" value="{{ query }}">
+                <input type="hidden" name="category" value="lowongan">
+
+                <!-- Expertise Checkboxes -->
+                <div class="col-12 col-md-10">
+                    <div class="d-flex flex-wrap gap-3">
+                        {% for ex in expertise_categories %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                type="checkbox"
+                                name="expertise"
+                                value="{{ ex.id }}"
+                                id="lowongan_ex{{ ex.id }}"
+                                {% if ex.id in selected_expertise %}checked{% endif %}
+                                style="accent-color:#0e1e7a;">
+                            <label class="form-check-label small" for="lowongan_ex{{ ex.id }}">
+                                {{ ex.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Filter Button -->
+                <div class="col-12 col-md-2 text-md-end">
+                    <button type="submit" class="btn btn-sm btn-brand text-white px-4">Filter</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
         <h4 class="mb-3">
             {% if category == "lowongan" %}
                 Lowongan ({{ lowongans.start_index }}–{{ lowongans.end_index }} dari {{ lowongans.paginator.count }})
             {% else %}
-                Lowongan 
+                Lowongan
             {% endif %}
         </h4>
         {% if lowongans %}
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
                 {% if category == "lowongan" %}
                     {% for l in lowongans %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ l.title }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ l.description|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge text-white rounded" style="background-color:#0e1e7a;">Lowongan</span>
+                        <a href="{% url 'lowongan:detail' l.id %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm lowongan-card">
+                                {% if l.created_by.event_profile.cover_image %}
+                                <img src="{{ l.created_by.event_profile.cover_image.url }}"
+                                    class="card-img-top"
+                                    alt="{{ l.title }}"
+                                    style="width: 100%; height: auto; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 4/1;">
+                                    <i class="bi bi-calendar-event text-secondary" style="font-size:2rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Title -->
+                                    <h5 class="card-title mb-1">{{ l.title }}</h5>
+                                    <p class="text-muted small mb-2">{{ l.get_job_type_display }}</p>
+
+                                    <!-- Badges -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary me-1 small">{{ l.expertise_category.name }}</span>
+                                        {% if l.is_remote %}
+                                            <span class="badge rounded-pill bg-success small">Remote</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Description -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ l.description|truncatewords:20 }}
+                                    </p>
+
+                                    <!-- Info list -->
+                                    <ul class="list-unstyled small mt-2 mb-0">
+                                        <li><i class="bi bi-geo-alt me-1 text-muted"></i> {{ l.location_display }}</li>
+                                        <li><i class="bi bi-calendar-event me-1 text-muted"></i> {{ l.event_date|date:"M j, Y" }}</li>
+                                        <li><i class="bi bi-hourglass-split me-1 text-muted"></i> {{ l.duration_hours }} jam</li>
+                                        {% if l.budget_amount %}
+                                        <li>
+                                            <i class="bi bi-cash-coin me-1 text-muted"></i> 
+                                            IDR {{ l.budget_amount|floatformat:0 }}{% if l.budget_negotiable %} (nego){% endif %}
+                                        </li>
+                                        {% endif %}
+                                        <li>
+                                            <i class="bi bi-alarm me-1 text-danger"></i> 
+                                            Deadline: {{ l.application_deadline|date:"M j, Y" }}
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% else %}
                     {% for l in lowongans|slice:":8" %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ l.title }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ l.description|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge bg-success text-white rounded">Lowongan</span>
+                        <a href="{% url 'lowongan:detail' l.id %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm lowongan-card">
+                                {% if l.created_by.event_profile.cover_image %}
+                                <img src="{{ l.created_by.event_profile.cover_image.url }}"
+                                    class="card-img-top"
+                                    alt="{{ l.title }}"
+                                    style="width: 100%; height: auto; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 4/1;">
+                                    <i class="bi bi-calendar-event text-secondary" style="font-size:2rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Title -->
+                                    <h5 class="card-title mb-1">{{ l.title }}</h5>
+                                    <p class="text-muted small mb-2">{{ l.get_job_type_display }}</p>
+
+                                    <!-- Badges -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary me-1 small">{{ l.expertise_category.name }}</span>
+                                        {% if l.is_remote %}
+                                            <span class="badge rounded-pill bg-success small">Remote</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Description -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ l.description|truncatewords:20 }}
+                                    </p>
+
+                                    <!-- Info list -->
+                                    <ul class="list-unstyled small mt-2 mb-0">
+                                        <li><i class="bi bi-geo-alt me-1 text-muted"></i> {{ l.location_display }}</li>
+                                        <li><i class="bi bi-calendar-event me-1 text-muted"></i> {{ l.event_date|date:"M j, Y" }}</li>
+                                        <li><i class="bi bi-hourglass-split me-1 text-muted"></i> {{ l.duration_hours }} jam</li>
+                                        {% if l.budget_amount %}
+                                        <li>
+                                            <i class="bi bi-cash-coin me-1 text-muted"></i> 
+                                            IDR {{ l.budget_amount|floatformat:0 }}{% if l.budget_negotiable %} (nego){% endif %}
+                                        </li>
+                                        {% endif %}
+                                        <li>
+                                            <i class="bi bi-alarm me-1 text-danger"></i> 
+                                            Deadline: {{ l.application_deadline|date:"M j, Y" }}
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% endif %}
@@ -100,13 +250,13 @@
                     <ul class="pagination justify-content-center">
                         {% if lowongans.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.previous_page_number }}">Previous</a>
+                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.previous_page_number }}{% for e in selected_expertise %}&expertise={{ e }}{% endfor %}">Previous</a>
                         </li>
                         {% endif %}
                         <li class="page-item disabled"><span class="page-link">Page {{ lowongans.number }} of {{ lowongans.paginator.num_pages }}</span></li>
                         {% if lowongans.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.next_page_number }}">Next</a>
+                            <a class="page-link" href="?q={{ query }}&category=lowongan&page={{ lowongans.next_page_number }}{% for e in selected_expertise %}&expertise={{ e }}{% endfor %}">Next</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -133,41 +283,113 @@
             {% endif %}
         </h4>
         {% if events %}
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
                 {% if category == "event" %}
                     {% for e in events %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            {% if e.cover_image %}
-                            <img src="{{ e.cover_image.url }}" class="card-img-top" alt="{{ e.name }}">
-                            {% endif %}
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ e.name }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ e.description|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge text-white rounded" style="background-color:#366ccf;">{{ e.location_display }}</span>
+                        <a href="{% url 'profiles:profile_detail' e.user.username %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm event-card">
+                                {% if e.cover_image %}
+                                <img src="{{ e.cover_image.url }}"
+                                    class="card-img-top"
+                                    alt="{{ e.name }}"
+                                    style="width: 100%; height: auto; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 4/1;">
+                                    <i class="bi bi-calendar-event text-secondary" style="font-size:2rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Title -->
+                                    <h5 class="card-title mb-1">{{ e.name }}</h5>
+                                    <p class="text-muted small mb-2">{{ e.event_status }}</p>
+
+                                    <!-- Badges: lokasi & durasi -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary me-1 small">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ e.location_display }}
+                                        </span>
+                                        <span class="badge rounded-pill bg-secondary small">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ e.event_duration_display }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ e.description|truncatewords:20 }}
+                                    </p>
+
+                                    <!-- Extra Info -->
+                                    <ul class="list-unstyled small mt-2 mb-0">
+                                        {% if e.website %}
+                                        <li><i class="bi bi-globe me-1 text-muted"></i> Website tersedia</li>
+                                        {% endif %}
+                                        {% if e.linkedin_url %}
+                                        <li><i class="bi bi-linkedin me-1 text-muted"></i> LinkedIn tersedia</li>
+                                        {% endif %}
+                                        {% if e.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ e.get_public_phone }}</li>
+                                        {% endif %}
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ e.email }}</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% else %}
                     {% for e in events|slice:":8" %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            {% if e.cover_image %}
-                            <img src="{{ e.cover_image.url }}" class="card-img-top" alt="{{ e.name }}">
-                            {% endif %}
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ e.name }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ e.description|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge text-white rounded" style="background-color:#366ccf;">{{ e.location_display }}</span>
+                        <a href="{% url 'profiles:profile_detail' e.user.username %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm event-card">
+                                {% if e.cover_image %}
+                                <img src="{{ e.cover_image.url }}"
+                                    class="card-img-top"
+                                    alt="{{ e.name }}"
+                                    style="width: 100%; height: auto; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 4/1;">
+                                    <i class="bi bi-calendar-event text-secondary" style="font-size:2rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Title -->
+                                    <h5 class="card-title mb-1">{{ e.name }}</h5>
+                                    <p class="text-muted small mb-2">{{ e.event_status }}</p>
+
+                                    <!-- Badges: lokasi & durasi -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary me-1 small">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ e.location_display }}
+                                        </span>
+                                        <span class="badge rounded-pill bg-info small">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ e.event_duration_display }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ e.description|truncatewords:20 }}
+                                    </p>
+
+                                    <!-- Extra Info -->
+                                    <ul class="list-unstyled small mt-2 mb-0">
+                                        {% if e.website %}
+                                        <li><i class="bi bi-globe me-1 text-muted"></i> Website tersedia</li>
+                                        {% endif %}
+                                        {% if e.linkedin_url %}
+                                        <li><i class="bi bi-linkedin me-1 text-muted"></i> LinkedIn tersedia</li>
+                                        {% endif %}
+                                        {% if e.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ e.get_public_phone }}</li>
+                                        {% endif %}
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ e.email }}</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% endif %}
@@ -207,16 +429,16 @@
 
         {% if category == "narasumber" %}
         <!-- Filter Expertise -->
-        <div class="bg-light border rounded p-3 mb-4">
-            <form method="get" class="row align-items-start">
+        <div class="border rounded p-3 mb-4 bg-white shadow-sm">
+            <form method="get" class="row g-3 align-items-center">
                 <input type="hidden" name="q" value="{{ query }}">
                 <input type="hidden" name="category" value="narasumber">
 
-                <!-- Checkbox Section (col-10) -->
+                <!-- Expertise Checkboxes -->
                 <div class="col-12 col-md-10">
                     <div class="d-flex flex-wrap gap-3">
                         {% for ex in expertise_categories %}
-                        <div class="form-check">
+                        <div class="form-check form-check-inline">
                             <input class="form-check-input"
                                 type="checkbox"
                                 name="expertise"
@@ -224,7 +446,7 @@
                                 id="ex{{ ex.id }}"
                                 {% if ex.id in selected_expertise %}checked{% endif %}
                                 style="accent-color:#0e1e7a;">
-                            <label class="form-check-label" for="ex{{ ex.id }}">
+                            <label class="form-check-label small" for="ex{{ ex.id }}">
                                 {{ ex.name }}
                             </label>
                         </div>
@@ -232,10 +454,9 @@
                     </div>
                 </div>
 
-
-                <!-- Button Section (col-2) -->
-                <div class="col-12 col-md-2 text-md-end mt-3 mt-md-0">
-                    <button type="submit" class="btn btn-sm border-0 text-white" style="background-color:#0e1e7a;">Filter</button>
+                <!-- Filter Button -->
+                <div class="col-12 col-md-2 text-md-end">
+                    <button type="submit" class="btn btn-sm btn-brand text-white px-4">Filter</button>
                 </div>
             </form>
         </div>
@@ -252,35 +473,117 @@
 
 
         {% if narasumbers %}
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
                 {% if category == "narasumber" %}
                     {% for n in narasumbers %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ n.full_name }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ n.bio|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge text-white rounded" style="background-color:#6c757d;">{{ n.expertise_area.name }}</span>
+                        <a href="{% url 'profiles:profile_detail' n.user.username %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm narsum-card">
+                                {% if n.profile_picture %}
+                                <img src="{{ n.profile_picture.url }}" 
+                                    class="card-img-top" 
+                                    alt="{{ n.full_name }}" 
+                                    style="object-fit: cover; height: 180px;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <i class="bi bi-person-circle text-secondary" style="font-size:3rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Nama -->
+                                    <h5 class="card-title mb-1">{{ n.full_name }}</h5>
+                                    <p class="text-muted small mb-2">{{ n.experience_display }}</p>
+
+                                    <!-- Expertise Badge -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary small">
+                                            {{ n.expertise_area.name }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Bio -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ n.bio|truncatewords:18 }}
+                                    </p>
+
+                                    <!-- Lokasi -->
+                                    <p class="small mb-1">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i> {{ n.location_display }}
+                                    </p>
+
+                                    <!-- Kontak (opsional) -->
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ n.email }}</li>
+                                        {% if n.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ n.get_public_phone }}</li>
+                                        {% endif %}
+                                        {% if n.linkedin_url %}
+                                        <li><i class="bi bi-linkedin me-1 text-muted"></i> LinkedIn tersedia</li>
+                                        {% endif %}
+                                        {% if n.portfolio_link %}
+                                        <li><i class="bi bi-globe me-1 text-muted"></i> Portfolio tersedia</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% else %}
                     {% for n in narasumbers|slice:":8" %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ n.full_name }}</h5>
-                                <p class="card-text text-muted flex-grow-1">{{ n.bio|truncatewords:25 }}</p>
-                                <div class="mt-2">
-                                    <span class="badge text-white rounded" style="background-color:#6c757d;">{{ n.expertise_area.name }}</span>
+                        <a href="{% url 'profiles:profile_detail' n.user.username %}" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm narsum-card">
+                                {% if n.profile_picture %}
+                                <img src="{{ n.profile_picture.url }}" 
+                                    class="card-img-top" 
+                                    alt="{{ n.full_name }}" 
+                                    style="object-fit: cover; height: 180px;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <i class="bi bi-person-circle text-secondary" style="font-size:3rem;"></i>
                                 </div>
-                                <a href="#" class="btn btn-sm mt-2 text-white" style="background-color:#0e1e7a;">Lihat Detail</a>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Nama -->
+                                    <h5 class="card-title mb-1">{{ n.full_name }}</h5>
+                                    <p class="text-muted small mb-2">{{ n.experience_display }}</p>
+
+                                    <!-- Expertise Badge -->
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill bg-primary small">
+                                            {{ n.expertise_area.name }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Bio -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ n.bio|truncatewords:18 }}
+                                    </p>
+
+                                    <!-- Lokasi -->
+                                    <p class="small mb-1">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i> {{ n.location_display }}
+                                    </p>
+
+                                    <!-- Kontak (opsional) -->
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ n.email }}</li>
+                                        {% if n.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ n.get_public_phone }}</li>
+                                        {% endif %}
+                                        {% if n.linkedin_url %}
+                                        <li><i class="bi bi-linkedin me-1 text-muted"></i> LinkedIn tersedia</li>
+                                        {% endif %}
+                                        {% if n.portfolio_link %}
+                                        <li><i class="bi bi-globe me-1 text-muted"></i> Portfolio tersedia</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 {% endif %}
@@ -313,5 +616,139 @@
         {% endif %}
     </div>
     {% endif %}
+
+    {% if not category or category == "pengguna" %}
+    <!-- Pengguna -->
+    <div id="sectionPengguna" class="mt-5">
+
+        <h4 class="mb-3">
+            {% if category == "pengguna" %}
+                Pengguna ({{ penggunas.start_index }}–{{ penggunas.end_index }} dari {{ penggunas.paginator.count }})
+            {% else %}
+                Pengguna
+            {% endif %}
+        </h4>
+
+        {% if penggunas %}
+            <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                {% if category == "pengguna" %}
+                    {% for p in penggunas %}
+                    <div class="col">
+                        <a href="#" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm narsum-card">
+                                {% if p.profile_picture %}
+                                <img src="{{ p.profile_picture.url }}" 
+                                    class="card-img-top" 
+                                    alt="{{ p.full_name }}" 
+                                    style="object-fit: cover; height: 180px;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <i class="bi bi-person-circle text-secondary" style="font-size:3rem;"></i>
+                                </div>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Nama -->
+                                    <h5 class="card-title mb-1">{{ p.full_name }}</h5>
+                                    <p class="text-muted small mb-2">Pengguna Terdaftar</p>
+
+                                    <!-- Bio -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ p.bio|truncatewords:18 }}
+                                    </p>
+
+                                    <!-- Lokasi -->
+                                    <p class="small mb-1">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i> {{ p.location_display }}
+                                    </p>
+
+                                    <!-- Kontak -->
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ p.email }}</li>
+                                        {% if p.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ p.get_public_phone }}</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for p in penggunas|slice:":8" %}
+                    <div class="col">
+                        <a href="#" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm narsum-card">
+                                {% if p.profile_picture %}
+                                <img src="{{ p.profile_picture.url }}" 
+                                    class="card-img-top" 
+                                    alt="{{ p.full_name }}" 
+                                    style="object-fit: cover; height: 180px;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <i class="bi bi-person-circle text-secondary" style="font-size:3rem;"></i>
+                                </div>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Nama -->
+                                    <h5 class="card-title mb-1">{{ p.full_name }}</h5>
+                                    <p class="text-muted small mb-2">Pengguna Terdaftar</p>
+
+                                    <!-- Bio -->
+                                    <p class="card-text small flex-grow-1">
+                                        {{ p.bio|truncatewords:18 }}
+                                    </p>
+
+                                    <!-- Lokasi -->
+                                    <p class="small mb-1">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i> {{ p.location_display }}
+                                    </p>
+
+                                    <!-- Kontak -->
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="bi bi-envelope me-1 text-muted"></i> {{ p.email }}</li>
+                                        {% if p.get_public_phone %}
+                                        <li><i class="bi bi-telephone me-1 text-muted"></i> {{ p.get_public_phone }}</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            {% if category == "pengguna" %}
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-3">
+                <ul class="pagination justify-content-center">
+                    {% if penggunas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&category=pengguna&page={{ penggunas.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Page {{ penggunas.number }} of {{ penggunas.paginator.num_pages }}</span>
+                    </li>
+                    {% if penggunas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&category=pengguna&page={{ penggunas.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% elif has_more.pengguna %}
+                <div class="text-center mt-3">
+                    <a href="?q={{ query }}&category=pengguna" class="btn btn-outline-brand">More Pengguna</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">Tidak ada pengguna ditemukan.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

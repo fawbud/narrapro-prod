@@ -34,8 +34,9 @@
                                 <div class="col-12 mb-2">
                                     <h3 class="mb-1">{{ narasumber_profile.full_name }}</h3>
                                     <p class="text-muted mb-2">@{{ profile_user.username }}</p>
+                                    <p class="text-muted mb-1"><strong>{{ narasumber_profile.pekerjaan }}</strong> - {{ narasumber_profile.jabatan }}</p>
                                 </div>
-                                
+
                                 <!-- Labels Row -->
                                 <div class="col-12 mb-3">
                                     <div class="d-flex flex-wrap gap-1">
@@ -47,6 +48,17 @@
                                         {% endif %}
                                     </div>
                                 </div>
+
+                                <!-- Book Narasumber Button -->
+                                {% if user.is_authenticated and profile_user.user_type == 'narasumber' %}
+                                    {% if user.user_type == 'event' or user.user_type == 'pengguna' %}
+                                    <div class="col-12 mb-3">
+                                        <a href="{% url 'profiles:create_booking' username=user.username narasumber_id=profile_user.id %}" class="btn btn-primary">
+                                            <i class="fas fa-calendar-check me-2"></i>Book Narasumber
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
                                 
                                 <!-- Contact Details -->
                                 <div class="col-md-6 mb-2">
@@ -92,11 +104,59 @@
                     <h5 class="mb-0"><i class="fas fa-user-circle text-muted me-2"></i>Tentang Saya</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0 lead">{{ narasumber_profile.bio }}</p>
+                    <p class="mb-3 lead">{{ narasumber_profile.bio }}</p>
+                    {% if narasumber_profile.portfolio_link %}
+                    <div class="text-end">
+                        <a href="{{ narasumber_profile.portfolio_link }}"
+                           target="_blank"
+                           class="btn btn-outline-narasumber">
+                            <i class="fas fa-briefcase text-narasumber me-2"></i>
+                            Buka Portfolio
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Card 3: Contact Links -->
+            <!-- Card 3: Education History -->
+            {% if narasumber_profile.educations.all %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-graduation-cap text-muted me-2"></i>Riwayat Edukasi</h5>
+                </div>
+                <div class="card-body">
+                    {% for education in narasumber_profile.educations.all %}
+                    <div class="education-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <h6 class="mb-1 fw-bold">{{ education.school_university }} - {{ education.get_degree_display }}</h6>
+                        {% if education.field_of_study or education.graduation_year %}
+                        <p class="mb-0 text-muted">
+                            {% if education.field_of_study %}{{ education.field_of_study }}{% endif %}{% if education.field_of_study and education.graduation_year %} - {% endif %}{% if education.graduation_year %}Lulus {{ education.graduation_year }}{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 4: Professional Certifications -->
+            {% if narasumber_profile.certifications.all %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-certificate text-muted me-2"></i>Sertifikasi Profesional</h5>
+                </div>
+                <div class="card-body">
+                    {% for cert in narasumber_profile.certifications.all %}
+                    <div class="certification-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <h6 class="mb-1 fw-bold">{{ cert.title }}</h6>
+                        <p class="mb-0 text-muted">{{ cert.description }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 5: Contact Links -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header card-header-narasumber">
                     <h5 class="mb-0"><i class="fas fa-link text-narasumber me-2"></i>Hubungi Saya</h5>
@@ -111,6 +171,7 @@
                                 <span>Kirim Email</span>
                             </a>
                         </div>
+
                         
                         <!-- Call Link (if phone is public) -->
                         {% if narasumber_profile.get_public_phone %}
@@ -123,17 +184,6 @@
                         </div>
                         {% endif %}
                         
-                        <!-- Portfolio Link (if provided) -->
-                        {% if narasumber_profile.portfolio_link %}
-                        <div class="col-md-4">
-                            <a href="{{ narasumber_profile.portfolio_link }}" 
-                               target="_blank"
-                               class="btn btn-outline-narasumber w-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-briefcase text-narasumber me-2"></i>
-                                <span>Lihat Portfolio</span>
-                            </a>
-                        </div>
-                        {% endif %}
                         
                         <!-- LinkedIn Link (if provided) -->
                         {% if narasumber_profile.linkedin_url %}

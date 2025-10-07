@@ -5,6 +5,17 @@ from django.utils import timezone
 import uuid
 import os
 
+def get_storage():
+    """Get the appropriate storage backend based on environment"""
+    if os.getenv("PRODUCTION") == "true":
+        from narrapro.simple_storage import SimpleSupabaseStorage
+        print(f"EVENT MODEL DEBUG: Using SimpleSupabaseStorage for production")
+        return SimpleSupabaseStorage()
+    else:
+        from django.core.files.storage import default_storage
+        print(f"EVENT MODEL DEBUG: Using default storage for development")
+        return default_storage
+
 User = get_user_model()
 
 
@@ -23,28 +34,20 @@ def event_cover_upload_path(instance, filename):
     return f"event_covers/{instance.user.id}/{unique_filename}"
 
 
-def event_profile_picture_upload_path(instance, filename):
-    """
-    Generate a unique upload path for event profile pictures.
-    Format: event_profiles/user_id/uuid_filename
-    """
-    # Get file extension
-    ext = filename.split('.')[-1].lower()
-    
-    # Generate unique filename
-    unique_filename = f"{uuid.uuid4().hex}.{ext}"
-    
-    # Create path with user ID for organization
-    return f"event_profiles/{instance.user.id}/{unique_filename}"
-
-
 class EventProfile(models.Model):
     """
     Profile model for event organizers containing detailed information
     about their events, contact details, and scheduling.
     """
     
-    # Indonesian provinces choices (same as narasumber)
+    # Event type choices
+    EVENT_TYPE_CHOICES = [
+        ('online', 'Online'),
+        ('offline', 'Offline'),
+        ('hybrid', 'Hybrid'),
+    ]
+    
+    # Indonesian provinces choices (for offline/hybrid events)
     PROVINCE_CHOICES = [
         ('aceh', 'Aceh'),
         ('sumatera_utara', 'Sumatera Utara'),
@@ -86,6 +89,21 @@ class EventProfile(models.Model):
         ('papua_pegunungan', 'Papua Pegunungan'),
     ]
     
+    # Online platform choices (for online events)
+    ONLINE_PLATFORM_CHOICES = [
+        ('zoom', 'Zoom'),
+        ('google_meet', 'Google Meet'),
+        ('teams', 'Microsoft Teams'),
+        ('webex', 'Cisco Webex'),
+        ('skype', 'Skype'),
+        ('discord', 'Discord'),
+        ('youtube_live', 'YouTube Live'),
+        ('facebook_live', 'Facebook Live'),
+        ('instagram_live', 'Instagram Live'),
+        ('twitch', 'Twitch'),
+        ('lainnya', 'Lainnya'),
+    ]
+    
     # User relationship (one-to-one with custom User model)
     user = models.OneToOneField(
         User,
@@ -100,23 +118,29 @@ class EventProfile(models.Model):
         help_text="Name of the event or organization"
     )
     
-    # Profile picture
-    profile_picture = models.ImageField(
-        upload_to=event_profile_picture_upload_path,
-        blank=True,
-        null=True,
-        help_text="Profile picture for the event organizer (optional)"
-    )
-    
     description = models.TextField(
         help_text="Description of the event or organization"
     )
     
-    # Location
+    # Event type
+    event_type = models.CharField(
+        max_length=10,
+        choices=EVENT_TYPE_CHOICES,
+        default='offline',
+        help_text="Type of event: Online, Offline, or Hybrid"
+    )
+    
+    # Location (dynamic based on event type)
     location = models.CharField(
         max_length=50,
-        choices=PROVINCE_CHOICES,
-        help_text="Province/location in Indonesia where events are held"
+        help_text="Location/platform where events are held"
+    )
+    
+    # Target audience
+    target_audience = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Description of the target audience for this event (optional)"
     )
     
     # Contact information
@@ -152,10 +176,13 @@ class EventProfile(models.Model):
         help_text="LinkedIn profile URL (optional)"
     )
     
-    # Cover image
+    # Cover image (optional, but recommended)
     cover_image = models.ImageField(
         upload_to=event_cover_upload_path,
-        help_text="Cover image for the event or organization"
+        blank=True,
+        null=True,
+        help_text="Cover image for the event or organization (recommended)",
+        storage=get_storage()  # Dynamic storage based on environment
     )
     
     # Event dates (nullable for one-time events)
@@ -188,7 +215,7 @@ class EventProfile(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.name} - {self.get_location_display()}"
+        return f"{self.name} - {self.location_display}"
     
     def get_public_phone(self):
         """
@@ -198,15 +225,39 @@ class EventProfile(models.Model):
     
     def clean(self):
         """
-        Custom validation to ensure end_date is after start_date.
+        Custom validation to ensure end_date is after start_date
+        and location is appropriate for event type.
         """
         from django.core.exceptions import ValidationError
-        
+        import os
+
+        print(f"DEBUG EventProfile.clean(): event_type={self.event_type}, location={self.location}")
+
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
                 raise ValidationError({
                     'end_date': 'End date must be after start date.'
                 })
+
+        # Validate location based on event type - with better error handling
+        if self.event_type == 'online':
+            # For online events, location should be from online platform choices
+            valid_platforms = [choice[0] for choice in self.ONLINE_PLATFORM_CHOICES]
+            if self.location and self.location not in valid_platforms:
+                print(f"DEBUG EventProfile.clean(): Online validation failed. location='{self.location}', valid_platforms={valid_platforms[:5]}...")
+                raise ValidationError({
+                    'location': f'Please select a valid online platform for online events. Current: "{self.location}"'
+                })
+        elif self.event_type in ['offline', 'hybrid']:
+            # For offline/hybrid events, location should be from province choices
+            valid_provinces = [choice[0] for choice in self.PROVINCE_CHOICES]
+            if self.location and self.location not in valid_provinces:
+                print(f"DEBUG EventProfile.clean(): Offline/hybrid validation failed. location='{self.location}', valid_provinces={valid_provinces[:5]}...")
+                raise ValidationError({
+                    'location': f'Please select a valid province for offline/hybrid events. Current: "{self.location}"'
+                })
+
+        print(f"DEBUG EventProfile.clean(): Validation PASSED")
     
     def save(self, *args, **kwargs):
         """
@@ -214,13 +265,47 @@ class EventProfile(models.Model):
         """
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to clean up the cover image from storage.
+        """
+        if self.cover_image:
+            try:
+                self.cover_image.delete(save=False)
+            except Exception as e:
+                print(f"Error deleting cover image: {e}")
+        super().delete(*args, **kwargs)
     
     @property
     def location_display(self):
         """
-        Get the display name of the location.
+        Get the display name of the location based on event type.
         """
-        return self.get_location_display()
+        if self.event_type == 'online':
+            # Get display name from online platform choices
+            for choice_value, choice_display in self.ONLINE_PLATFORM_CHOICES:
+                if choice_value == self.location:
+                    return choice_display
+            return self.location  # Fallback if not found
+        else:
+            # Get display name from province choices
+            for choice_value, choice_display in self.PROVINCE_CHOICES:
+                if choice_value == self.location:
+                    return choice_display
+            return self.location  # Fallback if not found
+    
+    @classmethod
+    def get_location_choices_for_event_type(cls, event_type):
+        """
+        Get appropriate location choices based on event type.
+        """
+        if event_type == 'online':
+            return cls.ONLINE_PLATFORM_CHOICES
+        elif event_type in ['offline', 'hybrid']:
+            return cls.PROVINCE_CHOICES
+        else:
+            return []
     
     @property
     def is_one_time_event(self):
