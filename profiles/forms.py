@@ -60,9 +60,9 @@ class NarasumberProfileForm(forms.ModelForm):
         from narasumber.models import NarasumberProfile, ExpertiseCategory
         model = NarasumberProfile
         fields = [
-            'profile_picture', 'full_name', 'bio', 'expertise_area', 
-            'experience_level', 'years_of_experience', 'email', 
-            'phone_number', 'is_phone_public', 'location', 
+            'profile_picture', 'full_name', 'pekerjaan', 'jabatan', 'bio', 'expertise_area',
+            'experience_level', 'years_of_experience', 'email',
+            'phone_number', 'is_phone_public', 'location',
             'portfolio_link', 'linkedin_url'
         ]
         widgets = {
@@ -73,6 +73,16 @@ class NarasumberProfileForm(forms.ModelForm):
             'full_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Nama Lengkap'
+            }),
+            'pekerjaan': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Pekerjaan',
+                'maxlength': '40'
+            }),
+            'jabatan': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Jabatan',
+                'maxlength': '40'
             }),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -116,6 +126,8 @@ class NarasumberProfileForm(forms.ModelForm):
         labels = {
             'profile_picture': 'Foto Profil',
             'full_name': 'Nama Lengkap',
+            'pekerjaan': 'Pekerjaan',
+            'jabatan': 'Jabatan',
             'bio': 'Biografi',
             'expertise_area': 'Area Keahlian',
             'experience_level': 'Level Pengalaman',

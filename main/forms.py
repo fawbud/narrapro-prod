@@ -77,7 +77,7 @@ class NarasumberRegistrationForm(forms.ModelForm):
     class Meta:
         model = NarasumberProfile
         fields = [
-            'profile_picture', 'bio', 'expertise_area', 'experience_level', 
+            'profile_picture', 'pekerjaan', 'jabatan', 'bio', 'expertise_area', 'experience_level',
             'years_of_experience', 'email', 'phone_number', 'is_phone_public',
             'location', 'portfolio_link', 'linkedin_url'
         ]
@@ -85,6 +85,16 @@ class NarasumberRegistrationForm(forms.ModelForm):
             'profile_picture': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
+            }),
+            'pekerjaan': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Pekerjaan',
+                'maxlength': '40'
+            }),
+            'jabatan': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Jabatan',
+                'maxlength': '40'
             }),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',

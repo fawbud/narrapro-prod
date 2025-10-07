@@ -194,6 +194,16 @@ class NarasumberProfile(models.Model):
         max_length=200,
         help_text="Full name of the narasumber"
     )
+
+    pekerjaan = models.CharField(
+        max_length=40,
+        help_text="Occupation/job of the narasumber"
+    )
+
+    jabatan = models.CharField(
+        max_length=40,
+        help_text="Position/title of the narasumber"
+    )
     
     # Profile picture
     profile_picture = models.ImageField(

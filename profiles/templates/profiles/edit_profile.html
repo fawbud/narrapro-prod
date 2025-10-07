@@ -119,7 +119,37 @@
                             </div>
                         {% endif %}
                     </div>
-                    
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.pekerjaan.id_for_label }}" class="form-label">
+                                {{ narasumber_form.pekerjaan.label }}
+                            </label>
+                            {{ narasumber_form.pekerjaan }}
+                            {% if narasumber_form.pekerjaan.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.pekerjaan.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ narasumber_form.jabatan.id_for_label }}" class="form-label">
+                                {{ narasumber_form.jabatan.label }}
+                            </label>
+                            {{ narasumber_form.jabatan }}
+                            {% if narasumber_form.jabatan.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in narasumber_form.jabatan.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label for="{{ narasumber_form.bio.id_for_label }}" class="form-label">
                             {{ narasumber_form.bio.label }}
