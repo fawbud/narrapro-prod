@@ -129,6 +129,7 @@
 {% load static %}
 <script src="{% static 'js/auto-crop-widget.js' %}"></script>
 <script src="{% static 'js/education-form-handler.js' %}"></script>
+<script src="{% static 'js/certification-form-handler.js' %}"></script>
 <script src="{% static 'js/event-form-handler.js' %}"></script>
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -195,6 +196,15 @@
 								// Add a small delay to ensure the DOM is fully ready
 								setTimeout(() => {
 									window.initializeEducationForms(roleSpecificFields);
+								}, 100);
+							}
+
+							// Initialize certification forms for narasumber
+							if (selectedType === 'narasumber' && window.initializeCertificationForms) {
+								console.log('🔵 Calling initializeCertificationForms for AJAX content');
+								// Add a small delay to ensure the DOM is fully ready
+								setTimeout(() => {
+									window.initializeCertificationForms(roleSpecificFields);
 								}, 100);
 							}
 

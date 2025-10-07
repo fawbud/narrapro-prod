@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.forms import inlineformset_factory
-from narasumber.models import ExpertiseCategory, NarasumberProfile, Education
+from narasumber.models import ExpertiseCategory, NarasumberProfile, Education, ProfessionalCertification
 from event.models import EventProfile
 from profiles.forms import PenggunaProfileForm
 
@@ -286,7 +286,17 @@ class CombinedRegistrationForm:
                         field_of_study=edu_data.get('field_of_study', ''),
                         graduation_year=edu_data.get('graduation_year', None)
                     )
-            
+
+            # Handle certification entries from POST data
+            certification_data = self._extract_certification_data()
+            for cert_data in certification_data:
+                if cert_data.get('title') and cert_data.get('description'):
+                    ProfessionalCertification.objects.create(
+                        narasumber_profile=profile,
+                        title=cert_data['title'],
+                        description=cert_data['description']
+                    )
+
             return user, profile
         elif user_type == 'event' and self.event_form:
             profile = self.event_form.save(commit=False)
@@ -333,6 +343,25 @@ class CombinedRegistrationForm:
             i += 1
 
         return education_entries
+
+    def _extract_certification_data(self):
+        """
+        Extract certification data from form data
+        """
+        certification_entries = []
+        if not hasattr(self, 'data') or not self.data:
+            return certification_entries
+
+        i = 0
+        while f'certification-{i}-title' in self.data:
+            entry = {
+                'title': self.data.get(f'certification-{i}-title', ''),
+                'description': self.data.get(f'certification-{i}-description', '')
+            }
+            certification_entries.append(entry)
+            i += 1
+
+        return certification_entries
 
     def validate_education_entries(self):
         """

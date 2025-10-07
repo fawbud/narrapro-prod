@@ -142,6 +142,22 @@ Profil {{ profile_user.get_full_name|default:profile_user.username }}
             </div>
         </div>
         {% endif %}
+
+        <!-- Certification Section -->
+        {% if narasumber_profile.certifications.all %}
+        <hr>
+        <h6 class="text-muted mb-3">Sertifikasi Profesional</h6>
+        <div class="row">
+            <div class="col-12">
+                {% for cert in narasumber_profile.certifications.all %}
+                <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <h6 class="mb-1 fw-bold">{{ cert.title }}</h6>
+                    <p class="mb-0 text-muted">{{ cert.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% elif profile_user.user_type == 'event' and event_profile %}
         <hr>
         <h6 class="text-muted mb-3">Informasi Event Organizer</h6>

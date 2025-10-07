@@ -126,12 +126,48 @@ class Education(models.Model):
         return f"{self.get_degree_display()} - {self.school_university}"
 
 
+class ProfessionalCertification(models.Model):
+    """
+    Model to represent professional certifications for narasumber.
+    Each narasumber can have multiple certification entries (up to 10).
+    """
+
+    narasumber_profile = models.ForeignKey(
+        'NarasumberProfile',
+        on_delete=models.CASCADE,
+        related_name='certifications',
+        help_text="Associated narasumber profile"
+    )
+
+    title = models.CharField(
+        max_length=200,
+        help_text="Title or name of the certification"
+    )
+
+    description = models.TextField(
+        help_text="Description of the certification, issuing organization, or other details"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this certification entry was created"
+    )
+
+    class Meta:
+        verbose_name = "Professional Certification"
+        verbose_name_plural = "Professional Certifications"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.narasumber_profile.full_name}"
+
+
 class NarasumberProfile(models.Model):
     """
     Profile model for narasumber users containing detailed information
     about their expertise, experience, and contact details.
     """
-    
+
     # Experience level choices
     EXPERIENCE_LEVEL_CHOICES = [
         ('BEGINNER', 'Beginner'),

@@ -408,7 +408,87 @@
                         <i class="fas fa-plus me-1"></i>Tambah Pendidikan Baru
                     </button>
                     {% endif %}
-                    
+
+                    <!-- Certification Section -->
+                    {% if certification_formset %}
+                    <hr class="my-4">
+                    <h6 class="text-narasumber mb-3"><i class="fas fa-certificate me-2"></i>Sertifikasi Profesional</h6>
+                    {{ certification_formset.management_form }}
+
+                    <div id="certification-formset">
+                        {% for form in certification_formset %}
+                        <div class="border rounded p-3 mb-3 certification-form" data-form-index="{{ forloop.counter0 }}">
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Sertifikasi {{ forloop.counter }}</h6>
+                                {% if not forloop.first or certification_formset|length > 1 %}
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-certification-form-btn">
+                                        <i class="fas fa-trash me-1"></i>Hapus
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                                        {{ form.title.label }}
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.title.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.description.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Hidden DELETE field -->
+                            {% if form.DELETE %}
+                                <div style="display: none;">
+                                    {{ form.DELETE }}
+                                </div>
+                            {% endif %}
+
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-muted small mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Anda dapat menambah, mengedit, atau menghapus sertifikasi (maksimal 10). Kosongkan field yang tidak relevan.
+                    </div>
+
+                    <button type="button" id="add-certification-form" class="btn btn-outline-primary btn-sm mb-3">
+                        <i class="fas fa-plus me-1"></i>Tambah Sertifikasi Baru
+                    </button>
+                    {% endif %}
+
                     {% elif event_form %}
                     <hr class="my-4">
                     <h6 class="text-event mb-3"><i class="fas fa-calendar-alt me-2"></i>Informasi Event Organizer</h6>
@@ -908,6 +988,142 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial setup
     updateAddButtonVisibility();
+
+    // Certification form handlers
+    const addCertificationBtn = document.getElementById('add-certification-form');
+    const certificationFormset = document.getElementById('certification-formset');
+    const maxCertificationForms = 10;
+
+    console.log('Edit profile certification handler initialized', {
+        addCertificationBtn: !!addCertificationBtn,
+        certificationFormset: !!certificationFormset
+    });
+
+    function updateCertificationAddButtonVisibility() {
+        if (!addCertificationBtn || !certificationFormset) return;
+
+        const currentForms = certificationFormset.querySelectorAll('.certification-form:not([style*="display: none"])').length;
+        if (currentForms >= maxCertificationForms) {
+            addCertificationBtn.style.display = 'none';
+        } else {
+            addCertificationBtn.style.display = 'inline-block';
+        }
+        console.log('Updated certification add button visibility', { currentForms, maxCertificationForms, visible: currentForms < maxCertificationForms });
+    }
+
+    function updateCertificationFormTitles() {
+        const forms = certificationFormset.querySelectorAll('.certification-form:not([style*="display: none"])');
+        forms.forEach((form, index) => {
+            const title = form.querySelector('h6');
+            if (title) {
+                title.textContent = `Sertifikasi ${index + 1}`;
+            }
+        });
+    }
+
+    if (addCertificationBtn && certificationFormset) {
+        addCertificationBtn.addEventListener('click', function() {
+            const totalForms = document.querySelector('#id_certifications-TOTAL_FORMS');
+            if (!totalForms) return;
+
+            const visibleForms = certificationFormset.querySelectorAll('.certification-form:not([style*="display: none"])').length;
+            const formCount = parseInt(totalForms.value);
+            console.log('Add certification clicked', { formCount, visibleForms, maxCertificationForms });
+
+            if (visibleForms < maxCertificationForms) {
+                const emptyFormTemplate = certificationFormset.querySelector('.certification-form:last-child').cloneNode(true);
+
+                // Update form indices
+                const inputs = emptyFormTemplate.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    const id = input.getAttribute('id');
+
+                    if (name) {
+                        input.setAttribute('name', name.replace(/certifications-\d+/, `certifications-${formCount}`));
+                    }
+                    if (id) {
+                        input.setAttribute('id', id.replace(/id_certifications-\d+/, `id_certifications-${formCount}`));
+                    }
+
+                    // Clear values
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                // Update labels
+                const labels = emptyFormTemplate.querySelectorAll('label');
+                labels.forEach(label => {
+                    const forAttr = label.getAttribute('for');
+                    if (forAttr) {
+                        label.setAttribute('for', forAttr.replace(/id_certifications-\d+/, `id_certifications-${formCount}`));
+                    }
+                });
+
+                // Update data attributes
+                emptyFormTemplate.setAttribute('data-form-index', formCount);
+
+                // Add remove button
+                const titleDiv = emptyFormTemplate.querySelector('.d-flex');
+                if (titleDiv) {
+                    titleDiv.innerHTML = `
+                        <h6 class="mb-0">Sertifikasi ${visibleForms + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-certification-form-btn">
+                            <i class="fas fa-trash me-1"></i>Hapus
+                        </button>
+                    `;
+                }
+
+                certificationFormset.appendChild(emptyFormTemplate);
+                totalForms.value = formCount + 1;
+
+                updateCertificationFormTitles();
+                updateCertificationAddButtonVisibility();
+            }
+        });
+
+        // Handle remove certification
+        certificationFormset.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-certification-form-btn') || e.target.parentElement.classList.contains('remove-certification-form-btn')) {
+                const certificationForm = e.target.closest('.certification-form');
+                const totalForms = document.querySelector('#id_certifications-TOTAL_FORMS');
+
+                if (certificationForm && totalForms) {
+                    console.log('Removing certification form');
+
+                    // Check if this is an existing form (has data) - mark for deletion
+                    const deleteInput = certificationForm.querySelector('input[name$="-DELETE"]');
+                    if (deleteInput) {
+                        const hasId = certificationForm.querySelector('input[name$="-id"]');
+                        if (hasId && hasId.value) {
+                            // Existing form - mark for deletion and hide immediately
+                            deleteInput.checked = true;
+                            certificationForm.style.display = 'none';
+                        } else {
+                            // New form - actually remove
+                            certificationForm.remove();
+                            totalForms.value = parseInt(totalForms.value) - 1;
+                        }
+                    } else {
+                        // No delete input - just remove
+                        certificationForm.remove();
+                        totalForms.value = parseInt(totalForms.value) - 1;
+                    }
+
+                    updateCertificationFormTitles();
+                    updateCertificationAddButtonVisibility();
+                }
+            }
+        });
+    }
+
+    // Initial certification setup
+    if (certificationFormset) {
+        updateCertificationAddButtonVisibility();
+    }
 });
 </script>
 {% endblock %}

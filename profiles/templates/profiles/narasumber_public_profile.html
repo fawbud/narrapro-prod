@@ -139,7 +139,24 @@
             </div>
             {% endif %}
 
-            <!-- Card 4: Contact Links -->
+            <!-- Card 4: Professional Certifications -->
+            {% if narasumber_profile.certifications.all %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-certificate text-muted me-2"></i>Sertifikasi Profesional</h5>
+                </div>
+                <div class="card-body">
+                    {% for cert in narasumber_profile.certifications.all %}
+                    <div class="certification-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <h6 class="mb-1 fw-bold">{{ cert.title }}</h6>
+                        <p class="mb-0 text-muted">{{ cert.description }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Card 5: Contact Links -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-header card-header-narasumber">
                     <h5 class="mb-0"><i class="fas fa-link text-narasumber me-2"></i>Hubungi Saya</h5>
