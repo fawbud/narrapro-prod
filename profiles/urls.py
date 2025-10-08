@@ -15,6 +15,7 @@ urlpatterns = [
     path('profiles/<str:username>/booking/<int:booking_id>/', views.booking_detail, name='booking_detail'),
     path('profiles/<str:username>/booking/create', views.book_narasumber, name='book_narasumber'),
     path('profiles/<str:username>/booking/cancel/<int:booking_id>/', views.cancel_booking, name='cancel_booking'),
+    path('profiles/<str:username>/booking/cancellation/<int:booking_id>/<str:action>/', views.approve_cancellation, name='approve_cancellation'),
     path('profiles/<str:username>/booking/create/<uuid:narasumber_id>', views.create_booking, name='create_booking'),
     path('profiles/<str:username>/booking/<int:booking_id>/<str:action>/', views.update_booking_status, name='update_booking_status'),
 ]

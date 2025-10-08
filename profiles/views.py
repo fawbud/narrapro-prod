@@ -4,6 +4,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404
+from django.utils import timezone
 from anymail.exceptions import AnymailRequestsAPIError
 
 from narrapro.email_service import send_speaker_booking_notification, send_booking_status_update
@@ -475,6 +476,7 @@ def profile_booking(request, username):
         ('APPROVED', 'Disetujui'),
         ('REJECTED', 'Ditolak'),
         ('CANCELED', 'Dibatalkan'),
+        ('CANCELLATION_REQUESTED', 'Permintaan Pembatalan'),
     ]
     all_statuses = [s[0] for s in status_options]
 
@@ -660,7 +662,9 @@ def create_booking(request, username, narasumber_id):
 @login_required
 def cancel_booking(request, username, booking_id):
     """
-    View for an event organizer OR pengguna to cancel a booking.
+    View for an event organizer OR pengguna to request cancellation of a booking.
+    If booking is still PENDING, cancel immediately.
+    If booking is APPROVED, request cancellation and wait for narasumber approval.
     """
     booking = get_object_or_404(Booking, id=booking_id)
 
@@ -679,13 +683,60 @@ def cancel_booking(request, username, booking_id):
         return redirect('profiles:profile_booking', username=request.user.username)
 
     if request.method == 'POST':
-        booking.status = 'CANCELED'
-        booking.save()
-        messages.success(request, "The booking has been canceled.")
+        cancellation_reason = request.POST.get('cancellation_reason', '')
+
+        # If booking is still PENDING, cancel immediately without approval
+        if booking.status == 'PENDING':
+            booking.status = 'CANCELED'
+            booking.cancellation_reason = cancellation_reason
+            booking.cancellation_requested_by = request.user
+            booking.cancellation_requested_at = timezone.now()
+            booking.save()
+            messages.success(request, "Booking berhasil dibatalkan.")
+
+        # If booking is APPROVED, request cancellation (needs narasumber approval)
+        elif booking.status == 'APPROVED':
+            booking.status = 'CANCELLATION_REQUESTED'
+            booking.cancellation_reason = cancellation_reason
+            booking.cancellation_requested_by = request.user
+            booking.cancellation_requested_at = timezone.now()
+            booking.save()
+            messages.success(request, "Permintaan pembatalan telah dikirim. Menunggu persetujuan narasumber.")
+
         return redirect('profiles:profile_booking', username=request.user.username)
 
     return redirect('profiles:profile_booking', username=request.user.username)
 
+
+@login_required
+def approve_cancellation(request, username, booking_id, action):
+    """
+    View for narasumber to approve or reject a cancellation request.
+    action: 'approve' or 'reject'
+    """
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Check if the user is the narasumber for this booking
+    if request.user != booking.narasumber:
+        raise Http404("You are not authorized to respond to this cancellation request.")
+
+    # Check if the booking has a cancellation request
+    if booking.status != 'CANCELLATION_REQUESTED':
+        messages.error(request, "There is no pending cancellation request for this booking.")
+        return redirect('profiles:profile_booking', username=request.user.username)
+
+    if request.method == 'POST':
+        if action == 'approve':
+            booking.status = 'CANCELED'
+            messages.success(request, "Permintaan pembatalan disetujui. Booking telah dibatalkan.")
+        elif action == 'reject':
+            booking.status = 'APPROVED'  # Revert back to approved
+            messages.success(request, "Permintaan pembatalan ditolak. Booking tetap berlaku.")
+
+        booking.save()
+        return redirect('profiles:profile_booking', username=request.user.username)
+
+    return redirect('profiles:profile_booking', username=request.user.username)
 
 
 @login_required

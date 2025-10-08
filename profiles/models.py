@@ -163,6 +163,7 @@ class Booking(models.Model):
         ('APPROVED', 'Disetujui'),
         ('REJECTED', 'Ditolak'),
         ('CANCELED', 'Dibatalkan'),
+        ('CANCELLATION_REQUESTED', 'Permintaan Pembatalan'),
     ]
 
     event = models.ForeignKey(
@@ -181,7 +182,7 @@ class Booking(models.Model):
         help_text="The narasumber being booked"
     )
     status = models.CharField(
-        max_length=10,
+        max_length=25,
         choices=STATUS_CHOICES,
         default='PENDING',
         help_text="The current status of the booking"
@@ -192,6 +193,24 @@ class Booking(models.Model):
     message = models.TextField(
         blank=True,
         help_text="A message from the event organizer to the narasumber"
+    )
+    cancellation_reason = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Reason for cancellation request from event/pengguna"
+    )
+    cancellation_requested_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Timestamp when cancellation was requested"
+    )
+    cancellation_requested_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cancellation_requests',
+        help_text="User who requested the cancellation"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -80,6 +80,7 @@ Detail Booking - NarraPro
                                     {% elif booking.status == 'APPROVED' %}bg-success
                                     {% elif booking.status == 'REJECTED' %}bg-danger
                                     {% elif booking.status == 'CANCELED' %}bg-secondary
+                                    {% elif booking.status == 'CANCELLATION_REQUESTED' %}bg-warning
                                     {% endif %}">
                                     {{ booking.get_status_display }}
                                 </span>
@@ -106,16 +107,52 @@ Detail Booking - NarraPro
             </div>
 
             <hr>
+
+            {% if booking.status == 'CANCELLATION_REQUESTED' %}
+            <div class="alert alert-warning">
+                <strong>Status:</strong> Permintaan pembatalan sedang menunggu persetujuan narasumber.
+                {% if booking.cancellation_reason %}
+                <br><strong>Alasan pembatalan:</strong> {{ booking.cancellation_reason }}
+                {% endif %}
+            </div>
+            {% endif %}
+
             <div class="d-flex justify-content-end">
                 {% if booking.status == 'PENDING' or booking.status == 'APPROVED' %}
-                <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger"
-                            onclick="return confirm('Yakin ingin membatalkan booking ini?');">
-                        Batalkan Booking
-                    </button>
-                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                    Batalkan Booking
+                </button>
                 {% endif %}
+            </div>
+
+            <!-- Modal untuk pembatalan -->
+            <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelModalLabel">Batalkan Booking</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="cancellation_reason" class="form-label">Alasan Pembatalan{% if booking.status == 'APPROVED' %} <span class="text-danger">*</span>{% endif %}</label>
+                                    <textarea class="form-control" id="cancellation_reason" name="cancellation_reason"
+                                              rows="3" {% if booking.status == 'APPROVED' %}required{% endif %}
+                                              placeholder="Jelaskan alasan pembatalan booking ini..."></textarea>
+                                    {% if booking.status == 'APPROVED' %}
+                                    <small class="text-muted">Permintaan pembatalan akan dikirim ke narasumber untuk disetujui.</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="submit" class="btn btn-danger">Kirim Permintaan Pembatalan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         {% elif is_event %}
             <!-- ==================== DETAIL BOOKING UNTUK EVENT / NARASUMBER ==================== -->
@@ -179,6 +216,7 @@ Detail Booking - NarraPro
                                     {% elif booking.status == 'APPROVED' %}bg-success
                                     {% elif booking.status == 'REJECTED' %}bg-danger
                                     {% elif booking.status == 'CANCELED' %}bg-secondary
+                                    {% elif booking.status == 'CANCELLATION_REQUESTED' %}bg-warning
                                     {% endif %}">
                                     {{ booking.get_status_display }}
                                 </span>
@@ -206,15 +244,54 @@ Detail Booking - NarraPro
 
             {% if request.user == booking.event or request.user == booking.narasumber %}
             <hr>
+
+            {% if booking.status == 'CANCELLATION_REQUESTED' and request.user.user_type == 'event' %}
+            <div class="alert alert-warning">
+                <strong>Status:</strong> Permintaan pembatalan sedang menunggu persetujuan narasumber.
+                {% if booking.cancellation_reason %}
+                <br><strong>Alasan pembatalan:</strong> {{ booking.cancellation_reason }}
+                {% endif %}
+            </div>
+            {% endif %}
+
             <div class="d-flex justify-content-end">
                 {% if request.user.user_type == 'event' %}
                     {% if booking.status == 'PENDING' or booking.status == 'APPROVED' %}
-                    <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post" class="me-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Batalkan Booking</button>
-                    </form>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModalEvent">
+                        Batalkan Booking
+                    </button>
                     {% endif %}
                 {% endif %}
+            </div>
+
+            <!-- Modal untuk pembatalan event -->
+            <div class="modal fade" id="cancelModalEvent" tabindex="-1" aria-labelledby="cancelModalEventLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelModalEventLabel">Batalkan Booking</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{% url 'profiles:cancel_booking' username=request.user.username booking_id=booking.id %}" method="post">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="cancellation_reason_event" class="form-label">Alasan Pembatalan{% if booking.status == 'APPROVED' %} <span class="text-danger">*</span>{% endif %}</label>
+                                    <textarea class="form-control" id="cancellation_reason_event" name="cancellation_reason"
+                                              rows="3" {% if booking.status == 'APPROVED' %}required{% endif %}
+                                              placeholder="Jelaskan alasan pembatalan booking ini..."></textarea>
+                                    {% if booking.status == 'APPROVED' %}
+                                    <small class="text-muted">Permintaan pembatalan akan dikirim ke narasumber untuk disetujui.</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="submit" class="btn btn-danger">Kirim Permintaan Pembatalan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
             {% endif %}
         {% elif is_narasumber %}
@@ -304,7 +381,26 @@ Detail Booking - NarraPro
                 </div>
 
                 <hr>
-                {% if booking.status != 'Disetujui' %}
+
+                {% if booking.status == 'CANCELLATION_REQUESTED' %}
+                <div class="alert alert-warning">
+                    <strong>Permintaan Pembatalan Booking</strong>
+                    <p>{{ booking.cancellation_requested_by.get_full_name }} meminta untuk membatalkan booking ini.</p>
+                    {% if booking.cancellation_reason %}
+                    <p><strong>Alasan:</strong> {{ booking.cancellation_reason }}</p>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <form action="{% url 'profiles:approve_cancellation' username=request.user.username booking_id=booking.id action='reject' %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">Tolak Pembatalan</button>
+                    </form>
+                    <form action="{% url 'profiles:approve_cancellation' username=request.user.username booking_id=booking.id action='approve' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin menyetujui pembatalan booking ini?');">Setujui Pembatalan</button>
+                    </form>
+                </div>
+                {% elif booking.status != 'Disetujui' %}
                 <div class="d-flex justify-content-end">
                     <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
                         {% csrf_token %}
@@ -399,7 +495,26 @@ Detail Booking - NarraPro
                 </div>
 
                 <hr>
-                {% if booking.status != 'APPROVED' %}
+
+                {% if booking.status == 'CANCELLATION_REQUESTED' %}
+                <div class="alert alert-warning">
+                    <strong>Permintaan Pembatalan Booking</strong>
+                    <p>{{ booking.cancellation_requested_by.get_full_name }} meminta untuk membatalkan booking ini.</p>
+                    {% if booking.cancellation_reason %}
+                    <p><strong>Alasan:</strong> {{ booking.cancellation_reason }}</p>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <form action="{% url 'profiles:approve_cancellation' username=request.user.username booking_id=booking.id action='reject' %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">Tolak Pembatalan</button>
+                    </form>
+                    <form action="{% url 'profiles:approve_cancellation' username=request.user.username booking_id=booking.id action='approve' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin menyetujui pembatalan booking ini?');">Setujui Pembatalan</button>
+                    </form>
+                </div>
+                {% elif booking.status != 'APPROVED' %}
                 <div class="d-flex justify-content-end">
                     <form action="{% url 'profiles:update_booking_status' username=request.user.username booking_id=booking.id action='decline' %}" method="post" class="me-2">
                         {% csrf_token %}

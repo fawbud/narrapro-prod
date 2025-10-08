@@ -138,3 +138,7 @@ GitHub.sublime-settings
 .history
 
 supabase-examples/
+
+# Node.js #
+node_modules/
+package-lock.json
