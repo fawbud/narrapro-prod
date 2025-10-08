@@ -137,19 +137,28 @@ def search_result_page(request):
 
     events, narasumbers, lowongans, penggunas = [], [], [], []
     has_more = {"event": False, "narasumber": False, "lowongan": False, "pengguna": False}
-    pagination_obj = None  
+    pagination_obj = None
 
     # counts default
     events_count = 0
     narasumbers_count = 0
     lowongans_count = 0
     penggunas_count = 0
+    expertise_counts = {}
 
     # =============== NARASUMBER ===============
     if category == "narasumber":
         qs = NarasumberProfile.objects.all()
         if query:
             qs = qs.filter(Q(full_name__icontains=query) | Q(bio__icontains=query))
+
+        # Calculate counts for each expertise category
+        expertise_counts = {}
+        base_qs = qs  # Store the queryset before expertise filtering
+        for ex in ExpertiseCategory.objects.all():
+            count = base_qs.filter(expertise_area__id=ex.id).count()
+            expertise_counts[ex.id] = count
+
         if expertise_ids:
             qs = qs.filter(expertise_area__id__in=expertise_ids)
 
@@ -176,6 +185,14 @@ def search_result_page(request):
         qs = Lowongan.objects.all()
         if query:
             qs = qs.filter(Q(title__icontains=query) | Q(description__icontains=query))
+
+        # Calculate counts for each expertise category
+        expertise_counts = {}
+        base_qs = qs  # Store the queryset before expertise filtering
+        for ex in ExpertiseCategory.objects.all():
+            count = base_qs.filter(expertise_category__id=ex.id).count()
+            expertise_counts[ex.id] = count
+
         if expertise_ids:
             qs = qs.filter(expertise_category__id__in=expertise_ids)
 
@@ -237,6 +254,15 @@ def search_result_page(request):
         has_more["pengguna"] = pengguna_qs.count() > 8
         # has_more["lowongan"] = lowongan_qs.count() > 8
 
+    # Add counts to expertise categories
+    expertise_list = []
+    for ex in ExpertiseCategory.objects.all():
+        expertise_list.append({
+            'id': ex.id,
+            'name': ex.name,
+            'count': expertise_counts.get(ex.id, 0)
+        })
+
     context = {
         "query": query,
         "category": category,
@@ -246,7 +272,7 @@ def search_result_page(request):
         "penggunas": penggunas,
         "has_more": has_more,
         "pagination_obj": pagination_obj,
-        "expertise_categories": ExpertiseCategory.objects.all(),
+        "expertise_categories": expertise_list,
         "selected_expertise": expertise_ids,
         "events_count": events_count,
         "narasumbers_count": narasumbers_count,
