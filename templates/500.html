@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>500 - Server Error | NarraPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Simple Header -->
+    <nav class="navbar navbar-light bg-white border-bottom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">NarraPro</a>
+        </div>
+    </nav>
+
+    <!-- Error Content -->
+    <main class="container">
+        <div class="text-center">
+            <div class="mb-4">
+                <h1 class="display-1 fw-bold text-danger">500</h1>
+                <h2 class="h3 mb-3">Internal Server Error</h2>
+                <p class="lead text-muted mb-4">
+                    Something went wrong on our end. We're working to fix the issue.
+                </p>
+                <p class="text-muted">
+                    Please try again later or contact support if the problem persists.
+                </p>
+            </div>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="/" class="btn btn-primary btn-lg">Go Home</a>
+                <a href="javascript:location.reload()" class="btn btn-outline-secondary btn-lg">Try Again</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 NarraPro. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
