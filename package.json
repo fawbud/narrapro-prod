@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@tanstack/vue-table": "^8.21.3",
+    "axios": "^1.12.2",
+    "pinia": "^3.0.3"
+  }
+}

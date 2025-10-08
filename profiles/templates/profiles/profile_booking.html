@@ -82,11 +82,12 @@
                                 </tr>
                             </table>
 
-                            <span class="badge 
+                            <span class="badge
                                 {% if booking.booking.status == 'PENDING' %}bg-warning
                                 {% elif booking.booking.status == 'APPROVED' %}bg-success
                                 {% elif booking.booking.status == 'REJECTED' %}bg-danger
                                 {% elif booking.booking.status == 'CANCELED' %}bg-secondary
+                                {% elif booking.booking.status == 'CANCELLATION_REQUESTED' %}bg-warning
                                 {% endif %}">
                                 {{ booking.booking.get_status_display }}
                             </span>
@@ -138,6 +139,7 @@
                                 {% elif booking.status == 'APPROVED' %}bg-success
                                 {% elif booking.status == 'REJECTED' %}bg-danger
                                 {% elif booking.status == 'CANCELED' %}bg-secondary
+                                {% elif booking.status == 'CANCELLATION_REQUESTED' %}bg-warning
                                 {% endif %}">
                                 {{ booking.get_status_display }}
                             </span>
