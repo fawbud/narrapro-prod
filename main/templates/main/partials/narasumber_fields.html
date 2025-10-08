@@ -12,6 +12,13 @@
 			<div class="enhanced-image-widget" data-type="profile">
 				{{ form.profile_picture }}
 			</div>
+			{% if form.profile_picture.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.profile_picture.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				<i class="fas fa-info-circle me-1"></i>
 				Upload a professional photo. Image will be automatically cropped to 1:1 ratio and compressed to max 1MB.
@@ -23,6 +30,13 @@
 				>Pekerjaan *</label
 			>
 			{{ form.pekerjaan }}
+			{% if form.pekerjaan.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.pekerjaan.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -30,6 +44,13 @@
 				>Jabatan *</label
 			>
 			{{ form.jabatan }}
+			{% if form.jabatan.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.jabatan.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -37,6 +58,13 @@
 				>Bio/About Yourself *</label
 			>
 			{{ form.bio }}
+			{% if form.bio.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.bio.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -44,6 +72,13 @@
 				>Keahlian *</label
 			>
 			{{ form.expertise_area }}
+			{% if form.expertise_area.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.expertise_area.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -51,6 +86,13 @@
 				>Experience Level *</label
 			>
 			{{ form.experience_level }}
+			{% if form.experience_level.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.experience_level.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -60,6 +102,13 @@
 				>Years of Experience *</label
 			>
 			{{ form.years_of_experience }}
+			{% if form.years_of_experience.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.years_of_experience.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -67,6 +116,13 @@
 				>Location (Province) *</label
 			>
 			{{ form.location }}
+			{% if form.location.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.location.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -74,6 +130,13 @@
 				>Contact Email *</label
 			>
 			{{ form.email }}
+			{% if form.email.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.email.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -81,6 +144,13 @@
 				>Phone Number</label
 			>
 			{{ form.phone_number }}
+			{% if form.phone_number.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.phone_number.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -100,6 +170,13 @@
 				>Portfolio Website</label
 			>
 			{{ form.portfolio_link }}
+			{% if form.portfolio_link.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.portfolio_link.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -107,6 +184,13 @@
 				>LinkedIn Profile</label
 			>
 			{{ form.linkedin_url }}
+			{% if form.linkedin_url.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.linkedin_url.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				<i class="fas fa-info-circle me-1"></i>
 				Add your LinkedIn profile URL (optional). Example: https://linkedin.com/in/your-username

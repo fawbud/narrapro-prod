@@ -10,6 +10,13 @@
 				>Event/Organization Name *</label
 			>
 			{{ form.name }}
+			{% if form.name.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.name.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -17,6 +24,13 @@
 				>Description *</label
 			>
 			{{ form.description }}
+			{% if form.description.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.description.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -24,6 +38,13 @@
 				>Event Type *</label
 			>
 			{{ form.event_type }}
+			{% if form.event_type.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.event_type.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -31,6 +52,13 @@
 				>Location/Platform *</label
 			>
 			{{ form.location }}
+			{% if form.location.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.location.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -38,6 +66,13 @@
 				>Target Audience</label
 			>
 			{{ form.target_audience }}
+			{% if form.target_audience.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.target_audience.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				Describe your intended audience (e.g., "Professionals, Students, General Public")
 			</div>
@@ -48,6 +83,13 @@
 				>Contact Email *</label
 			>
 			{{ form.email }}
+			{% if form.email.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.email.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -55,6 +97,13 @@
 				>Phone Number</label
 			>
 			{{ form.phone_number }}
+			{% if form.phone_number.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.phone_number.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-md-6">
@@ -71,6 +120,13 @@
 				>Website URL</label
 			>
 			{{ form.website }}
+			{% if form.website.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.website.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<div class="col-12">
@@ -78,6 +134,13 @@
 				>LinkedIn Profile</label
 			>
 			{{ form.linkedin_url }}
+			{% if form.linkedin_url.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.linkedin_url.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				<i class="fas fa-info-circle me-1"></i>
 				Add your LinkedIn profile URL (optional). Example: https://linkedin.com/in/your-username
@@ -91,6 +154,13 @@
 			<div class="enhanced-image-widget" data-type="cover">
 				{{ form.cover_image }}
 			</div>
+			{% if form.cover_image.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.cover_image.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				Upload a cover image for your event or organization. Image will be automatically cropped to 4:1 ratio and compressed to max 4MB.
 			</div>
@@ -101,6 +171,13 @@
 				>Event Start Date</label
 			>
 			{{ form.start_date }}
+			{% if form.start_date.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.start_date.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">Optional: For one-time events only</div>
 		</div>
 
@@ -109,6 +186,13 @@
 				>Event End Date</label
 			>
 			{{ form.end_date }}
+			{% if form.end_date.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in form.end_date.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">Optional: For one-time events only</div>
 		</div>
 	</div>

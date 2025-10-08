@@ -44,54 +44,67 @@ def register_view(request):
     """
     Registration view with dynamic form fields based on user type
     """
+    # Initialize forms
+    base_form = BaseUserRegistrationForm()
+    narasumber_form = NarasumberRegistrationForm()
+    event_form = EventRegistrationForm()
+    pengguna_form = PenggunaProfileForm()
+    selected_user_type = None
+
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
-        
+        selected_user_type = user_type
+
+        # Create forms with POST data
+        base_form = BaseUserRegistrationForm(data=request.POST)
+
         # Create combined form
         combined_form = CombinedRegistrationForm(
-            data=request.POST, 
+            data=request.POST,
             files=request.FILES
         )
-        
+
         # Additional validation for education entries if narasumber
         education_valid = True
         if user_type == 'narasumber':
             education_valid = combined_form.validate_education_entries()
-        
+
         if combined_form.is_valid(user_type) and education_valid:
             try:
                 user, profile = combined_form.save(user_type)
                 send_new_user_confirmation([user.email], user.username)
                 messages.success(
-                    request, 
+                    request,
                     f'Pendaftaran berhasil! Akun Anda menungggu persetujuan admin. Anda akan menerima email ketika di-approve.'
                 )
                 return redirect('main:login')
             except Exception as e:
                 messages.error(request, f'Pendaftaran gagal: {str(e)}')
         else:
-            # Get all form errors
-            errors = combined_form.get_errors(user_type)
-            for field, error_list in errors.items():
-                for error in error_list:
-                    messages.error(request, f'{field}: {error}')
-            
+            # Preserve role-specific form with errors
+            if user_type == 'narasumber':
+                narasumber_form = NarasumberRegistrationForm(data=request.POST, files=request.FILES)
+                narasumber_form.is_valid()  # Trigger validation to populate errors
+            elif user_type == 'event':
+                event_form = EventRegistrationForm(data=request.POST, files=request.FILES)
+                event_form.is_valid()  # Trigger validation to populate errors
+            elif user_type == 'pengguna':
+                pengguna_form = PenggunaProfileForm(data=request.POST, files=request.FILES)
+                pengguna_form.is_valid()  # Trigger validation to populate errors
+
             # Add education validation errors
             if not education_valid:
                 messages.error(request, 'Silakan berikan setidaknya satu entri pendidikan lengkap dengan gelar dan sekolah/universitas.')
 
-    # For GET requests or form errors, show the registration form
-    base_form = BaseUserRegistrationForm()
-    narasumber_form = NarasumberRegistrationForm()
-    event_form = EventRegistrationForm()
-    
     context = {
         'base_form': base_form,
         'narasumber_form': narasumber_form,
         'event_form': event_form,
+        'pengguna_form': pengguna_form,
+        'selected_user_type': selected_user_type,
         'expertise_categories': ExpertiseCategory.objects.all().order_by('name')
     }
-    
+
     return render(request, 'main/register.html', context)
 
 

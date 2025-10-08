@@ -13,6 +13,13 @@
 			<div class="enhanced-image-widget" data-type="profile">
 				{{ pengguna_form.profile_picture }}
 			</div>
+			{% if pengguna_form.profile_picture.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.profile_picture.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				<i class="fas fa-info-circle me-1"></i>
 				Upload a clear profile picture. The image will be cropped to 1:1 ratio and compressed (max 1 MB).
@@ -25,6 +32,13 @@
 				Bio / About Yourself
 			</label>
 			{{ pengguna_form.bio }}
+			{% if pengguna_form.bio.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.bio.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<!-- Email -->
@@ -33,6 +47,13 @@
 				Contact Email *
 			</label>
 			{{ pengguna_form.email }}
+			{% if pengguna_form.email.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.email.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<!-- Phone Number -->
@@ -41,6 +62,13 @@
 				Phone Number
 			</label>
 			{{ pengguna_form.phone_number }}
+			{% if pengguna_form.phone_number.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.phone_number.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<!-- Make Phone Public -->
@@ -59,6 +87,13 @@
 				Website (optional)
 			</label>
 			{{ pengguna_form.website }}
+			{% if pengguna_form.website.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.website.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 		</div>
 
 		<!-- LinkedIn -->
@@ -67,6 +102,13 @@
 				LinkedIn Profile (optional)
 			</label>
 			{{ pengguna_form.linkedin_url }}
+			{% if pengguna_form.linkedin_url.errors %}
+				<div class="invalid-feedback d-block">
+					{% for error in pengguna_form.linkedin_url.errors %}
+						{{ error }}
+					{% endfor %}
+				</div>
+			{% endif %}
 			<div class="form-text">
 				<i class="fas fa-info-circle me-1"></i>
 				Example: https://linkedin.com/in/your-username
