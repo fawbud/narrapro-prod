@@ -107,7 +107,7 @@
                                 {% if ex.id in selected_expertise %}checked{% endif %}
                                 style="accent-color:#0e1e7a;">
                             <label class="form-check-label small" for="lowongan_ex{{ ex.id }}">
-                                {{ ex.name }}
+                                {{ ex.name }} ({{ ex.count }})
                             </label>
                         </div>
                         {% endfor %}
@@ -447,7 +447,7 @@
                                 {% if ex.id in selected_expertise %}checked{% endif %}
                                 style="accent-color:#0e1e7a;">
                             <label class="form-check-label small" for="ex{{ ex.id }}">
-                                {{ ex.name }}
+                                {{ ex.name }} ({{ ex.count }})
                             </label>
                         </div>
                         {% endfor %}

@@ -508,3 +508,12 @@ class PenggunaProfileForm(forms.ModelForm):
         # Add help text for existing profile pictures
         if self.instance and self.instance.pk and self.instance.profile_picture:
             self.fields['profile_picture'].help_text = 'Leave empty to keep current profile picture'
+
+        # Add Indonesian error messages
+        self.fields['email'].error_messages = {
+            'required': 'Anda belum mengisi Contact Email',
+            'invalid': 'Email tidak valid'
+        }
+        self.fields['phone_number'].error_messages = {'invalid': 'Nomor telepon tidak valid'}
+        self.fields['website'].error_messages = {'invalid': 'URL tidak valid'}
+        self.fields['linkedin_url'].error_messages = {'invalid': 'URL LinkedIn tidak valid'}

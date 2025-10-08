@@ -16,32 +16,46 @@ class BaseUserRegistrationForm(UserCreationForm):
     first_name = forms.CharField(
         max_length=150,
         required=True,
+        error_messages={
+            'required': 'Anda belum mengisi First Name',
+        },
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'First Name'
         })
     )
-    
+
     last_name = forms.CharField(
         max_length=150,
         required=True,
+        error_messages={
+            'required': 'Anda belum mengisi Last Name',
+        },
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Last Name'
         })
     )
-    
+
     email = forms.EmailField(
         required=True,
+        error_messages={
+            'required': 'Anda belum mengisi Email Address',
+            'invalid': 'Email tidak valid',
+        },
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
             'placeholder': 'Email Address'
         })
     )
-    
+
     user_type = forms.ChoiceField(
         choices=User.USER_TYPE_CHOICES,
         initial='',  # Default to empty (Pilih Role)
+        error_messages={
+            'required': 'Anda belum memilih User Type',
+            'invalid_choice': 'Pilihan tidak valid',
+        },
         widget=forms.Select(attrs={
             'class': 'form-control',
             'id': 'user_type_select'
@@ -51,7 +65,7 @@ class BaseUserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'first_name', 'last_name', 'email', 'user_type', 'password1', 'password2')
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Add CSS classes to inherited fields
@@ -59,14 +73,26 @@ class BaseUserRegistrationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Username'
         })
+        self.fields['username'].error_messages = {
+            'required': 'Anda belum mengisi Username',
+            'unique': 'Username sudah digunakan',
+        }
+
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Password'
         })
+        self.fields['password1'].error_messages = {
+            'required': 'Anda belum mengisi Password',
+        }
+
         self.fields['password2'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Confirm Password'
         })
+        self.fields['password2'].error_messages = {
+            'required': 'Anda belum mengisi Confirm Password',
+        }
 
 
 class NarasumberRegistrationForm(forms.ModelForm):
@@ -140,6 +166,34 @@ class NarasumberRegistrationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Make sure expertise categories are available
         self.fields['expertise_area'].queryset = ExpertiseCategory.objects.all().order_by('name')
+
+        # Add Indonesian error messages
+        self.fields['pekerjaan'].error_messages = {'required': 'Anda belum mengisi Pekerjaan'}
+        self.fields['jabatan'].error_messages = {'required': 'Anda belum mengisi Jabatan'}
+        self.fields['bio'].error_messages = {'required': 'Anda belum mengisi Bio'}
+        self.fields['expertise_area'].error_messages = {
+            'required': 'Anda belum memilih Keahlian',
+            'invalid_choice': 'Pilihan tidak valid'
+        }
+        self.fields['experience_level'].error_messages = {
+            'required': 'Anda belum memilih Experience Level',
+            'invalid_choice': 'Pilihan tidak valid'
+        }
+        self.fields['years_of_experience'].error_messages = {
+            'required': 'Anda belum mengisi Years of Experience',
+            'invalid': 'Nilai tidak valid'
+        }
+        self.fields['location'].error_messages = {
+            'required': 'Anda belum memilih Location',
+            'invalid_choice': 'Pilihan tidak valid'
+        }
+        self.fields['email'].error_messages = {
+            'required': 'Anda belum mengisi Contact Email',
+            'invalid': 'Email tidak valid'
+        }
+        self.fields['phone_number'].error_messages = {'invalid': 'Nomor telepon tidak valid'}
+        self.fields['portfolio_link'].error_messages = {'invalid': 'URL tidak valid'}
+        self.fields['linkedin_url'].error_messages = {'invalid': 'URL LinkedIn tidak valid'}
 
 
 class EventRegistrationForm(forms.ModelForm):
@@ -229,6 +283,29 @@ class EventRegistrationForm(forms.ModelForm):
 
         # Update location choices based on event type
         self.fields['location'].choices = EventProfile.get_location_choices_for_event_type(event_type)
+
+        # Add Indonesian error messages
+        self.fields['name'].error_messages = {'required': 'Anda belum mengisi Event/Organization Name'}
+        self.fields['description'].error_messages = {'required': 'Anda belum mengisi Description'}
+        self.fields['event_type'].error_messages = {
+            'required': 'Anda belum memilih Event Type',
+            'invalid_choice': 'Pilihan tidak valid'
+        }
+        self.fields['location'].error_messages = {
+            'required': 'Anda belum memilih Location/Platform',
+            'invalid_choice': 'Pilihan tidak valid'
+        }
+        self.fields['target_audience'].error_messages = {'required': 'Anda belum mengisi Target Audience'}
+        self.fields['email'].error_messages = {
+            'required': 'Anda belum mengisi Contact Email',
+            'invalid': 'Email tidak valid'
+        }
+        self.fields['phone_number'].error_messages = {'invalid': 'Nomor telepon tidak valid'}
+        self.fields['website'].error_messages = {'invalid': 'URL tidak valid'}
+        self.fields['linkedin_url'].error_messages = {'invalid': 'URL LinkedIn tidak valid'}
+        self.fields['cover_image'].error_messages = {'required': 'Anda belum mengupload Cover Image'}
+        self.fields['start_date'].error_messages = {'invalid': 'Tanggal tidak valid'}
+        self.fields['end_date'].error_messages = {'invalid': 'Tanggal tidak valid'}
 
 
 class CombinedRegistrationForm:

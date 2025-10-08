@@ -159,7 +159,8 @@ if not DEBUG:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
     # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
     # and renames the files with unique names for each version to support long-term caching
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Use ManifestStaticFilesStorage instead of CompressedManifestStaticFilesStorage to avoid errors with missing files
+    STATICFILES_STORAGE = 'whitenoise.storage.ManifestStaticFilesStorage'
 
 # Storage Configuration
 print(f"SETTINGS DEBUG: PRODUCTION env var = '{os.getenv('PRODUCTION')}'")
