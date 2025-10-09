@@ -109,3 +109,55 @@ class BookingAdmin(admin.ModelAdmin):
     search_fields = ('event__username', 'narasumber__username', 'message')
     date_hierarchy = 'booking_date'
     ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    def get_fields(self, request, obj=None):
+        """
+        Customize fields based on booking type
+        """
+        if obj and obj.event is None:
+            # This is a pengguna booking - hide event field and show pengguna info
+            fields = ('pengguna_info', 'narasumber', 'status', 'booking_date', 'message', 
+                     'cancellation_reason', 'created_at', 'updated_at')
+        else:
+            # This is an event booking - show all fields
+            fields = ('event', 'narasumber', 'status', 'booking_date', 'message', 
+                     'cancellation_reason', 'created_at', 'updated_at')
+        return fields
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Make certain fields readonly based on booking type and context
+        """
+        readonly = ['created_at', 'updated_at']
+        
+        if obj and obj.event is None:
+            # For pengguna bookings, add pengguna info field
+            readonly.extend(['pengguna_info'])
+        
+        return readonly
+
+    def pengguna_info(self, obj):
+        """
+        Display pengguna information for pengguna bookings
+        """
+        if obj and obj.event is None:
+            try:
+                pengguna_booking = obj.pengguna_extension
+                if pengguna_booking and pengguna_booking.pengguna:
+                    pengguna = pengguna_booking.pengguna
+                    return format_html(
+                        '<strong>Booked by Pengguna:</strong> {} ({})<br>'
+                        '<strong>Interview Topic:</strong> {}<br>'
+                        '<strong>Contact Email:</strong> {}',
+                        pengguna.get_full_name(),
+                        pengguna.username,
+                        pengguna_booking.interview_topic,
+                        pengguna_booking.contact_email
+                    )
+                else:
+                    return "Unknown Pengguna"
+            except:
+                return "Error retrieving pengguna information"
+        return ""
+    pengguna_info.short_description = "Pengguna Booking Details"

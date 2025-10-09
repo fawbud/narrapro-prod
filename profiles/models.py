@@ -221,8 +221,24 @@ class Booking(models.Model):
         ordering = ['-booking_date']
 
     def __str__(self):
-        try:
-            event_name = self.event.event_profile.name if hasattr(self.event, 'event_profile') else self.event.username
-        except:
-            event_name = self.event.username
-        return f"Booking for {self.narasumber.get_full_name()} by {event_name} on {self.booking_date}"
+        if self.event:
+            try:
+                if hasattr(self.event, 'event_profile'):
+                    event_name = f"{self.event.event_profile.name} ({self.event.username})"
+                else:
+                    event_name = f"{self.event.get_full_name()} ({self.event.username})"
+            except:
+                event_name = f"{self.event.username}"
+        else:
+            # This is a pengguna booking - find the pengguna who made the booking
+            try:
+                pengguna_booking = self.pengguna_extension
+                if pengguna_booking and pengguna_booking.pengguna:
+                    pengguna = pengguna_booking.pengguna
+                    event_name = f"{pengguna.get_full_name()} ({pengguna.username})"
+                else:
+                    event_name = "Unknown Pengguna"
+            except:
+                event_name = "Unknown Pengguna"
+        
+        return f"Booking for {self.narasumber.get_full_name()} ({self.narasumber.username}) by {event_name} on {self.booking_date}"
