@@ -35,13 +35,6 @@ else:
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.narrapro.org',
-    'https://narrapro.org',
-    'https://*.railway.app',
-]
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -224,5 +217,7 @@ NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd" # Adjust this path if necessar
 # CSRF_TRUSTED_ORIGINS
 CSRF_TRUSTED_ORIGINS = [
     'https://narrapro.up.railway.app',
-    # Add your actual production domain here
+    'https://*.railway.app',
+    'https://narrapro.org',
+    'https://*.narrapro.org',
 ]
