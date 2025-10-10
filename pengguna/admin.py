@@ -119,11 +119,15 @@ class PenggunaBookingAdmin(admin.ModelAdmin):
 
     def booking_link(self, obj):
         """
-        Hyperlink to the related Booking object in admin.
+        Display booking ID and provide admin link that bypasses user views.
         """
         if obj.booking_id:
-            url = reverse('admin:profiles_booking_change', args=[obj.booking_id])
-            return format_html('<a href="{}">Booking #{}</a>', url, obj.booking_id)
+            # Use JavaScript to ensure we stay in admin context
+            onclick_script = f"window.open('/admin/profiles/booking/{obj.booking_id}/change/', '_blank'); return false;"
+            return format_html(
+                '<a href="/admin/profiles/booking/{}/change/" onclick="{}" target="_blank" style="color: #007cba;">Booking #{}</a>',
+                obj.booking_id, onclick_script, obj.booking_id
+            )
         return "-"
     booking_link.short_description = "Booking"
 
