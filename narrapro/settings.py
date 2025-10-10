@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.narrapro.org',
+    'https://narrapro.org',
     'https://*.railway.app',
 ]
 
