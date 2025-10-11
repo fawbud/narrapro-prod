@@ -200,7 +200,7 @@ EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
 ANYMAIL = {
     'RESEND_API_KEY': os.getenv('RESEND_API_KEY'),
 }
-DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'support@narrapro.org')
 
 
 # Tailwind CSS Configuration
